@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'Ventures',description:'Discover KR8 DIGITALS, its free digital-skills Academy and its creative Tribe community.',alternates:{canonical:'/ventures'},openGraph:{title:'Ventures | TIMFIRE',description:'Discover KR8 DIGITALS, its free digital-skills Academy and its creative Tribe community.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'Ventures',item:'https://kutimfire.com/ventures'}]})}}/><Section section="ventures"/></>}

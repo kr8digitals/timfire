@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'Now',description:'See what TIMFIRE is focused on now, from Linguistics studies to websites, AI agents and KR8 DIGITALS.',alternates:{canonical:'/now'},openGraph:{title:'Now | TIMFIRE',description:'See what TIMFIRE is focused on now, from Linguistics studies to websites, AI agents and KR8 DIGITALS.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'Now',item:'https://kutimfire.com/now'}]})}}/><Section section="now"/></>}

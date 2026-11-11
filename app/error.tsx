@@ -1,0 +1,1 @@
+'use client';export default function ErrorPage({reset}:{error:Error;reset:()=>void}){return <main id="main" className="shell section"><span className="eyebrow">Something went wrong</span><h1>Let's try that again.</h1><button className="button primary" onClick={reset}>Try again</button></main>}

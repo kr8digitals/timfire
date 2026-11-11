@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'Timeline',description:'Follow milestones in TIMFIRE’s education, creative journey and founding of KR8 DIGITALS.',alternates:{canonical:'/timeline'},openGraph:{title:'Timeline | TIMFIRE',description:'Follow milestones in TIMFIRE’s education, creative journey and founding of KR8 DIGITALS.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'Timeline',item:'https://kutimfire.com/timeline'}]})}}/><Section section="timeline"/></>}

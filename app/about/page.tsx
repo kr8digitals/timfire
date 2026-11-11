@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'About',description:'Meet TIMFIRE, a website and AI agent developer, creative and founder of KR8 DIGITALS based in Abakaliki.',alternates:{canonical:'/about'},openGraph:{title:'About | TIMFIRE',description:'Meet TIMFIRE, a website and AI agent developer, creative and founder of KR8 DIGITALS based in Abakaliki.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'About',item:'https://kutimfire.com/about'}]})}}/><Section section="about"/></>}

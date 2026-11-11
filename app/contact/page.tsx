@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'Contact',description:'Get in touch with TIMFIRE by email or WhatsApp to discuss a project or collaboration.',alternates:{canonical:'/contact'},openGraph:{title:'Contact | TIMFIRE',description:'Get in touch with TIMFIRE by email or WhatsApp to discuss a project or collaboration.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'Contact',item:'https://kutimfire.com/contact'}]})}}/><Section section="contact"/></>}

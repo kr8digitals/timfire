@@ -1,0 +1,4 @@
+import type {Metadata} from 'next';
+import Section from '@/components/sections';
+export const metadata:Metadata={title:'Services',description:'Explore starting prices for website development, AI agents, design, SEO and one-on-one mentorship.',alternates:{canonical:'/services'},openGraph:{title:'Services | TIMFIRE',description:'Explore starting prices for website development, AI agents, design, SEO and one-on-one mentorship.',images:['/images/og.jpg']}};
+export default function Page(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:'https://kutimfire.com'},{'@type':'ListItem',position:2,name:'Services',item:'https://kutimfire.com/services'}]})}}/><Section section="services"/></>}

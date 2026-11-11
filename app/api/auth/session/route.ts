@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';import {session} from '@/lib/auth';export async function GET(){const s=await session();return NextResponse.json({authenticated:!!s,expires:s?.expires||0},{headers:{'Cache-Control':'no-store'}})}

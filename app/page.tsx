@@ -1,0 +1,2 @@
+import Home from '@/components/home';
+export default function HomePage(){return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@graph':[{'@type':'Person',name:'TIMFIRE',url:'https://kutimfire.com',address:{'@type':'PostalAddress',addressLocality:'Abakaliki',addressRegion:'Ebonyi State',addressCountry:'NG'}},{'@type':'Organization',name:'KR8 DIGITALS',url:'https://kr8digitals.com',founder:{'@type':'Person',name:'TIMFIRE'}},{'@type':'WebSite',name:'TIMFIRE',url:'https://kutimfire.com'}]})}}/><Home/></>}

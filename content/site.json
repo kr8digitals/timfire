@@ -25,36 +25,7 @@
       "CNY": 0.00461,
       "JPY": 0.0995
     },
-    "stats": [
-      {
-        "id": "sites",
-        "value": "9",
-        "label": "websites designed and built",
-        "source": "Live projects listed on this site, including four hotel and resort builds through KR8 DIGITALS.",
-        "isPublic": true
-      },
-      {
-        "id": "since",
-        "value": "2023",
-        "label": "building websites since",
-        "source": "In his own words, in the promotional design he published for his web development work.",
-        "isPublic": true
-      },
-      {
-        "id": "agents",
-        "value": "5",
-        "label": "AI agents built and running",
-        "source": "RIYA on KR8 DIGITALS, plus Beauty Shuts, Aether, Goj and Tenny.",
-        "isPublic": true
-      },
-      {
-        "id": "cohort",
-        "value": "8",
-        "label": "weeks per free KR8 Academy cohort",
-        "source": "The posted structure of KR8 Academy: tuition-free cohorts with a verifiable KR8 ID.",
-        "isPublic": true
-      }
-    ],
+    "stats": [],
     "socials": [
       {
         "id": "facebook",

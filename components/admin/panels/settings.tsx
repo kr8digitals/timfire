@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Save, Plus, RotateCcw } from 'lucide-react';
+import { Save, RotateCcw } from 'lucide-react';
 import type { SiteContent, Stat } from '@/lib/cms/types';
-import { Field, Panel, Toggle, Pill, newId, Empty, RowList } from '../kit';
+import { Field, Panel, Toggle } from '../kit';
 
 export function SiteSettingsPanel({ content, update }: { content: SiteContent; update: (fn: (d: SiteContent) => void) => void }) {
   const settings = content.settings;
@@ -34,95 +34,8 @@ export function SiteSettingsPanel({ content, update }: { content: SiteContent; u
         <Field label="Line 3 — the name" value={settings.heroName} onChange={(v) => patch({ heroName: v })} wide />
       </Panel>
 
-      <StatsPanel content={content} update={update} />
       <SocialsPanel content={content} update={update} />
     </>
-  );
-}
-
-function StatsPanel({ content, update }: { content: SiteContent; update: (fn: (d: SiteContent) => void) => void }) {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const editing = content.settings.stats.find((s) => s.id === editingId) || null;
-
-  function patch(changes: Partial<Stat>) {
-    if (!editingId) return;
-    update((d) => {
-      const stat = d.settings.stats.find((s) => s.id === editingId);
-      if (!stat) return;
-      Object.assign(stat, changes);
-    });
-  }
-
-  if (editing) {
-    return (
-      <>
-        <div className="admin-actions" style={{ marginBottom: 16 }}>
-          <button type="button" className="button ghost small" onClick={() => setEditingId(null)}>
-            ← All figures
-          </button>
-        </div>
-        <Panel title="Figure" description="The source field is shown under each number on the homepage. If you cannot fill it in honestly, the figure should not be published.">
-          <div className="row-2">
-            <Field label="Value" value={editing.value} onChange={(v) => patch({ value: v })} required placeholder="9" />
-            <Field label="Label" value={editing.label} onChange={(v) => patch({ label: v })} required placeholder="websites built" />
-          </div>
-          <Field label="Source / basis" value={editing.source} onChange={(v) => patch({ source: v })} type="textarea" rows={3} help="Where this number comes from. This is published." wide />
-          <Toggle label="Show publicly" checked={editing.isPublic} onChange={(v) => patch({ isPublic: v })} />
-        </Panel>
-      </>
-    );
-  }
-
-  return (
-    <Panel
-      title={`Figures (${content.settings.stats.length})`}
-      description="The numbers on the homepage. Verified figures only — each one shows its basis."
-      actions={
-        <button
-          type="button"
-          className="button primary small"
-          onClick={() => {
-            const id = newId('stat');
-            update((d) => {
-              d.settings.stats.push({ id, value: '', label: '', source: '', isPublic: false });
-            });
-            setEditingId(id);
-          }}
-        >
-          <Plus size={15} aria-hidden="true" /> Add figure
-        </button>
-      }
-    >
-      {content.settings.stats.length === 0 ? (
-        <Empty>No figures. The homepage section will not render.</Empty>
-      ) : (
-        <RowList
-          items={content.settings.stats}
-          onReorder={(from, direction) =>
-            update((d) => {
-              const target = from + direction;
-              if (target < 0 || target >= d.settings.stats.length) return;
-              [d.settings.stats[from], d.settings.stats[target]] = [d.settings.stats[target], d.settings.stats[from]];
-            })
-          }
-          onRemove={(id) => update((d) => { d.settings.stats = d.settings.stats.filter((s) => s.id !== id); })}
-          onEdit={(id) => setEditingId(id)}
-          render={(item) => {
-            const stat = content.settings.stats.find((s) => s.id === item.id)!;
-            return (
-              <div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-                  <strong style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: 'var(--orange)' }}>{stat.value || '—'}</strong>
-                  <span style={{ fontSize: '.9rem' }}>{stat.label || 'no label'}</span>
-                  {!stat.isPublic && <Pill kind="private">hidden</Pill>}
-                </div>
-                {stat.source && <p className="small muted" style={{ margin: '2px 0 0', fontSize: '.76rem' }}>{stat.source}</p>}
-              </div>
-            );
-          }}
-        />
-      )}
-    </Panel>
   );
 }
 

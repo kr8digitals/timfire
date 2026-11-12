@@ -61,7 +61,7 @@ a pass on a real phone and a real laptop. That pass is still owed.
 | Check | Result |
 | --- | --- |
 | Placeholders | No `[ADD: …]` or `TODO:` in rendered pages |
-| Statistics | Replaced with sourced, countable figures: 9 built sites, since 2023, 5 agents, 8-week cohort. Each carries a `source` note. The owner's earlier 50+ clients / 5,000+ students / 15 mentees are **not** used, because they are unverifiable |
+| Statistics | **No statistics on the homepage.** The section was removed on request; the earlier 50+ clients / 5,000+ students / 15 mentees were unverifiable and are gone from the content document entirely |
 | Prices | Unchanged from the brief: website ₦150k, AI ₦200k, SEO ₦80k, graphic ₦20k, branding ₦100k, mentorship ₦2,500/hr; video, redesign and audit are quote-only |
 | Currency | Naira is the base; every other figure is derived from it |
 | Palette | `#0b0706`, `#f27a1a`, `#8e1b3a`, `#f9f9f9`. No new brand colours |

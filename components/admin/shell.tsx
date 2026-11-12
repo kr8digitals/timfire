@@ -85,6 +85,7 @@ export default function AdminShell() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; kind: 'ok' | 'error' | '' }>({ text: '', kind: '' });
   const [saving, setSaving] = useState(false);
+  const [setup, setSetup] = useState<{ ready: boolean; backend: string } | null>(null);
 
   /* ── Session ───────────────────────────────────────────────────────────── */
 
@@ -94,6 +95,7 @@ export default function AdminShell() {
       .then((data) => {
         setAuth(data.authenticated ? 'in' : 'out');
         setExpires(data.expires || 0);
+        if (data.setup) setSetup(data.setup);
       })
       .catch(() => setAuth('out'));
   }, []);
@@ -345,6 +347,15 @@ export default function AdminShell() {
           </button>
         </div>
       </header>
+
+      {setup && !setup.ready && (
+        <Notice kind="error">
+          <strong>Saving is not connected.</strong> This deployment has no content storage configured, so edits
+          cannot be written. Set <code>GITHUB_CONTENT_TOKEN</code>, <code>GITHUB_CONTENT_REPO</code> and{' '}
+          <code>GITHUB_CONTENT_BRANCH</code> in the host&apos;s environment variables and redeploy. The public site
+          keeps working in the meantime.
+        </Notice>
+      )}
 
       {message.text && (
         <Notice kind={message.kind}>

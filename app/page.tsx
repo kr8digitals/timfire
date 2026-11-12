@@ -429,45 +429,6 @@ function Ventures({
   );
 }
 
-/* ── Section 7: Numbers ──────────────────────────────────────────────────── */
-
-function Numbers({ stats }: { stats: Awaited<ReturnType<typeof getContent>>['settings']['stats'] }) {
-  const live = stats.filter((s) => s.isPublic);
-  if (!live.length) return null;
-  return (
-    <section className="section">
-      <div className="shell">
-        <Reveal>
-          <div className="sectionhead">
-            <div className="inner">
-              <span className="eyebrow">In numbers</span>
-              <h2>
-                Only what I can <em>back up.</em>
-              </h2>
-            </div>
-            <p>
-              Every figure here has a basis. If I cannot point to where a number comes from, it does not belong on
-              this site.
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal>
-          <div className={`statline`} style={{ gridTemplateColumns: `repeat(${Math.min(live.length, 4)}, 1fr)` }}>
-            {live.map((stat) => (
-              <div key={stat.id}>
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-                <span className="stat-source">{stat.source}</span>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 /* ── Section 8: Let's make something real ────────────────────────────────── */
 
 function FinalCTA({
@@ -601,7 +562,6 @@ export default async function HomePage() {
         <HowIHelp />
         <Beyond />
         <Ventures ventures={content.ventures} />
-        <Numbers stats={content.settings.stats} />
         <FinalCTA posts={content.posts} />
       </main>
     </CurrencyProvider>

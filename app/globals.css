@@ -163,14 +163,6 @@ p{max-width:68ch}
 .headcta:hover{background:#f27a1a1a;border-color:var(--orange)}
 .mobile-menu{display:none}
 
-/* The visitor bar is deliberately quiet: it is a nicety, not the header. */
-.locbar{background:#080504;border-bottom:1px solid #1c1410;color:#8d7d74;font-size:.8rem}
-.locbar .shell{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:31px;flex-wrap:wrap;padding-block:5px}
-.locbar span{display:inline-flex;align-items:center;gap:7px}
-.locbar strong{color:#cfc1b8;font-weight:600}
-.locbar .loc-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px #f27a1a26;flex:none}
-.locbar a{color:var(--orange);display:inline-flex;align-items:center;min-height:31px}
-.locbar a:hover{text-decoration:underline;text-underline-offset:3px}
 
 .overlay{position:fixed;inset:0;z-index:99;background:#000000cc;backdrop-filter:blur(6px);display:grid;place-items:start center;padding:6vh 16px;overflow-y:auto}
 .modal{background:#1b120e;color:var(--paper);border:1px solid #6d4c38;border-radius:24px;padding:26px;width:min(660px,100%);max-height:88vh;overflow:auto;box-shadow:var(--shadow-2)}

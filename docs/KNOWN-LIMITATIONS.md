@@ -72,12 +72,14 @@ The site self-hosts two WOFF2 files in `app/fonts/`. They are loaded through
 assets. Do not move them to `public/` without also dropping `next/font/local`,
 or they will be requested twice.
 
-## Statistics on the site are unverified
+## There are no statistics on the site
 
 The figures carried over from the owner's brief — 50+ clients, 5,000+ students
-taught, 15 mentees — have not been independently confirmed. They are marked in
-the content for review. Any statistic that ships needs a visible source note;
-anything that cannot be sourced should be removed rather than softened.
+taught, 15 mentees — could not be confirmed, so that homepage section was removed
+rather than replaced with different numbers. The `settings.stats` array still
+exists in the content schema and the type, but nothing renders it and the admin
+no longer offers an editor for it. If sourced figures come back, they should
+return with a visible basis next to each one.
 
 ## Testing
 

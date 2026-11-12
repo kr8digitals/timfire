@@ -137,9 +137,10 @@ is the local-development fallback and is ignored.
 * Currency switching converts from the naira base; the naira figure is the
   source of truth.
 * Facts that are not known are marked `[ADD: …]` or `TODO:` in the content, never
-  replaced with something plausible. Any statistic must carry a visible source
-  note; the owner-supplied figures (50+ clients, 5,000+ students, 15 mentees)
-  remain unverified and must be confirmed or removed before launch.
+  replaced with something plausible. The homepage deliberately carries **no
+  statistics**: the earlier figures (50+ clients, 5,000+ students, 15 mentees)
+  could not be verified, so the section was removed rather than dressed up with
+  smaller numbers. If sourced figures return later, they need a visible basis.
 
 ---
 

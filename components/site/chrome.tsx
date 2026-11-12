@@ -73,63 +73,6 @@ function Modal({
   );
 }
 
-/* ── Visitor bar ─────────────────────────────────────────────────────────── */
-
-/**
- * Shows the visitor's own local time, derived from their device clock and time
- * zone. No network call, no tracking, no geolocation prompt. It sits in a thin
- * strip above the header rather than floating over the page.
- */
-function VisitorBar() {
-  const [loc, setLoc] = useState<{ city: string; time: string; offset: string } | null>(null);
-
-  useEffect(() => {
-    function read() {
-      try {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-        const city = tz.split('/').pop()?.replace(/_/g, ' ') || '';
-        const now = new Date();
-        const time = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(now);
-        const parts = new Intl.DateTimeFormat(undefined, { timeZoneName: 'shortOffset' }).formatToParts(now);
-        const offset = parts.find((p) => p.type === 'timeZoneName')?.value || '';
-        setLoc({ city, time, offset });
-      } catch {
-        setLoc(null);
-      }
-    }
-    read();
-    const id = setInterval(read, 30_000);
-    return () => clearInterval(id);
-  }, []);
-
-  return (
-    <aside className="locbar" aria-label="Your local time">
-      <div className="shell">
-        <span>
-          <i className="loc-dot" aria-hidden="true" />
-          {loc?.city ? (
-            <>
-              You are reading from <strong>{loc.city}</strong>
-              {loc.offset ? ` · ${loc.offset}` : ''}
-            </>
-          ) : (
-            'Reading from somewhere in the world'
-          )}
-        </span>
-        <span aria-live="off">
-          {loc ? (
-            <>
-              Your time <strong className="mono">{loc.time}</strong>
-            </>
-          ) : (
-            'TIMFIRE · Abakaliki, Nigeria'
-          )}
-        </span>
-      </div>
-    </aside>
-  );
-}
-
 /* ── Search ──────────────────────────────────────────────────────────────── */
 
 type SearchEntry = { title: string; href: string; type: string; terms: string };
@@ -247,7 +190,6 @@ export function Header() {
   return (
     <>
       <header className="header">
-        <VisitorBar />
         <div className="shell headrow">
           <Link className="logo" href="/" aria-label="TIMFIRE — home">
             TIMFIRE<span>.</span>

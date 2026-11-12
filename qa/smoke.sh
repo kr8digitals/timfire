@@ -36,6 +36,11 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Co
 code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/admin/inbox")
 [ "$code" = "401" ] && echo "ok   inbox requires auth 401" || { echo "FAIL inbox auth ($code)"; fail=1; }
 
+echo "-- content api"
+html=$(curl -s "$BASE/api/content")
+echo "$html" | grep -q '"version":1' && echo "ok   /api/content serves site data" || { echo "FAIL /api/content"; fail=1; }
+echo "$html" | grep -q 'ADD: poem' && { echo "FAIL drafts leak to anonymous /api/content"; fail=1; } || echo "ok   drafts hidden from anonymous content api"
+
 echo "-- headers"
 curl -sI "$BASE/" | grep -qi 'content-security-policy' && echo "ok   CSP present" || { echo "FAIL CSP missing"; fail=1; }
 curl -sI "$BASE/" | grep -qi 'x-content-type-options: nosniff' && echo "ok   nosniff present" || { echo "FAIL nosniff missing"; fail=1; }

@@ -137,6 +137,12 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
   .work-hero-art{min-height:300px;margin-top:8px}
 }
 
+/* ---------- Ventures hero ---------- */
+.ventures-hero{padding-top:76px}
+.ventures-hero h1{font-size:clamp(2.5rem,4.6vw,4.6rem)}
+.ventures-photo img,.face-first{object-position:center 6%!important;max-height:660px}
+@media(max-width:800px){.ventures-hero{padding-top:56px}}
+
 /* ---------- Service landing pages ---------- */
 .lp-price{margin-top:22px;color:var(--muted);font-size:1.02rem}
 .lp-price strong{color:var(--orange);font-family:var(--font-display);font-size:1.2rem}

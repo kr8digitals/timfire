@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, Lock, MessageCircle, Mail, Code2, Bot, GraduationCap, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Bot, GraduationCap, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
 import { isPublished } from '@/lib/content';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
 import { Reveal } from '@/components/motion';
@@ -103,7 +103,7 @@ export default function Section({ section }: { section: string }) {
   const { data } = useStore();
   return (
     <main id="main">
-      {section !== 'work' && <Heading section={section} />}
+      {section !== 'work' && section !== 'ventures' && <Heading section={section} />}
       <div className="shell">
         {section === 'about' && <About />}
         {section === 'work' && <Work />}
@@ -418,36 +418,45 @@ function Work() {
 function Ventures() {
   return (
     <>
-      <div className="two-col">
+      <section className="shell work-hero ventures-hero">
         <Reveal>
-          <div className="copy-panel">
+          <div>
             <span className="eyebrow">Founder · KR8 DIGITALS</span>
-            <h2>
-              We create.
+            <h1>
+              We create. We innovate.
               <br />
-              <em>We innovate.</em>
-              <br />
-              We deliver results.
-            </h2>
-            <p>
-              KR8 DIGITALS is a creative company: fast websites, unforgettable brand identities, video, AI systems and
-              search authority for organisations ready to lead — alongside free training for the next generation of
-              digital builders.
+              <em>We deliver results.</em>
+            </h1>
+            <p className="page-lead">
+              KR8 DIGITALS is a creative company: fast websites, brand identities that hold up in daylight, video, SEO
+              and AI systems for organisations ready to lead. It exists for a second reason as well — the profit funds
+              KR8 Academy, tuition-free training for the next generation of digital builders.
             </p>
-            <p>
+            <p style={{ marginTop: 18 }}>
               <strong>THINK IT. KR8 IT.</strong>
             </p>
-            <a href="https://kr8digitals.com" className="text-link" target="_blank" rel="noopener noreferrer">
-              Visit KR8 DIGITALS <ArrowUpRight size={18} />
-            </a>
+            <div className="actions">
+              <a href="https://kr8digitals.com" className="button primary" target="_blank" rel="noopener noreferrer">
+                Visit KR8 DIGITALS <ArrowUpRight size={18} />
+              </a>
+              <a href="#ecosystem" className="button ghost">
+                Inside the ecosystem <ArrowDown size={18} />
+              </a>
+            </div>
           </div>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="photo-card">
-            <PImage src="/images/supplied-founder.webp" alt="TIMFIRE standing in a white shirt and brown trousers" width={1023} height={1537} />
+          <div className="photo-card ventures-photo">
+            <PImage
+              src="/images/supplied-founder.webp"
+              alt="TIMFIRE, founder of KR8 DIGITALS, standing in a white shirt and brown trousers"
+              width={1023}
+              height={1537}
+              className="face-first"
+            />
           </div>
         </Reveal>
-      </div>
+      </section>
 
       <Reveal>
         <blockquote className="quote-panel">
@@ -457,7 +466,7 @@ function Ventures() {
       </Reveal>
 
       <Reveal>
-        <div className="sectionhead section">
+        <div className="sectionhead section" id="ecosystem">
           <div>
             <span className="eyebrow">The ecosystem</span>
             <h2>

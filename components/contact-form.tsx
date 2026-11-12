@@ -58,7 +58,13 @@ export default function ContactForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), topic, message: message.trim(), website }),
+        body: JSON.stringify({
+          kind: 'general',
+          name: name.trim(),
+          email: email.trim(),
+          answers: { topic, message: message.trim() },
+          website,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {

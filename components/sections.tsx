@@ -101,7 +101,7 @@ export default function Section({ section }: { section: string }) {
   const { data } = useStore();
   return (
     <main id="main">
-      <Heading section={section} />
+      {section !== 'work' && <Heading section={section} />}
       <div className="shell">
         {section === 'about' && <About />}
         {section === 'work' && <Work />}
@@ -227,8 +227,58 @@ function Work() {
   const { data } = useStore();
   const own = data.websites.filter((x) => x.isPublic && !x.kind.startsWith('KR8 studio'));
   const studio = data.websites.filter((x) => x.isPublic && x.kind.startsWith('KR8 studio'));
+  const agents = data.agents.filter((x) => x.isPublic);
   return (
     <>
+      <section className="shell work-hero">
+        <Reveal>
+          <div>
+            <span className="eyebrow">Proof of capability</span>
+            <h1>
+              Real work,
+              <br />
+              <em>live and in use.</em>
+            </h1>
+            <p className="page-lead">
+              Hotels taking reservations at midnight. STEM programmes taking registrations. An assistant answering
+              customers on a real website right now. Everything on this page was built to do a job — and is judged by
+              whether the job gets done.
+            </p>
+            <div className="cluster" style={{ marginTop: 22, gap: 10 }}>
+              <span className="badge">{own.length + studio.length} websites</span>
+              <span className="badge private">{agents.length} AI agents</span>
+              <span className="badge private">Sole developer on every build</span>
+            </div>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="work-hero-art">
+            <div className="shot a">
+              <Image
+                src="/images/afristem-site.webp"
+                alt="Screenshot of the live AFRISTEM Global website"
+                width={730}
+                height={375}
+                sizes="(max-width: 800px) 70vw, 40vw"
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            </div>
+            <div className="shot b">
+              <Image
+                src="/images/kr8-site.webp"
+                alt="Screenshot of the live KR8 DIGITALS website"
+                width={1340}
+                height={625}
+                sizes="(max-width: 800px) 60vw, 34vw"
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
+            </div>
+            <span className="live-tag">
+              <i aria-hidden="true" /> both live now
+            </span>
+          </div>
+        </Reveal>
+      </section>
       <Reveal>
         <div className="sectionhead">
           <div>
@@ -261,6 +311,24 @@ function Work() {
       <p className="muted" style={{ marginTop: 20 }}>
         And more.
       </p>
+
+      <Reveal>
+        <section className="cta-block" style={{ marginTop: 60 }}>
+          <div>
+            <span className="eyebrow">Your turn</span>
+            <h2>
+              Need a website? <em>Or a better one?</em>
+            </h2>
+            <p className="muted" style={{ marginTop: 12, maxWidth: 520 }}>
+              A new build, a rebuild, a redesign, an audit or targeted fixes — each path is explained properly on its
+              own page, with what it costs and exactly what you can expect from the process.
+            </p>
+          </div>
+          <Link href="/services/website-design-development" className="button primary">
+            Explore website development <ArrowUpRight size={18} />
+          </Link>
+        </section>
+      </Reveal>
 
       {studio.length > 0 && (
         <>
@@ -328,11 +396,15 @@ function Work() {
           <div>
             <span className="eyebrow">AI, built around your work</span>
             <h2>
-              Need an AI agent of <em>your own?</em>
+              Need an AI agent <em>of your own?</em>
             </h2>
+            <p className="muted" style={{ marginTop: 12, maxWidth: 520 }}>
+              Not sure what an agent is, or whether your work has one hiding in it? The landing page explains both in
+              plain language — and shows agents that are live today, answering real customers.
+            </p>
           </div>
-          <Link href={'/contact?service=' + encodeURIComponent('AI agent development')} className="button primary">
-            Request one <ArrowUpRight size={18} />
+          <Link href="/services/ai-agent-development" className="button primary">
+            See what an agent can do <ArrowUpRight size={18} />
           </Link>
         </section>
       </Reveal>

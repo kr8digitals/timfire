@@ -1,0 +1,1124 @@
+{
+  "version": 2,
+  "settings": {
+    "name": "TIMFIRE",
+    "role": "Website developer · AI agent developer · Founder of KR8 DIGITALS",
+    "base": "Abakaliki, Ebonyi State, Nigeria",
+    "email": "hi@kutimfire.com",
+    "whatsapp": "2348166552758",
+    "heroWelcome": "Welcome to my space.",
+    "heroLine": "You're the one I've been expecting.",
+    "heroName": "I am Timfire.",
+    "ratesUpdated": "2026-11-01",
+    "rates": {
+      "NGN": 1,
+      "USD": 0.000647,
+      "GBP": 0.000489,
+      "EUR": 0.000559,
+      "CAD": 0.000905,
+      "AUD": 0.000993,
+      "GHS": 0.00786,
+      "ZAR": 0.0113,
+      "KES": 0.0836,
+      "INR": 0.0569,
+      "AED": 0.00238,
+      "CNY": 0.00461,
+      "JPY": 0.0995
+    },
+    "stats": [],
+    "socials": [
+      {
+        "id": "facebook",
+        "name": "Facebook",
+        "url": "https://www.facebook.com/share/1EHJ272qmK/",
+        "isPublic": true
+      },
+      {
+        "id": "instagram",
+        "name": "Instagram",
+        "url": "https://www.instagram.com/timfire3/",
+        "isPublic": true
+      },
+      {
+        "id": "tiktok",
+        "name": "TikTok",
+        "url": "https://www.tiktok.com/@kutimfire",
+        "isPublic": true
+      },
+      {
+        "id": "x",
+        "name": "X",
+        "url": "",
+        "isPublic": false
+      },
+      {
+        "id": "linkedin",
+        "name": "LinkedIn",
+        "url": "",
+        "isPublic": false
+      },
+      {
+        "id": "youtube",
+        "name": "YouTube",
+        "url": "",
+        "isPublic": false
+      }
+    ]
+  },
+  "posts": [
+    {
+      "id": "post-1",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "title": "What I check before I agree to build a website",
+      "slug": "what-i-check-before-i-build-a-website",
+      "category": "Process",
+      "tags": [
+        "web development",
+        "process",
+        "small business"
+      ],
+      "summary": "The decision that sinks most small-business websites happens long before anyone writes a line of code. Here is the short list I go through before quoting.",
+      "body": "Most of the websites I am asked to fix were not badly designed. They were badly decided. Someone chose the pages before anyone agreed what a visitor is supposed to do.\n\n## Start with one outcome\n\nBefore I quote, I ask a question that is deliberately narrow: what is the single most valuable thing a visitor could do on this site? For a hotel it is a booking. For a hospital it is a phone call. For a photographer it is a message with a date in it.\n\nIf the answer is \"all of them\", there is no answer yet, and the site will be built to say nothing in particular.\n\n## Then count the clicks\n\nI open the site on a mid-range Android phone on a slow connection and count how many taps it takes to reach the action above. If it is more than two, that is the first thing I fix, regardless of how the site looks.\n\n## Then read the first screen out loud\n\nThis is the test most sites fail. Read the top of your homepage aloud as though explaining it to someone who has never heard of you. If it contains the words \"solutions\", \"innovative\" or \"passionate\", it is not explaining anything.\n\n## Only then does design start\n\nDesign is the part everyone wants to talk about first and it is the part that matters third. Get the outcome, the click count and the first screen right, and the design has something to serve. Skip those three and even a beautiful site fails quietly — which is the worst way for anything to fail.",
+      "cover": "/images/work/tech-desk.webp",
+      "coverAlt": "TIMFIRE working on a website build",
+      "status": "published",
+      "visibility": "public",
+      "publishedAt": "2026-10-14T08:00:00.000Z",
+      "featured": true,
+      "readingMinutes": 3
+    },
+    {
+      "id": "post-2",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "title": "An AI agent is only as useful as what you feed it",
+      "slug": "an-ai-agent-is-only-as-useful-as-what-you-feed-it",
+      "category": "AI agents",
+      "tags": [
+        "AI agents",
+        "automation",
+        "guardrails"
+      ],
+      "summary": "Everyone wants an AI assistant. Almost nobody wants to do the boring part: deciding what it is allowed to know and what it must refuse.",
+      "body": "A chatbot that invents a price is worse than no chatbot at all. It does not just fail — it costs you a customer who trusted it.\n\n## The knowledge base is the product\n\nWhen I build an agent, most of the work is not technical. It is sitting with the owner and writing down what is actually true: the real prices, the real turnaround times, the real things the business will not do.\n\nThat document is the agent. The model is just the part that talks.\n\n## Refusals are a feature\n\nA good agent says \"I do not know that, let me get a person\" more often than a bad one. I write the refusal rules before I write the answers, because the failure mode of a confident wrong answer is much more expensive than the failure mode of an honest escalation.\n\n## Then watch what people actually ask\n\nFor two weeks after launch I read the conversations. Without exception, people ask things nobody predicted. The knowledge base changes in that fortnight more than it changes in the next two months.\n\nIf you are buying an agent, ask your developer what happens when it is asked something outside its knowledge. If the answer is vague, the agent will be vague at the worst possible moment.",
+      "cover": "/images/work/workspace-neon.webp",
+      "coverAlt": "A purple-lit multi-screen workstation",
+      "status": "published",
+      "visibility": "public",
+      "publishedAt": "2026-11-02T08:00:00.000Z",
+      "featured": true,
+      "readingMinutes": 3
+    },
+    {
+      "id": "post-3",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "title": "Eight weeks, no tuition, and a number anyone can check",
+      "slug": "eight-weeks-no-tuition",
+      "category": "KR8",
+      "tags": [
+        "KR8 Academy",
+        "teaching",
+        "digital skills"
+      ],
+      "summary": "Why KR8 Academy is free, why the cohorts are eight weeks long, and why every graduate leaves with an ID that can be verified.",
+      "body": "The most common reason people in my city never learn digital skills is not a lack of interest. It is a lack of a way in.\n\nCourses cost money. Bootcamps require a laptop and free evenings. Free tutorials require a connection good enough to stream them and the confidence to know which of the ten thousand links to follow.\n\n## Why free\n\nKR8 Academy charges nothing because a fee, however small, is a filter. It filters for people who already have a little capital, and those are precisely the people who need the least help.\n\n## Why eight weeks\n\nLong enough for a skill to become a habit. Short enough that someone with a job, a family or an unreliable generator can finish. Every cohort that runs longer loses people not because they gave up but because life happened.\n\n## Why the ID\n\nCertificates that cannot be checked are decoration. Each KR8 Academy graduate receives a verifiable KR8 ID, so an employer or client can confirm the training actually happened. It is a small piece of infrastructure and it changes how seriously the certificate is taken.\n\nThe studio's client work pays for this. That is the model: build websites for businesses, use part of what that earns to teach people who could not otherwise learn.",
+      "cover": "/images/ventures/kr8-poster-dev.webp",
+      "coverAlt": "A KR8 promotion for website development",
+      "status": "published",
+      "visibility": "public",
+      "publishedAt": "2026-09-22T08:00:00.000Z",
+      "featured": false,
+      "readingMinutes": 3
+    }
+  ],
+  "creative": [
+    {
+      "id": "c-p1",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "title": "Not Yet",
+      "slug": "not-yet",
+      "category": "Poetry",
+      "lede": "A poem about the gap between who you are and who everyone is waiting for you to become.",
+      "body": "TODO: owner to supply the full text of this poem.\n\nThis page is built and waiting for the words. Until they arrive, nothing here is presented as finished work.",
+      "cover": "/images/creative/poetry-candle.webp",
+      "coverAlt": "A notebook and a candle in a library",
+      "mediaType": "none",
+      "mediaUrl": "",
+      "captionUrl": "",
+      "status": "draft",
+      "visibility": "public",
+      "publishedAt": "",
+      "featured": false
+    },
+    {
+      "id": "c-p2",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "title": "Spoken word — stage piece",
+      "slug": "stage-piece",
+      "category": "Spoken word",
+      "lede": "Written for a stage, timed for breath, built to land on the last line.",
+      "body": "TODO: owner to supply the piece and the recording.\n\nThe player, captions and transcript layout are built. Add the media when the performance is ready to publish.",
+      "cover": "/images/creative/spoken-stage.webp",
+      "coverAlt": "A stage lit in pink and blue for a performance",
+      "mediaType": "none",
+      "mediaUrl": "",
+      "captionUrl": "",
+      "status": "draft",
+      "visibility": "public",
+      "publishedAt": "",
+      "featured": false
+    },
+    {
+      "id": "c-m1",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "title": "Piano — first recordings",
+      "slug": "piano-first-recordings",
+      "category": "Music & piano",
+      "lede": "The earliest things I recorded, kept because they are honest about where I was.",
+      "body": "TODO: owner to supply audio recordings.\n\nPublishing a first recording is its own kind of courage. When the files are ready they go here, with the date they were played.",
+      "cover": "/images/creative/music-neon.webp",
+      "coverAlt": "A keyboard and studio monitors beneath a neon MUSIC sign",
+      "mediaType": "none",
+      "mediaUrl": "",
+      "captionUrl": "",
+      "status": "draft",
+      "visibility": "public",
+      "publishedAt": "",
+      "featured": false
+    }
+  ],
+  "gallery": [
+    {
+      "id": "g-01",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "src": "/images/gallery/01-orange-suit.webp",
+      "alt": "TIMFIRE in a burnt-orange jacket and white shirt against a warm brown backdrop",
+      "title": "The orange jacket",
+      "caption": "The portrait that ended up everywhere — the site, the business card, the first screenshot anyone sees.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-02",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "src": "/images/gallery/02-green-chair.webp",
+      "alt": "TIMFIRE laughing in a dark green suit, seated in a leather chair",
+      "title": "Green chair, real laugh",
+      "caption": "Mid-laugh, which is usually the only honest expression in a studio session.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-03",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "src": "/images/gallery/03-stool.webp",
+      "alt": "TIMFIRE in a brown suit sitting on a wooden stool against a dark background",
+      "title": "Stool, brown suit",
+      "caption": "The KR8 DIGITALS founder image. Quiet, deliberate, not trying to look busy.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-04",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 4,
+      "src": "/images/gallery/04-white-suit.webp",
+      "alt": "TIMFIRE standing in a white outfit with one hand in his pocket",
+      "title": "All white",
+      "caption": "The full-length version, standing, hand in pocket, entirely unbothered.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-05",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 5,
+      "src": "/images/gallery/05-cream.webp",
+      "alt": "TIMFIRE in a cream sweater sitting on a wooden chair, laughing behind his hand",
+      "title": "Cream sweater",
+      "caption": "Shot on the same afternoon as everything else in this room. A different person entirely.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-06",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 6,
+      "src": "/images/gallery/06-black-suit.webp",
+      "alt": "TIMFIRE in a black turtleneck suit standing against a dark brown background",
+      "title": "Black turtleneck",
+      "caption": "Almost a silhouette. The one that looks most like a record sleeve.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-07",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 7,
+      "src": "/images/gallery/07-white-shirt.webp",
+      "alt": "TIMFIRE seated in a white shirt against a deep brown backdrop",
+      "title": "White shirt",
+      "caption": "The simplest frame in the set. No jacket, no prop, no distraction.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-08",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 8,
+      "src": "/images/gallery/08-music.webp",
+      "alt": "TIMFIRE in a plaid shirt in a studio with a neon MUSIC sign and keyboard",
+      "title": "The music room",
+      "caption": "Neon sign, MIDI keyboard, a plaid shirt. The most literal portrait of the musical half.",
+      "collection": "Studio",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-09",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 9,
+      "src": "/images/gallery/09-stage.webp",
+      "alt": "A stage lit with coloured lights and a microphone stand",
+      "title": "Before the mic",
+      "caption": "The lit stage, minutes before it fills. The part of performing nobody photographs.",
+      "collection": "Stage",
+      "year": "2025",
+      "orientation": "landscape",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-10",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 10,
+      "src": "/images/gallery/10-candle.webp",
+      "alt": "TIMFIRE sitting on the floor of a library writing in a notebook by candlelight",
+      "title": "Candle and notebook",
+      "caption": "Written by hand before it was typed. That has not changed.",
+      "collection": "Writing",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-11",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 11,
+      "src": "/images/gallery/11-speak.webp",
+      "alt": "TIMFIRE seated in a black t-shirt gesturing with both hands open while talking",
+      "title": "Mid-explanation",
+      "caption": "From the video set. Hands doing most of the talking, as usual.",
+      "collection": "Studio",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-12",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 12,
+      "src": "/images/gallery/12-jump.webp",
+      "alt": "TIMFIRE jumping in the air in a yellow sweater against a pale background",
+      "title": "Off the ground",
+      "caption": "The only frame from the whole shoot where nothing is composed.",
+      "collection": "Street",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-13",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 13,
+      "src": "/images/gallery/13-white-pray.webp",
+      "alt": "A seated figure in white with hands together in a reflective pose",
+      "title": "Stillness",
+      "caption": "A quiet frame, kept for the mood rather than the likeness.",
+      "collection": "Studio",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-14",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 14,
+      "src": "/images/gallery/14-street.webp",
+      "alt": "TIMFIRE walking a tree-lined street in a light blue t-shirt",
+      "title": "The walk home",
+      "caption": "Abakaliki in the background, ordinary afternoon light, no studio anywhere.",
+      "collection": "Street",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-15",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 15,
+      "src": "/images/gallery/15-church.webp",
+      "alt": "TIMFIRE standing with a friend in front of an Assemblies of God sign",
+      "title": "Beyond the door",
+      "caption": "Church, where a lot of the confidence came from before there was any work to be confident about.",
+      "collection": "Community",
+      "year": "2024",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-16",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 16,
+      "src": "/images/gallery/16-traditional.webp",
+      "alt": "TIMFIRE in white traditional attire with coral beads, raising a fist",
+      "title": "Coral and white",
+      "caption": "Traditional dress, one fist raised. The Igbo side of the story, worn properly.",
+      "collection": "Culture",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-17",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 17,
+      "src": "/images/gallery/17-graduation.webp",
+      "alt": "TIMFIRE in graduation gown and cap beside a friend on a street",
+      "title": "Finished school",
+      "caption": "Nnodo Secondary School, completed. The day the next seven years started arguing with each other.",
+      "collection": "Milestones",
+      "year": "2024",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-18",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 18,
+      "src": "/images/gallery/18-workspace.webp",
+      "alt": "TIMFIRE at a purple-lit multi-screen workstation",
+      "title": "The desk at night",
+      "caption": "Where the sites actually get built. Three screens, one playlist, no daylight.",
+      "collection": "Work",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": true,
+      "visibility": "public"
+    },
+    {
+      "id": "g-19",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 19,
+      "src": "/images/gallery/19-face-studio.webp",
+      "alt": "Close portrait of TIMFIRE in a green shirt against a green background",
+      "title": "Green on green",
+      "caption": "The tightest frame in the set, and the only one where the shirt matches the wall.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-20",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 20,
+      "src": "/images/gallery/20-hallway.webp",
+      "alt": "TIMFIRE and a friend standing together in a bright empty hall",
+      "title": "Empty hall",
+      "caption": "Somewhere between an event and the walk home, in good company.",
+      "collection": "Community",
+      "year": "2024",
+      "orientation": "landscape",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-21",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 21,
+      "src": "/images/gallery/21-window.webp",
+      "alt": "TIMFIRE seated beside a window in soft daylight, looking towards the camera",
+      "title": "Window light",
+      "caption": "No flash, no studio. Just a window, a chair and an afternoon.",
+      "collection": "Street",
+      "year": "2024",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-22",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 22,
+      "src": "/images/gallery/22-classroom.webp",
+      "alt": "TIMFIRE in a classroom with a young student writing beside him",
+      "title": "The classroom",
+      "caption": "Before the websites there was a classroom, and someone patient enough to explain things twice.",
+      "collection": "Community",
+      "year": "2024",
+      "orientation": "landscape",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-23",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 23,
+      "src": "/images/gallery/23-street-white.webp",
+      "alt": "TIMFIRE standing in an all-white outfit on a quiet residential street",
+      "title": "All white, outside",
+      "caption": "The studio outfit taken outdoors, where the light does not cooperate.",
+      "collection": "Street",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-24",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 24,
+      "src": "/images/gallery/24-glass.webp",
+      "alt": "TIMFIRE and a friend in sunglasses reflected in a glass building",
+      "title": "Glass building",
+      "caption": "The only corporate-looking frame in the entire archive, achieved accidentally.",
+      "collection": "Work",
+      "year": "2025",
+      "orientation": "landscape",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-25",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 25,
+      "src": "/images/gallery/25-classroom.webp",
+      "alt": "TIMFIRE and a fellow student in a school corridor",
+      "title": "Corridor days",
+      "caption": "Secondary school, captured in the middle of an ordinary school day.",
+      "collection": "Milestones",
+      "year": "2023",
+      "orientation": "landscape",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-26",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 26,
+      "src": "/images/gallery/26-seated.webp",
+      "alt": "TIMFIRE seated and smiling in a dark t-shirt and trousers",
+      "title": "Seated",
+      "caption": "The frame used on the promotional design, before the text was ever added.",
+      "collection": "Portraits",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-27",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 27,
+      "src": "/images/gallery/27-culture.webp",
+      "alt": "TIMFIRE in white traditional attire with coral beads against a blue wall",
+      "title": "Culture, again",
+      "caption": "The same attire, a different wall, and a better sky.",
+      "collection": "Culture",
+      "year": "2025",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    },
+    {
+      "id": "g-28",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 28,
+      "src": "/images/gallery/28-shirt-portrait.webp",
+      "alt": "TIMFIRE smiling in a patterned shirt on a road with trees behind him",
+      "title": "Roadside smile",
+      "caption": "Taken on a road, by a friend, with no plan whatsoever. It shows.",
+      "collection": "Street",
+      "year": "2024",
+      "orientation": "portrait",
+      "featured": false,
+      "visibility": "public"
+    }
+  ],
+  "projects": [
+    {
+      "id": "afristem",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "name": "AFRISTEM Global",
+      "slug": "afristem-global",
+      "url": "https://afristemglobal.org",
+      "summary": "A home for STEM education, competitions and programmes across Africa.",
+      "description": [
+        "AFRISTEM Global needed a site that could hold a lot: programmes, competitions, registration, resources and the institutional credibility that comes with running STEM education at scale.",
+        "I designed and built the site end to end — the information architecture first, then the page templates, then the build. The result is a site that can absorb new programmes without being rebuilt each time, which matters for an organisation that keeps adding them."
+      ],
+      "role": "Design and development",
+      "year": "2024",
+      "image": "/images/afristem-site.webp",
+      "imageAlt": "The AFRISTEM Global website open on a screen",
+      "kind": "Website",
+      "stack": [
+        "Next.js",
+        "React",
+        "Responsive design",
+        "SEO foundations"
+      ],
+      "highlights": [
+        "Programme and competition pages that non-technical staff can extend",
+        "Registration flows that work on low-end phones",
+        "Search-ready page structure from the first page built"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "primestem",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "name": "Prime STEM Nigeria",
+      "slug": "prime-stem-nigeria",
+      "url": "https://primestemnigeria.afristemglobal.org",
+      "summary": "A redesign on an AFRISTEM subdomain for STEM education and opportunity in Nigeria.",
+      "description": [
+        "A Nigeria-facing arm of the AFRISTEM work, rebuilt to speak directly to students, parents and schools rather than to an international institutional audience.",
+        "The redesign reordered the whole page: opportunity first, explanation second. Fewer sections, more direct language, and a clearer path from \"what is this\" to \"how do I take part\"."
+      ],
+      "role": "Redesign and development",
+      "year": "2025",
+      "image": "/images/work/tech-desk.webp",
+      "imageAlt": "TIMFIRE working on a website build",
+      "kind": "Website redesign",
+      "stack": [
+        "Next.js",
+        "Information architecture",
+        "Responsive design"
+      ],
+      "highlights": [
+        "Restructured around student intent rather than organisational structure",
+        "Rebuilt on the same maintainable foundation as the main site"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "kr8",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "name": "KR8 DIGITALS",
+      "slug": "kr8-digitals",
+      "url": "https://kr8digitals.com",
+      "summary": "The home of KR8 DIGITALS — services, the Academy, the Tribe and RIYA.",
+      "description": [
+        "KR8 DIGITALS is the agency I founded and run. Its website had to do something difficult: sell services, recruit students into a tuition-free academy, host a community of three thousand-plus creators, and introduce RIYA, the AI assistant that answers for the studio.",
+        "I built it as a single coherent system rather than a set of separate pages. The services, the Academy and the Tribe all share one visual language, so the studio reads as one company rather than three offers sharing a logo.",
+        "RIYA runs on the same site — a domain-grounded assistant that answers questions about the programmes, the services and the application process."
+      ],
+      "role": "Founder · design and development",
+      "year": "2024–2026",
+      "image": "/images/ventures/kr8-poster-ai.webp",
+      "imageAlt": "KR8 DIGITALS artwork on human and AI collaboration",
+      "kind": "Website",
+      "stack": [
+        "Next.js",
+        "React",
+        "AI integration",
+        "Content system"
+      ],
+      "highlights": [
+        "Services, Academy and community under one coherent design system",
+        "RIYA, a domain-grounded AI assistant, live on the site",
+        "Free eight-week Academy cohorts with verifiable KR8 IDs"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "riya",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 4,
+      "name": "RIYA",
+      "slug": "riya",
+      "url": "https://kr8digitals.com",
+      "summary": "The AI assistant that answers for KR8 DIGITALS.",
+      "description": [
+        "RIYA answers questions about KR8 DIGITALS — what the studio does, what the Academy costs (nothing), how the cohorts work, and how to apply.",
+        "She is grounded in the studio's real information rather than trained on the open internet, which means she can answer specifically and refuse honestly when a question falls outside what she knows."
+      ],
+      "role": "Build and knowledge design",
+      "year": "2025",
+      "image": "/images/work/workspace-neon.webp",
+      "imageAlt": "A multi-screen workstation lit in purple",
+      "kind": "AI agent",
+      "stack": [
+        "LLM integration",
+        "Retrieval grounding",
+        "Guardrails"
+      ],
+      "highlights": [
+        "Answers from approved studio content, not general guesswork",
+        "Hands over to a human when the question needs one",
+        "Live on kr8digitals.com"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "cirenes",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 5,
+      "name": "Cirenes Hotels",
+      "slug": "cirenes-hotels",
+      "url": "https://cirenes-hotels-liart.vercel.app/",
+      "summary": "Estate, rooms, rates, menu, events hall, gallery, guest book and a reservation flow.",
+      "description": [
+        "A full hotel site built through KR8 DIGITALS: the estate and grounds, room categories with rates, the kitchen menu, the events hall, a photo gallery, a guest book and a reservation flow that hands off to WhatsApp with the details already filled in.",
+        "The reservation step was the whole point of the build. Most hotel sites in this market lose bookings in a contact form; this one moves a guest from \"which room\" to \"here are my dates\" in a single screen."
+      ],
+      "role": "KR8 DIGITALS studio build",
+      "year": "2025",
+      "image": "/images/work/studio-collab.webp",
+      "imageAlt": "Two people reviewing a build together",
+      "kind": "KR8 studio build",
+      "stack": [
+        "Next.js",
+        "WhatsApp handoff",
+        "Gallery system"
+      ],
+      "highlights": [
+        "Reservation flow that carries details straight into WhatsApp",
+        "Menu, gallery and events hall manage without code changes"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "saltlake",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 6,
+      "name": "Salt Lake Hotels",
+      "slug": "salt-lake-hotels",
+      "url": "https://salt-lake-hotels-kappa.vercel.app/",
+      "summary": "Grounds, four room tiers confirmed over WhatsApp, kitchen menu, evenings and events.",
+      "description": [
+        "Four room tiers presented so a guest can tell them apart at a glance, with booking confirmed over WhatsApp — the channel guests actually use here.",
+        "The site carries the grounds, a kitchen menu, an evenings section and an events page, all built so the hotel can update the menu without calling a developer."
+      ],
+      "role": "KR8 DIGITALS studio build",
+      "year": "2025",
+      "image": "/images/work/tech-desk.webp",
+      "imageAlt": "A website build in progress",
+      "kind": "KR8 studio build",
+      "stack": [
+        "Next.js",
+        "WhatsApp booking",
+        "Responsive design"
+      ],
+      "highlights": [
+        "Four clearly differentiated room tiers",
+        "Menu and events editable without touching code"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "monabliss",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 7,
+      "name": "Monabliss Hotels",
+      "slug": "monabliss-hotels",
+      "url": "https://monabliss-hotels-green.vercel.app/",
+      "summary": "Compound, rooms and prices, amenity checklist, kitchen menu, reviews, events and a guest book.",
+      "description": [
+        "Built around the compound itself — the thing a guest is actually choosing. Rooms and prices sit alongside an amenity checklist so expectations are set before arrival.",
+        "Reviews and a guest book give the hotel a public record of past stays, which does more for trust than any amount of marketing copy."
+      ],
+      "role": "KR8 DIGITALS studio build",
+      "year": "2025",
+      "image": "/images/work/workspace-neon.webp",
+      "imageAlt": "A workstation with multiple screens",
+      "kind": "KR8 studio build",
+      "stack": [
+        "Next.js",
+        "Guest book",
+        "Content system"
+      ],
+      "highlights": [
+        "Amenity checklist that answers questions before they are asked",
+        "Guest book and reviews built in"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "galaxy",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 8,
+      "name": "Galaxy La-Palm Royal Resort",
+      "slug": "galaxy-la-palm",
+      "url": "https://galaxy-lapalm.vercel.app/",
+      "summary": "Suites, grounds, dining, events, and facilities including a cinema, games lounge and pool.",
+      "description": [
+        "The largest of the hotel builds. A resort sells the grounds and the facilities as much as the rooms, so this site leads with what there is to do: the cinema, the games lounge, the pool, the dining, the events spaces.",
+        "The structure lets each facility stand on its own while still reading as one property, and keeps the booking path short from every page."
+      ],
+      "role": "KR8 DIGITALS studio build",
+      "year": "2025",
+      "image": "/images/work/studio-collab.webp",
+      "imageAlt": "Two collaborators reviewing a resort build",
+      "kind": "KR8 studio build",
+      "stack": [
+        "Next.js",
+        "Facilities system",
+        "Booking handoff"
+      ],
+      "highlights": [
+        "Facilities-led structure for a destination property",
+        "Short booking path from every page"
+      ],
+      "status": "Live",
+      "isPublic": true
+    },
+    {
+      "id": "chitom",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 9,
+      "name": "Chitom Raphah Hospital",
+      "slug": "chitom-raphah-hospital",
+      "url": "https://chitomraphahospital.com",
+      "summary": "A hospital site in progress — departments, services and patient information.",
+      "description": [
+        "A hospital build where the hardest part is not the design but the content: explaining departments, services and patient information in language that reduces anxiety instead of adding to it.",
+        "TODO: owner to confirm current build status and what can be published."
+      ],
+      "role": "Design and development",
+      "year": "2026",
+      "image": "/images/work/tech-desk.webp",
+      "imageAlt": "A website build in progress",
+      "kind": "Website",
+      "stack": [
+        "Next.js",
+        "Accessibility-focused design"
+      ],
+      "highlights": [
+        "Accessibility treated as a requirement, not an extra"
+      ],
+      "status": "In development",
+      "isPublic": true
+    }
+  ],
+  "ventures": [
+    {
+      "id": "kr8-digitals",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "name": "KR8 DIGITALS",
+      "slug": "kr8-digitals",
+      "tagline": "An agency built on the belief that access beats gatekeeping.",
+      "description": "The studio I founded and run. Websites, branding, graphic design, video editing, SEO and AI agents — delivered for small businesses, hotels, hospitals and organisations. The work pays for the teaching.",
+      "url": "https://kr8digitals.com",
+      "image": "/images/ventures/kr8-founder.webp",
+      "imageAlt": "TIMFIRE, founder of KR8 DIGITALS, seated in a brown suit",
+      "facts": [
+        {
+          "label": "Founded by",
+          "value": "Kenneth Timothy Iziogo"
+        },
+        {
+          "label": "What it does",
+          "value": "Websites, branding, design, video, SEO, AI agents"
+        },
+        {
+          "label": "Principle",
+          "value": "Whoever you are, whatever you do, we exist because of you."
+        }
+      ],
+      "isPublic": true
+    },
+    {
+      "id": "kr8-academy",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "name": "KR8 Academy",
+      "slug": "kr8-academy",
+      "tagline": "Free digital skills training. Eight weeks. No tuition.",
+      "description": "Tuition-free cohorts that teach digital skills to people who could not otherwise afford to learn them. At the end, graduates receive a verifiable KR8 ID — proof of the training that anyone can check.",
+      "url": "https://academy.kr8digitals.com",
+      "image": "/images/ventures/kr8-poster-dev.webp",
+      "imageAlt": "A promotional design for website development mentorship",
+      "facts": [
+        {
+          "label": "Cost to students",
+          "value": "Nothing"
+        },
+        {
+          "label": "Cohort length",
+          "value": "Eight weeks"
+        },
+        {
+          "label": "On completion",
+          "value": "A verifiable KR8 ID"
+        }
+      ],
+      "isPublic": true
+    },
+    {
+      "id": "kr8-tribe",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "name": "KR8 Tribe",
+      "slug": "kr8-tribe",
+      "tagline": "Three thousand creators, in one community.",
+      "description": "The community around the studio: more than three thousand creators sharing work, opportunities and the unglamorous daily practice of getting better. It is where the Academy graduates go after they finish.",
+      "url": "https://kr8digitals.com/tribe",
+      "image": "/images/ventures/kr8-poster-ai.webp",
+      "imageAlt": "KR8 DIGITALS artwork on human and AI collaboration",
+      "facts": [
+        {
+          "label": "Members",
+          "value": "3,000+ creators"
+        },
+        {
+          "label": "Open to",
+          "value": "Academy graduates and working creatives"
+        }
+      ],
+      "isPublic": true
+    }
+  ],
+  "timeline": [
+    {
+      "id": "t-2018",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "year": "2018",
+      "title": "Started at Nnodo Secondary School",
+      "description": "Began secondary school in September 2018.",
+      "kind": "milestone",
+      "isPublic": true
+    },
+    {
+      "id": "t-2023",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "year": "2023",
+      "title": "Finalist, Coal City University essay competition",
+      "description": "Selected as a finalist in the national essay competition on drug abuse.",
+      "kind": "recognition",
+      "isPublic": true
+    },
+    {
+      "id": "t-2023b",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "year": "2023",
+      "title": "Started building websites",
+      "description": "Wrote the first lines of a site that somebody other than him would actually use, and kept going.",
+      "kind": "building",
+      "isPublic": true
+    },
+    {
+      "id": "t-2024",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 4,
+      "year": "2024",
+      "title": "Completed secondary school",
+      "description": "Finished at Nnodo Secondary School.",
+      "kind": "milestone",
+      "isPublic": true
+    },
+    {
+      "id": "t-kr8",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 5,
+      "year": "2024",
+      "title": "Founded KR8 DIGITALS",
+      "description": "Started the studio: websites, design and AI agents for small businesses — with free digital skills training built into the model.",
+      "kind": "building",
+      "isPublic": true
+    },
+    {
+      "id": "t-drill",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 6,
+      "year": "2025",
+      "title": "Completed the 30 Days Consistency Drill",
+      "description": "Finished Consistency Drill 5.0 with David Ochulade, hosted by Chichi Chukwuka — a thirty-day training in the unglamorous habit of showing up. Certificate held.",
+      "kind": "learning",
+      "isPublic": true
+    },
+    {
+      "id": "t-2026",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 7,
+      "year": "2026",
+      "title": "JAMB UTME",
+      "description": "Sat the JAMB Unified Tertiary Matriculation Examination.",
+      "kind": "milestone",
+      "isPublic": true
+    },
+    {
+      "id": "t-uni",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 8,
+      "year": "2026",
+      "title": "Admitted to Ebonyi State University",
+      "description": "Admitted to study Linguistics — the study of how language actually works, which turns out to matter for everything else here.",
+      "kind": "milestone",
+      "isPublic": true
+    }
+  ],
+  "credentials": [
+    {
+      "id": "cert-drill",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "title": "Certificate of Completion — 30 Days Consistency Drill",
+      "issuer": "Consistency Drill with David Ochulade, hosted by Chichi Chukwuka",
+      "date": "2025-12",
+      "description": "Awarded in December 2025 on completion of the thirty-day Consistency Drill as a hosted trainee.",
+      "image": "/images/about/certificate.webp",
+      "isPublic": true
+    }
+  ],
+  "now": [
+    {
+      "id": "now-1",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 1,
+      "label": "Studying",
+      "body": "Linguistics at Ebonyi State University. First year, which means being a beginner again in a room full of them.",
+      "isPublic": true
+    },
+    {
+      "id": "now-2",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 2,
+      "label": "Running",
+      "body": "KR8 DIGITALS — client work, the Academy cohorts, and the Tribe.",
+      "isPublic": true
+    },
+    {
+      "id": "now-3",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 3,
+      "label": "Building",
+      "body": "AI agents, and this site, which is a longer project than it looks.",
+      "isPublic": true
+    },
+    {
+      "id": "now-4",
+      "createdAt": "2026-11-11T00:00:00.000Z",
+      "updatedAt": "2026-11-11T00:00:00.000Z",
+      "order": 4,
+      "label": "Reading",
+      "body": "Whatever is nearest. Mostly about language, systems, or how people decide to trust something.",
+      "isPublic": true
+    }
+  ],
+  "serviceOverrides": []
+}

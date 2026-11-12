@@ -7,6 +7,7 @@ import { FORMS } from '@/lib/forms';
 import { seed } from '@/lib/content';
 import { SITE_ORIGIN } from '@/lib/site';
 import EnquiryForm from '@/components/enquiry-form';
+import { Price } from '@/components/currency';
 
 export function generateStaticParams() {
   return SERVICE_PAGES.map((p) => ({ slug: p.slug }));
@@ -53,8 +54,7 @@ export default async function ServiceLandingPage({ params }: { params: Promise<{
           <p className="lp-price">
             {service.ngn !== null ? (
               <>
-                Starting at <strong>₦{service.ngn.toLocaleString()}</strong>
-                {service.unit === 'hour' ? ' / hour' : ''} · {service.note}
+                <Price ngn={service.ngn} unit={service.unit} prefix="Starting at " /> · {service.note}
               </>
             ) : (
               <>

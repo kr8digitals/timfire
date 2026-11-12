@@ -7,6 +7,8 @@ import { isPublished } from '@/lib/content';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
 import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
+import { Price, CurrencySelect } from '@/components/currency';
+import { servicePageByServiceId } from '@/lib/services-content';
 
 const pageCopy: Record<string, { eyebrow: string; title: string; accent: string; description: string }> = {
   about: {
@@ -536,109 +538,50 @@ function Ventures() {
   );
 }
 
-const symbols: Record<string, string> = {
-  USD: 'US dollar',
-  NGN: 'Nigerian naira',
-  EUR: 'Euro',
-  GBP: 'British pound',
-  CAD: 'Canadian dollar',
-  AUD: 'Australian dollar',
-  GHS: 'Ghanaian cedi',
-  ZAR: 'South African rand',
-  KES: 'Kenyan shilling',
-  INR: 'Indian rupee',
+const SVC_LINES: Record<string, string> = {
+  website: 'A fast site built around the one action a visitor should take.',
+  ai: 'Repetitive work handed to something grounded in your real rules.',
+  seo: 'Found by the people who are already searching for you.',
+  graphic: 'Two seconds of a stranger’s attention, won on purpose.',
+  branding: 'Priced correctly in the customer’s head before you quote.',
+  video: 'Cut for the first three seconds, captioned for sound-off.',
+  mentorship: 'Pay as you learn, on your real project, one hour at a time.',
 };
-
-function detectCurrency() {
-  try {
-    const locale = new Intl.Locale(navigator.language);
-    const region = locale.region || '';
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (region === 'NG' || tz === 'Africa/Lagos') return 'NGN';
-    return (
-      ({ GB: 'GBP', US: 'USD', CA: 'CAD', AU: 'AUD', GH: 'GHS', ZA: 'ZAR', KE: 'KES', IN: 'INR', DE: 'EUR', FR: 'EUR', IT: 'EUR', ES: 'EUR', IE: 'EUR', NL: 'EUR' } as Record<string, string>)[region] || 'USD'
-    );
-  } catch {
-    return 'USD';
-  }
-}
 
 function Services() {
   const { data } = useStore();
-  const [currency, setCurrency] = useState('USD');
-  const [rates, setRates] = useState<Record<string, number>>(data.settings.rates);
-
-  useEffect(() => {
-    setCurrency(detectCurrency());
-    try {
-      const saved = localStorage.getItem('timfire-rate-cache');
-      if (saved) {
-        const v = JSON.parse(saved);
-        if (Date.now() - v.time < 86400000) setRates({ ...data.settings.rates, ...v.rates });
-      }
-    } catch {
-      /* ignore */
-    }
-    fetch('https://api.frankfurter.app/latest?from=USD')
-      .then((r) => {
-        if (!r.ok) throw Error('exchange service failed');
-        return r.json();
-      })
-      .then((v) => {
-        if (v.rates && typeof v.rates === 'object') {
-          setRates({ ...data.settings.rates, ...v.rates, USD: 1 });
-          localStorage.setItem('timfire-rate-cache', JSON.stringify({ time: Date.now(), rates: v.rates }));
-        }
-      })
-      .catch(() => {});
-  }, [data.settings.rates]);
-
-  const usable = currency === 'NGN' || currency === 'USD' || (Number.isFinite(rates[currency]) && rates[currency] > 0);
-  const chosen = usable ? currency : 'USD';
-
   return (
     <>
       <Reveal>
-        <div className="sectionhead">
-          <div>
-            <label htmlFor="currency" className="form-label">
-              Display currency
-            </label>
-            <select className="price-select" id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-              {Object.entries(symbols).map(([code, name]) => (
-                <option value={code} key={code}>
-                  {code} — {name}
-                </option>
-              ))}
-            </select>
-            {!usable && <p className="muted">Conversion unavailable; showing USD.</p>}
-          </div>
-          <p>Optional monthly maintenance is extra. Prices are starting points and depend on your requirements.</p>
+        <p className="page-lead" style={{ maxWidth: 720 }}>
+          A service is only worth listing if it solves a problem you can name. Below is what each one is and the
+          problem it removes. Open any of them for the full explanation — what the work involves, what you walk away
+          with, how the process runs — and the form built for that exact enquiry.
+        </p>
+      </Reveal>
+      <Reveal delay={0.05}>
+        <div className="sectionhead" style={{ marginTop: 30, marginBottom: 0, alignItems: 'end' }}>
+          <CurrencySelect />
+          <p>Starting prices are naira-based and convert instantly. Scope changes the number — you always get a written quote first.</p>
         </div>
       </Reveal>
-      <div className="page-grid">
+      <div className="page-grid" style={{ marginTop: 26 }}>
         {data.services
           .filter((x) => x.enabled)
           .map((x, i) => {
-            const amount = chosen === 'NGN' ? x.ngn : x.usd === null ? null : x.usd * (rates[chosen] || 1);
+            const page = servicePageByServiceId(x.id);
             return (
               <Reveal key={x.id} delay={Math.min(i * 0.05, 0.3)}>
                 <article className="card" id={x.id}>
                   <h3>{x.name}</h3>
-                  <p className="price">
-                    {amount === null ? (
-                      'Request a quote'
-                    ) : (
-                      <>
-                        From{' '}
-                        {new Intl.NumberFormat(undefined, { style: 'currency', currency: chosen, currencyDisplay: 'narrowSymbol', maximumFractionDigits: chosen === 'NGN' ? 0 : 2 }).format(amount)}
-                        {x.unit === 'hour' ? ' / hour' : ''}
-                      </>
-                    )}
-                  </p>
-                  <p className="muted">{x.note}</p>
-                  <Link className="text-link" href={'/contact?service=' + encodeURIComponent(x.name)}>
-                    Get in touch <ArrowUpRight size={18} />
+                  {x.ngn !== null ? (
+                    <Price ngn={x.ngn} unit={x.unit} />
+                  ) : (
+                    <p className="price">Request a quote</p>
+                  )}
+                  <p className="muted">{SVC_LINES[x.id] || x.note}</p>
+                  <Link className="text-link" href={page ? `/services/${page.slug}` : '/contact'}>
+                    Learn more <ArrowUpRight size={18} />
                   </Link>
                 </article>
               </Reveal>
@@ -677,7 +620,7 @@ function Services() {
               One-on-one mentorship is pay-as-you-learn: bring a real project, a stuck point or a career question, and
               we work through it together. Sessions are practical, not motivational.
             </p>
-            <Link className="text-link" href={'/contact?service=' + encodeURIComponent('One-on-one mentorship')}>
+            <Link className="text-link" href="/services/mentorship">
               Book a session <ArrowUpRight size={18} />
             </Link>
           </div>

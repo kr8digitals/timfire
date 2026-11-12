@@ -551,7 +551,7 @@ function Services() {
             const amount = chosen === 'NGN' ? x.ngn : x.usd === null ? null : x.usd * (rates[chosen] || 1);
             return (
               <Reveal key={x.id} delay={Math.min(i * 0.05, 0.3)}>
-                <article className="card">
+                <article className="card" id={x.id}>
                   <h3>{x.name}</h3>
                   <p className="price">
                     {amount === null ? (

@@ -143,6 +143,26 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 .ventures-photo img,.face-first{object-position:center 6%!important;max-height:660px}
 @media(max-width:800px){.ventures-hero{padding-top:56px}}
 
+/* ---------- Gallery ---------- */
+.masonry{columns:3;column-gap:20px}
+@media(max-width:1020px){.masonry{columns:2}}
+@media(max-width:680px){.masonry{columns:1}}
+.shot{break-inside:avoid;margin:0 0 22px}
+.shot-btn{display:block;width:100%;padding:0;border:1px solid var(--border);background:var(--panel);border-radius:16px;overflow:hidden;cursor:zoom-in;transition:border-color .25s,transform .25s}
+.shot-btn:hover,.shot-btn:focus-visible{border-color:var(--orange);transform:translateY(-3px)}
+.shot-btn img{width:100%;height:auto;display:block}
+.shot figcaption{font-size:14px;line-height:1.5;color:var(--muted);padding:10px 4px 0}
+.lightbox{position:fixed;inset:0;z-index:90;background:rgba(7,4,3,.95);display:flex;align-items:center;justify-content:center;gap:14px;padding:24px}
+.lightbox-close{position:absolute;top:18px;right:18px}
+.lightbox-nav{flex:0 0 auto;width:52px;height:52px;border-radius:50%;border:1px solid var(--border);background:rgba(249,249,249,.06);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,border-color .2s}
+.lightbox-nav:hover,.lightbox-nav:focus-visible{background:var(--orange);border-color:var(--orange);color:#180b05}
+.lightbox-figure{margin:0;max-width:min(88vw,1080px);display:flex;flex-direction:column;align-items:center;gap:14px}
+.lightbox-figure img{max-width:100%;max-height:78vh;width:auto;height:auto;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.lightbox-figure figcaption{display:flex;align-items:baseline;gap:16px;justify-content:center;text-align:center;flex-wrap:wrap}
+.lightbox-caption{color:var(--paper);font-size:15px}
+.lightbox-count{color:var(--muted);font-size:13px}
+@media(max-width:680px){.lightbox{gap:6px;padding:14px}.lightbox-nav{width:40px;height:40px}.lightbox-figure img{max-height:70vh}}
+
 /* ---------- Service landing pages ---------- */
 .lp-price{margin-top:22px;color:var(--muted);font-size:1.02rem}
 .lp-price strong{color:var(--orange);font-family:var(--font-display);font-size:1.2rem}

@@ -15,7 +15,7 @@ export interface SiteData {
  stats:{id:string;value:string;label:string;isPublic:boolean}[]; services:Service[]; websites:Work[]; agents:Agent[];
  creative:Creative[]; journal:Article[]; timeline:TimelineItem[]; certificates:Certificate[]; testimonials:Testimonial[];
  now:{items:string[]; updated:string}; socials:{id:string;name:string;url:string;isPublic:boolean}[];
- settings:{jambScore:string;showJambScore:boolean;rates:Record<string,number>}; media:Media[]; revisions:Record<string,Revision[]>;
+ settings:{jambScore:string;showJambScore:boolean;rates:Record<string,number>;ratesUpdated:string}; media:Media[]; revisions:Record<string,Revision[]>;
 }
 export const seed:SiteData={
  version:1, profile:{name:'TIMFIRE',location:'Abakaliki, Ebonyi State, Nigeria',intro:'Based in Abakaliki, Ebonyi State, Nigeria. Working remotely for anyone, anywhere.',heroLine:"You're the one I've been expecting.",heroWelcome:'Welcome to my space.',heroName:'I am Timfire.',about:'I build websites and AI agents, lead KR8 DIGITALS, and make room for words, music and learning.'},
@@ -48,7 +48,7 @@ export const seed:SiteData={
  certificates:[{id:'essay-cert',title:'Coal City University essay competition',description:'[ADD: certificate scan; VERIFY: final result]',image:'',isPublic:false}],testimonials:[],
  now:{items:['Studying Linguistics.','Running KR8 DIGITALS.','Building AI agents and websites.','[ADD: what else is happening now]'],updated:''},
  socials:[{id:'facebook',name:'Facebook',url:'https://www.facebook.com/share/1EHJ272qmK/',isPublic:true},{id:'instagram',name:'Instagram',url:'https://www.instagram.com/timfire3/',isPublic:true},{id:'tiktok',name:'TikTok',url:'https://www.tiktok.com/@kutimfire',isPublic:true},{id:'linkedin',name:'LinkedIn',url:'',isPublic:false},{id:'x',name:'X',url:'',isPublic:false},{id:'youtube',name:'YouTube',url:'',isPublic:false}],
- settings:{jambScore:'',showJambScore:false,rates:{USD:1}},media:[],revisions:{}
+ settings:{jambScore:'',showJambScore:false,rates:{NGN:1,USD:0.00065,GBP:0.00049,EUR:0.00056,CAD:0.00091,AUD:0.00099,GHS:0.0079,ZAR:0.0113,KES:0.084,INR:0.057,AED:0.0024,CNY:0.0046,JPY:0.1,SGD:0.00086},ratesUpdated:'November 2026'},media:[],revisions:{}
 };
 export function isPublished(item:{status:Status;visibility:Visibility;publishAt:string}):boolean {
  return item.visibility==='public'&&(item.status==='published'||(item.status==='scheduled'&&!!item.publishAt&&new Date(item.publishAt).getTime()<=Date.now()));

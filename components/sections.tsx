@@ -43,9 +43,9 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
   },
   journal: {
     eyebrow: 'The journal',
-    title: 'Ideas in',
-    accent: 'progress.',
-    description: 'Writing and reflections, shared as they grow.',
+    title: 'Published',
+    accent: 'and forthcoming.',
+    description: 'Poems, spoken word, articles, books and announcements — indexed for search the moment they go live.',
   },
   timeline: {
     eyebrow: 'The journey',
@@ -803,8 +803,9 @@ function Journal() {
   return (
     <>
       <Reveal>
-        <p className="muted" style={{ maxWidth: 640 }}>
-          Notes on building, learning and the work behind the work. Articles are published here as they are finished.
+        <p className="page-lead" style={{ maxWidth: 720 }}>
+          The publishing space: poems, spoken word, articles, books and announcements. Everything lands here the moment
+          it is ready — search and categories below, the full text behind each title.
         </p>
       </Reveal>
       <div className="page-grid section" style={{ paddingTop: 0 }}>
@@ -863,7 +864,23 @@ function Journal() {
       </div>
       {!found.length && (
         <div className="empty" style={{ marginTop: 24 }}>
-          {items.length ? 'No articles match your search.' : 'Articles coming soon. [ADD: first journal article]'}
+          {items.length ? (
+            'No articles match your search yet.'
+          ) : (
+            <>
+              <strong style={{ fontFamily: 'var(--font-display)', display: 'block', marginBottom: 8 }}>
+                The shelf is built; the work is on its way.
+              </strong>
+              <p style={{ margin: '0 0 10px' }}>
+                Poems, spoken word pieces, articles, books and announcements will be published here the moment they are
+                finished, through the admin dashboard — and indexed for search the moment they are published. Until
+                then, the creative space holds what is ready.
+              </p>
+              <Link className="text-link" href="/creative">
+                Visit the creative space <ArrowUpRight size={18} />
+              </Link>
+            </>
+          )}
         </div>
       )}
       {found.length > count && (

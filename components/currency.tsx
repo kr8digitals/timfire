@@ -1,6 +1,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { CURRENCIES, formatPrice } from '@/lib/currency';
+import { CURRENCIES, formatPrice, RATES } from '@/lib/currency';
+import { useStore } from '@/lib/store';
 
 /**
  * Site-wide currency choice. Persisted in localStorage so a visitor who picks
@@ -9,9 +10,16 @@ import { CURRENCIES, formatPrice } from '@/lib/currency';
  * updated monthly by the owner, never fetched at runtime.
  */
 
-const Ctx = createContext<{ code: string; setCode: (c: string) => void }>({ code: 'NGN', setCode: () => {} });
+const Ctx = createContext<{ code: string; setCode: (c: string) => void; rates: Record<string, number>; updated: string }>({
+  code: 'NGN',
+  setCode: () => {},
+  rates: RATES,
+  updated: '',
+});
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
+  const { data } = useStore();
+  const rates = Object.keys(data.settings.rates || {}).length ? data.settings.rates : RATES;
   const [code, setCodeState] = useState('NGN');
   useEffect(() => {
     try {
@@ -38,7 +46,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
   }
-  return <Ctx.Provider value={{ code, setCode }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ code, setCode, rates, updated: data.settings.ratesUpdated }}>{children}</Ctx.Provider>;
 }
 
 function regionCurrency(region: string): string {
@@ -55,18 +63,18 @@ export function useCurrency() {
 
 /** Renders a naira amount in the visitor's chosen currency, instantly. */
 export function Price({ ngn, unit, prefix = 'From ' }: { ngn: number; unit?: string; prefix?: string }) {
-  const { code } = useCurrency();
+  const { code, rates } = useCurrency();
   return (
     <span className="price mono">
       {prefix}
-      {formatPrice(ngn, code)}
+      {formatPrice(ngn, code, rates)}
       {unit === 'hour' ? ' / hour' : ''}
     </span>
   );
 }
 
 export function CurrencySelect() {
-  const { code, setCode } = useCurrency();
+  const { code, setCode, updated } = useCurrency();
   return (
     <div className="currency-box">
       <label className="form-label" htmlFor="currency">Show prices in</label>
@@ -78,7 +86,8 @@ export function CurrencySelect() {
         ))}
       </select>
       <p className="small muted" style={{ marginTop: 8 }}>
-        Naira is the base price; conversion uses the rates I publish each month.
+        Naira is the base price; conversion uses the rates I publish each month
+        {updated ? ` (updated ${updated})` : ''}.
       </p>
     </div>
   );

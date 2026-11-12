@@ -43,17 +43,17 @@ export const CURRENCIES: { code: string; label: string }[] = [
   { code: 'SGD', label: 'Singapore dollar' },
 ];
 
-export function convert(ngn: number, code: string): number {
-  const rate = RATES[code];
+export function convert(ngn: number, code: string, rates: Record<string, number> = RATES): number {
+  const rate = rates[code];
   if (!rate || !Number.isFinite(rate) || rate <= 0) return ngn;
   return ngn * rate;
 }
 
-export function formatPrice(ngn: number, code: string): string {
+export function formatPrice(ngn: number, code: string, rates: Record<string, number> = RATES): string {
   if (code === 'NGN') {
     return '₦' + ngn.toLocaleString('en-NG');
   }
-  const value = convert(ngn, code);
+  const value = convert(ngn, code, rates);
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: code,

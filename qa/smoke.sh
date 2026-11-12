@@ -36,6 +36,18 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Co
 code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/admin/inbox")
 [ "$code" = "401" ] && echo "ok   inbox requires auth 401" || { echo "FAIL inbox auth ($code)"; fail=1; }
 
+echo "-- subscription + email surfaces"
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/subscribe" -H 'Content-Type: application/json' -d '{"name":"","email":"x"}')
+[ "$code" = "400" ] && echo "ok   subscribe validation 400" || { echo "FAIL subscribe validation ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/subscribe" -H 'Content-Type: application/json' -d '{"name":"QA Reader","email":"qa-reader@example.com"}')
+if [ "$code" = "200" ] || [ "$code" = "503" ]; then echo "ok   subscribe responds ($code: 200 live, 503 only when the database is unreachable)"; else { echo "FAIL subscribe ($code)"; fail=1; }; fi
+code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/unsubscribe?token=not-a-real-token")
+[ "$code" = "200" ] && echo "ok   unsubscribe page renders" || { echo "FAIL unsubscribe page ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/admin/broadcast" -H 'Content-Type: application/json' -d '{"subject":"x","body":"y"}')
+[ "$code" = "401" ] && echo "ok   broadcast requires auth 401" || { echo "FAIL broadcast auth ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/admin/templates")
+[ "$code" = "401" ] && echo "ok   templates require auth 401" || { echo "FAIL templates auth ($code)"; fail=1; }
+
 echo "-- content api"
 html=$(curl -s "$BASE/api/content")
 echo "$html" | grep -q '"version":1' && echo "ok   /api/content serves site data" || { echo "FAIL /api/content"; fail=1; }

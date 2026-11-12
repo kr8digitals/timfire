@@ -575,6 +575,23 @@ function Services() {
       </div>
 
       <Reveal>
+        <div className="service-notes">
+          <div>
+            <strong>Clear starting prices.</strong>
+            <span>Scope changes, and so can the number — you always get a written quote first.</span>
+          </div>
+          <div>
+            <strong>Built for mobile speed.</strong>
+            <span>Sites are built to load fast on the phones most of your visitors actually use.</span>
+          </div>
+          <div>
+            <strong>You own everything.</strong>
+            <span>Domain, hosting and files are set up in your name, with a handover walkthrough.</span>
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal>
         <div className="feature-band section">
           <div className="photo-card">
             <PImage src="/images/mentorship.webp" alt="TIMFIRE speaking with open hands during a mentorship session" width={928} height={1152} />

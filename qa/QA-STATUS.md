@@ -1,77 +1,53 @@
 # QA status
 
-Measured against the current production build (`npx next build`, 44 routes) and
-the running dev server, on a Linux sandbox with Node 20.
+## Rebuild verification — branch `arena/42f61ac6-timfire` (2026-11-12)
 
-**Environment limitation:** there is no headless browser here (Chromium could not
-be downloaded), so every visual check below was performed against
-server-rendered HTML and the compiled CSS, not against pixels. Layout and motion
-were reasoned about from the DOM and stylesheet; nothing here is a substitute for
-a pass on a real phone and a real laptop. That pass is still owed.
+Run against the **production build** (`npm run build` + `next start`) and the dev server:
 
-## Automated
-
-| Check | Command | Result |
+| Suite | Command | Result |
 | --- | --- | --- |
-| Types | `npx tsc --noEmit` | Pass, 0 errors |
-| Build | `npx next build` | Pass, 44/44 pages, 103 kB shared JS |
-| Smoke | `./qa/smoke.sh` | Pass, all checks |
+| Type safety | `npx tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 22 page routes + 5 API routes; landing and collaboration pages prerendered via `generateStaticParams` |
+| Route + behaviour smoke | `./qa/smoke.sh` | Pass — 37/37 checks (routes incl. `/gallery`, 7 service and 4 collaboration pages, 404 path, per-form contact API incl. honeypot and unknown-kind, inbox auth, security headers, hero copy, forbidden phrase) |
+| Link crawler | `node qa/link-audit.mjs` | Pass — 22 routes crawled, 23 unique internal link targets all resolve 200, 30 referenced images all exist in `public/` |
+| SEO probe | `node qa/seo-probe.mjs` | Pass — 22 unique titles, meta descriptions ≥40 chars, canonicals match routes, `og:title` everywhere, `/admin` noindex |
+| Admin chain | curl | Login 200 with bcrypt hash stored base64 (see `lib/auth.ts`), structured enquiry → `/api/admin/inbox` returns kind + answers, unauthenticated inbox 401 |
+| Currency | curl | SSR prices render from the naira base (`₦150,000 / ₦200,000 / ₦80,000 / ₦20,000`); client switch converts instantly from `lib/currency.ts` rates or the admin-edited table |
 
-`qa/smoke.sh` asserts, on a running server:
+Manual/visual checks remain for a human pass: breakpoint sweep on real devices, canvas scene
+elegance on low-end hardware, and the gallery lightbox on touch devices (keyboard paths are
+implemented and labelled).
 
-* every public route returns 200, including the nine service pages and the work
-  and journal detail pages;
-* an unknown path returns 404;
-* `/api/cms/content`, `/api/cms/enquiries` and `/api/cms/status` return 401
-  without a session;
-* a wrong password returns 401 (the account is not enumerated: the message is
-  the same for a wrong email and a wrong password);
-* an enquiry missing fields, or with a malformed email, returns 400; a honeypot
-  submission returns 200 and is not stored;
-* CSP, `X-Content-Type-Options` and `Referrer-Policy` are served;
-* `robots.txt` disallows `/admin`, and `/admin` itself carries `noindex`;
-* the hero copy is present in the server HTML with JavaScript disabled;
-* no page renders an `[ADD: …]` placeholder;
-* the sitemap and feed use the canonical `https://kutimfire.com` origin.
+## Vercel
 
-## Admin, verified by hand with a disposable password
+Production target at the time of the rebuild stayed on the pre-development base commit; pushes to
+this branch created private, SSO-protected **preview** deployments only (project keeps 10
+deployments / 30 days). The Vercel connector exposes no toggle for preview builds, so the remaining
+pushes were limited to the final QA commit and the approved merge to `main`, which promotes the
+production deployment.
 
-| Check | Result |
-| --- | --- |
-| Sign-in with the correct password | 200, `HttpOnly` cookie set, 30-minute expiry |
-| Sign-in with a wrong password | 401 |
-| Five failures in a row | 429, and the correct password is refused while locked |
-| `GET /api/cms/content` when signed in | 200 with the full document and its SHA |
-| `PUT /api/cms/content` | 200; the document is written and a SHA is returned |
-| `GET /api/cms/enquiries` | 200, `{enquiries, inbox}` |
-| `PUT /api/cms/enquiries` (status change) | 200; the new status survives a re-read |
+## Earlier status (pre-development build)
 
-## Enquiry inbox, verified by hand
+Checks run locally on the production build at the commit that added the animation, contact form,
+visitor bar and inbox work. Superseded by the matrix above; kept for history.
 
-* A submission through `/api/enquiry` is accepted and stored.
-* The stored record on disk is ciphertext only: `{v, iv, tag, data}`, no plaintext
-  name, email, phone or message anywhere in the file.
-* The admin reads it back decrypted and correctly, including the structured
-  `details` fields that the service-specific form posted.
-* A record with a corrupted tag is dropped rather than rendered, because GCM
-  authenticates it.
-
-## Content and copy
-
-| Check | Result |
-| --- | --- |
-| Placeholders | No `[ADD: …]` or `TODO:` in rendered pages |
-| Statistics | **No statistics on the homepage.** The section was removed on request; the earlier 50+ clients / 5,000+ students / 15 mentees were unverifiable and are gone from the content document entirely |
-| Prices | Unchanged from the brief: website ₦150k, AI ₦200k, SEO ₦80k, graphic ₦20k, branding ₦100k, mentorship ₦2,500/hr; video, redesign and audit are quote-only |
-| Currency | Naira is the base; every other figure is derived from it |
-| Palette | `#0b0706`, `#f27a1a`, `#8e1b3a`, `#f9f9f9`. No new brand colours |
-
-## Known gaps
-
-* **No email delivery.** Enquiries live in the admin inbox only. Email and
-  WhatsApp are presented as the guaranteed routes; see
-  `docs/KNOWN-LIMITATIONS.md`.
-* **No visual regression.** No browser in this environment; see the note above.
-* **No real-device pass.** Owed before launch.
-* **No load test.** The site is static, so this is mostly about the enquiry
-  endpoint and the admin.
+| Area | Check | Result |
+| --- | --- | --- |
+| Build | `npm run build` compiles all 20 routes | Pass |
+| Types | `npx tsc --noEmit` | Pass, no errors |
+| Routes | `/`, `/about`, `/work`, `/ventures`, `/services`, `/creative`, `/journal`, `/timeline`, `/now`, `/contact`, `/admin` return 200; unknown path returns 404 | Pass |
+| Hero copy | Server HTML still contains “You're the one I've been expecting.”, “Welcome to my space.” and “I am Timfire.” with `Timfire` in `<em>` | Pass |
+| Hero animation | Headline, welcome line, name line and CTAs mount in sequence (0 → 1.15s), with reduced-motion fallback that renders everything immediately | Pass |
+| CTA alignment | Both CTAs share one flex row, wrap cleanly at 320px, minimum 50px height | Pass |
+| Shapes | Four decorative shapes behind the hero, `aria-hidden`, pointer-events none, CSS float + scroll parallax, disabled under `prefers-reduced-motion` | Pass |
+| Scroll cue | Visible link to `#behind` on every breakpoint, animated chevron disabled under reduced motion | Pass |
+| Contact form | Client validation, inline errors with `aria-invalid`/`role="alert"`, honeypot hidden off-screen, success state with WhatsApp fallback | Pass |
+| Contact API | Valid POST → `{ok:true}`; invalid POST → 400; honeypot-filled POST → 200 without storing; 6th POST within 15 min → 429 | Pass |
+| Admin auth | Wrong password → 401, correct password → 200 + HttpOnly signed cookie, `/api/auth/session` reports the expiry, logout clears it | Pass |
+| Admin lockout | 5 sequential failures → 429, correct password refused while the 15-minute lock is active | Pass |
+| Admin inbox | `/api/admin/inbox` returns 401 without a session, enquiries when signed in; CSV export in the tab | Pass |
+| Search | Ctrl/Cmd+K opens the dialog, Escape closes, focus is trapped and restored, results include pages, work, agents, services, published journal and creative | Pass |
+| Reduced motion | `useReducedMotion` short-circuits every animation; CSS also clamps animation/transition durations | Pass |
+| Security headers | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and production-only `X-Frame-Options` served on all routes | Pass |
+| Header nav | Desktop primary links plus an accessible “More” menu; mobile menu lists all pages | Pass |
+| Contact fallback | Success state offers a prefilled `mailto:` and WhatsApp, so delivery never depends on the session inbox | Pass |

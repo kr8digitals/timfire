@@ -289,16 +289,16 @@ export default function Home() {
                 built writing verses and standing on stages — the creative work and the technical work feed each other.
               </p>
               <div className="chip-row">
-                <Link href="/creative" className="chip">
+                <Link href="/creative#music" className="chip">
                   <Music2 size={15} /> Music &amp; piano
                 </Link>
-                <Link href="/creative" className="chip">
+                <Link href="/creative#spoken-word" className="chip">
                   <Mic2 size={15} /> Spoken word
                 </Link>
-                <Link href="/creative" className="chip">
+                <Link href="/creative#poetry" className="chip">
                   <Feather size={15} /> Poetry
                 </Link>
-                <Link href="/creative" className="chip">
+                <Link href="/creative#speaking" className="chip">
                   <Presentation size={15} /> Public speaking
                 </Link>
               </div>

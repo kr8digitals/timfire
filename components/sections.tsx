@@ -37,9 +37,9 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
   },
   creative: {
     eyebrow: 'The creative space',
-    title: 'Words, sound',
-    accent: 'and space.',
-    description: 'Poems, spoken word, music and piano.',
+    title: 'Code is one',
+    accent: 'of my languages.',
+    description: 'Poetry, spoken word, music, piano and the stage — the practices that teach the ear everything the keyboard later uses.',
   },
   journal: {
     eyebrow: 'The journal',
@@ -632,90 +632,151 @@ function Services() {
   );
 }
 
-function Creative() {
+function CreativePieces({ category }: { category: string }) {
+  const { data } = useStore();
+  const items = data.creative.filter(isPublished).filter((x) => x.category === category);
+  if (!items.length)
+    return (
+      <div className="empty" style={{ marginTop: -20, marginBottom: 10 }}>
+        New {category.toLowerCase()} work lands here first. Nothing is published yet — and nothing has been invented to
+        fill the space.
+      </div>
+    );
   return (
-    <>
-      <div className="two-col">
-        <Reveal>
-          <div className="copy-panel">
-            <span className="eyebrow">Poetry · spoken word · music</span>
-            <h2>
-              A place for <em>expression.</em>
-            </h2>
-            <p>
-              Not everything worth making is a website. This is where the poems, spoken word pieces and piano live — the
-              quieter half of the same practice.
-            </p>
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="photo-card creative-photo">
-            <PImage src="/images/writing.webp" alt="TIMFIRE smiling with an open book on his lap" width={1280} height={1920} />
-          </div>
-        </Reveal>
-      </div>
-      <div className="section">
-        <CreativeList />
-      </div>
-      <section className="two-col section">
-        <Reveal>
-          <div className="photo-card creative-photo">
-            <PImage src="/images/music-studio.webp" alt="TIMFIRE standing in a music studio beneath a MUSIC sign" width={1402} height={1920} />
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="copy-panel">
-            <span className="eyebrow">Music · piano</span>
-            <h2>
-              Another way to <em>express.</em>
-            </h2>
-            <p>Music and piano are part of this creative space. Work will be shared here as it is ready.</p>
-          </div>
-        </Reveal>
-      </section>
-      <Related links={[['Journal', '/journal'], ['About', '/about'], ['Now', '/now']]} />
-    </>
+    <div className="page-grid" style={{ marginBottom: 10 }}>
+      {items.map((x) => (
+        <article className="card light" key={x.id}>
+          <span className="badge">{x.category}</span>
+          <h3>{x.title}</h3>
+          <Link className="text-link" style={{ color: '#842e00' }} href={'/creative/' + encodeURIComponent(x.slug)}>
+            Read or listen <ArrowUpRight size={18} />
+          </Link>
+        </article>
+      ))}
+    </div>
   );
 }
 
-function CreativeList() {
-  const { data } = useStore();
-  const items = data.creative.filter(isPublished);
-  if (!items.length) {
-    return (
-      <>
-        <h2>
-          Creative <em>work.</em>
-        </h2>
-        <p className="muted" style={{ maxWidth: 640 }}>
-          The space is being prepared. Each card below is a placeholder for work that will be published here.
-        </p>
-        <div className="page-grid" style={{ marginTop: 24 }}>
-          {['[ADD: poem 1]', '[ADD: poem 2]', '[ADD: poem 3]', '[ADD: spoken word]', '[ADD: music or piano]'].map((x) => (
-            <div className="card" key={x}>
-              {x}
-            </div>
-          ))}
-        </div>
-      </>
-    );
-  }
+function Creative() {
   return (
     <>
-      <h2>
-        Creative <em>work.</em>
-      </h2>
-      <div className="page-grid" style={{ marginTop: 24 }}>
-        {items.map((x) => (
-          <article className="card light" key={x.id}>
-            <span className="badge">{x.category}</span>
-            <h3>{x.title}</h3>
-            <Link className="text-link" style={{ color: '#842e00' }} href={'/creative/' + encodeURIComponent(x.slug)}>
-              Explore <ArrowUpRight size={18} />
-            </Link>
-          </article>
-        ))}
-      </div>
+      <section id="music" className="two-col section" style={{ paddingTop: 10 }}>
+        <Reveal>
+          <div className="copy-panel">
+            <span className="eyebrow">Music · singing · songwriting · keyboard · piano</span>
+            <h2>
+              Music is where I am <em>least in a hurry.</em>
+            </h2>
+            <p>
+              I sing, I write songs, and I play piano and keyboard. Not four activities — one practice with four doors.
+              A melody arrives before the words, or a line of lyric demands a chord under it, and the keyboard is where
+              the two argue until they agree.
+            </p>
+            <p>
+              Music is also where my ear for language was trained: rhythm, restraint, knowing when a verse has one line
+              too many. Every page of copy I write is edited by that ear.
+            </p>
+            <div className="actions">
+              <Link href="/collaborate/music" className="button primary">
+                Request a music collaboration <ArrowUpRight size={18} />
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="photo-card creative-photo">
+            <PImage src="/images/creative/music-studio.webp" alt="TIMFIRE standing in a music studio beneath a MUSIC sign" width={1402} height={1920} />
+          </div>
+        </Reveal>
+      </section>
+      <CreativePieces category="Music & piano" />
+
+      <section id="spoken-word" className="two-col section">
+        <Reveal delay={0.05}>
+          <div className="photo-card creative-photo">
+            <PImage src="/images/creative/spoken-stage.webp" alt="TIMFIRE performing spoken word on a stage" width={1200} height={1600} />
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="copy-panel">
+            <span className="eyebrow">Spoken word</span>
+            <h2>
+              Writing with <em>a pulse.</em>
+            </h2>
+            <p>
+              A spoken word piece is not finished on the page. It is finished when it survives a room: the pause that
+              holds, the line that lands, the breath placed so the audience leans in. I write for the ear first and the
+              page second.
+            </p>
+            <p>Performances, commissions, recordings and workshops — if your event needs a voice rather than a playlist, this is the door.</p>
+            <div className="actions">
+              <Link href="/collaborate/spoken-word" className="button primary">
+                Request spoken word <ArrowUpRight size={18} />
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+      <CreativePieces category="Spoken word" />
+
+      <section id="poetry" className="two-col section">
+        <Reveal>
+          <div className="copy-panel">
+            <span className="eyebrow">Poetry</span>
+            <h2>
+              The quietest <em>loud page.</em>
+            </h2>
+            <p>
+              Poetry is compression: the most feeling in the fewest words. I write poems the way I write everything else
+              now — in the open, in the Journal, revised in public when a revision is honest.
+            </p>
+            <p>Commissions, publication and joint work all begin the same way: with the subject, and why it matters to you.</p>
+            <div className="actions">
+              <Link href="/collaborate/poetry" className="button primary">
+                Commission or collaborate <ArrowUpRight size={18} />
+              </Link>
+              <Link href="/journal" className="button ghost">
+                Read the Journal <ArrowUpRight size={18} />
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="photo-card creative-photo">
+            <PImage src="/images/creative/poetry-candle.webp" alt="TIMFIRE writing by candlelight" width={1200} height={1600} />
+          </div>
+        </Reveal>
+      </section>
+      <CreativePieces category="Poetry" />
+
+      <section id="speaking" className="two-col section">
+        <Reveal delay={0.05}>
+          <div className="photo-card creative-photo">
+            <PImage src="/images/creative/speaking.webp" alt="TIMFIRE speaking into a microphone in front of an audience" width={1200} height={1600} />
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="copy-panel">
+            <span className="eyebrow">Public speaking</span>
+            <h2>
+              A room, and <em>something to say.</em>
+            </h2>
+            <p>
+              I speak on discipline, building in public, digital skills and the plain language behind good work — to
+              students, creators, churches and companies. Through KR8 Academy I teach eight-week cohorts, so a stage is
+              never far away.
+            </p>
+            <p>I accept invitations when there is something worth saying to that particular room. Tell me about yours.</p>
+            <div className="actions">
+              <Link href="/collaborate/speaking" className="button primary">
+                Invite me to speak <ArrowUpRight size={18} />
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <Related links={[['Journal', '/journal'], ['About', '/about'], ['Now', '/now']]} />
     </>
   );
 }

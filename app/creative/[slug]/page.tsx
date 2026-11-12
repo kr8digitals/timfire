@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Detail from '@/components/detail';
-import { seed, isPublished } from '@/lib/content';
+import { publicView } from '@/lib/content';
+import { loadSiteData } from '@/lib/db';
 import { SITE_ORIGIN } from '@/lib/site';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const piece = seed.creative.find((x) => x.slug === decodeURIComponent(slug) && isPublished(x));
+  const { data } = await loadSiteData();
+  const piece = publicView(data).creative.find((x) => x.slug === decodeURIComponent(slug));
   if (!piece) return { title: 'Creative', robots: { index: false, follow: false } };
   return {
     title: piece.title,

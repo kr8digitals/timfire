@@ -1,12 +1,19 @@
 import type { MetadataRoute } from 'next';
-import { seed, isPublished } from '@/lib/content';
+import { publicView } from '@/lib/content';
+import { loadSiteData } from '@/lib/db';
 import { SERVICE_PAGES } from '@/lib/services-content';
 import { SITE_ORIGIN } from '@/lib/site';
 
 const COLLABORATIONS = ['music', 'spoken-word', 'poetry', 'speaking'];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** Always generated from the live database, never baked at build time, so a
+ *  post published from the admin appears here without a redeploy. */
+export const dynamic = 'force-dynamic';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
+  const { data } = await loadSiteData();
+  const published = publicView(data);
   const routes = ['', 'about', 'work', 'ventures', 'services', 'creative', 'journal', 'gallery', 'timeline', 'now', 'contact'];
   const entries: MetadataRoute.Sitemap = routes.map((path) => ({
     url: `${SITE_ORIGIN}/${path}`,
@@ -20,10 +27,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const c of COLLABORATIONS) {
     entries.push({ url: `${SITE_ORIGIN}/collaborate/${c}`, lastModified, changeFrequency: 'monthly', priority: 0.6 });
   }
-  for (const post of seed.journal.filter(isPublished)) {
+  for (const post of published.journal) {
     entries.push({ url: `${SITE_ORIGIN}/journal/${post.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.6 });
   }
-  for (const piece of seed.creative.filter(isPublished)) {
+  for (const piece of published.creative) {
     entries.push({ url: `${SITE_ORIGIN}/creative/${piece.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.5 });
   }
   return entries;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { enquiryInbox } from '@/lib/enquiry';
+import { insertEnquiry } from '@/lib/db';
 import { FORMS, FORM_KINDS } from '@/lib/forms';
 
 /**
@@ -75,7 +76,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  inbox.unshift({ id: crypto.randomUUID(), kind, name, email, answers, at: new Date().toISOString() });
-  if (inbox.length > 200) inbox.length = 200;
+  // The database is the system of record; the session inbox remains as a
+  // safety net so a submission is never lost if Supabase is unreachable.
+  const id = crypto.randomUUID();
+  const stored = await insertEnquiry({ id, kind, name, email, answers });
+  if (!stored) {
+    inbox.unshift({ id, kind, name, email, answers, at: new Date().toISOString() });
+    if (inbox.length > 200) inbox.length = 200;
+  }
   return NextResponse.json({ ok: true }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
 }

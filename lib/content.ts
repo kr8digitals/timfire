@@ -54,3 +54,15 @@ export function isPublished(item:{status:Status;visibility:Visibility;publishAt:
  return item.visibility==='public'&&(item.status==='published'||(item.status==='scheduled'&&!!item.publishAt&&new Date(item.publishAt).getTime()<=Date.now()));
 }
 export const cloneSeed=():SiteData=>JSON.parse(JSON.stringify(seed));
+/** What a visitor who is not signed in may ever see: no drafts, no private or
+ *  hidden items, no revision history, no hidden scores. */
+export function publicView(d:SiteData):SiteData {
+  const out:SiteData=JSON.parse(JSON.stringify(d));
+  const pub=<T extends {isPublic?:boolean}>(xs:T[])=>xs.filter(x=>x.isPublic!==false);
+  out.stats=pub(out.stats);out.websites=pub(out.websites);out.agents=pub(out.agents);
+  out.certificates=pub(out.certificates);out.testimonials=pub(out.testimonials);out.socials=pub(out.socials);
+  out.creative=out.creative.filter(isPublished);out.journal=out.journal.filter(isPublished);
+  out.revisions={};
+  if(!out.settings.showJambScore)out.settings.jambScore='';
+  return out;
+}

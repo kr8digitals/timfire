@@ -1,47 +1,88 @@
 # Known limitations
 
-Read this before treating the site as a finished, fully-managed publication.
+What this site does not do yet, and what to watch out for. Written to be read by
+whoever picks the project up next.
 
-## Content is browser-local
+## No email provider
 
-Public pages read from `lib/content.ts` (`seed`) through `lib/store.tsx`. The store persists
-edits to `localStorage`, so changes made in `/admin` are visible **only in the browser that made
-them**. There is no shared database yet. Until one is added:
+Enquiries land in `/admin → Enquiries` and nowhere else. Nothing is forwarded to
+an inbox automatically. The form therefore presents email and WhatsApp as the
+guaranteed routes, and both are shown again after a successful submission.
 
-- Content changes must be made in `lib/content.ts` and deployed, or
-- The JSON exported from `/admin → Import & export` must be imported in each browser that needs it.
+Consequence: **someone has to open the admin and check.** If that will not
+happen daily, connect a transactional email provider before launch. The place to
+do it is `app/api/enquiry/route.ts`, after a successful `appendEnquiry`.
 
-## Contact form delivery
+## Enquiries are single-instance in development only
 
-`POST /api/contact` validates input (zod), rejects honeypot hits silently, and rate-limits to
-5 submissions per IP per 15 minutes. Enquiries are held in a session inbox that is readable from
-`/admin → Inbox` and can be exported as CSV. That inbox lives in server memory and is cleared on
-redeploy or when the server instance changes. **A transactional email provider (Resend, Postmark,
-SES, etc.) is still required for guaranteed delivery.** Email and WhatsApp links on `/contact`
-remain the dependable routes.
+In production, enquiries are written to the `admin-inbox` branch of the content
+repository through the GitHub API, so they are shared across every instance.
 
-## Admin authentication
+Locally, without `GITHUB_CONTENT_TOKEN`, they go to `content/inbox.enc.json` on
+disk, which is git-ignored. Two developers running the site locally will not see
+each other's test enquiries. That is intended.
 
-Login requires `ADMIN_EMAIL` and `ADMIN_PASSWORD_HASH` (bcrypt) in the deployment environment.
-Set the hash with:
+## The inbox key is unrecoverable
 
-```bash
-node -e "console.log(require('bcryptjs').hashSync('your-password', 12))"
-```
+Enquiries are encrypted with AES-256-GCM. If `INBOX_KEY` (or
+`ADMIN_SESSION_SECRET`, which it falls back to) is changed or lost, every
+existing record becomes unreadable — permanently, by design. Keep a copy of the
+key in a password manager, not only in the host's dashboard.
 
-Without those variables `/admin` shows the login form but accepts no credentials. Cookie sessions
-are HMAC-signed, HttpOnly, `SameSite=Lax`, expire after 30 minutes, and lock the IP out for 15
-minutes after 5 failed attempts.
+Also note that rotating `ADMIN_SESSION_SECRET` while the inbox relies on it
+makes the inbox unreadable. Set an explicit `INBOX_KEY`.
 
-## Placeholders in content
+## Editing requires a GitHub token
 
-Items marked `[ADD: …]` are deliberately unfilled: certificate scans, the KR8 founding date, two
-project descriptions (Chitom Rhaphah Hospital, Consistency Drill) and the creative works. They are
-visible in the UI so they are not shipped unnoticed.
+The admin has no database of its own. It commits to the repository, so:
 
-## Not implemented
+* `GITHUB_CONTENT_TOKEN` must have **Contents: read and write** on the repo;
+* a save is a commit, which triggers a deploy — content changes go live after
+  that build finishes, not instantly;
+* if the token expires, saving fails with a clear message; the public site is
+  unaffected.
 
-- No email sending, no database, no server-side media uploads (admin media is compressed to WebP
-  in the browser and stored in `localStorage`).
-- Journal and creative detail routes are `noindex` until real, publishable work exists.
-- Automated tests are limited to the checked flows in `qa/QA-STATUS.md`.
+## Images are committed to the repository
+
+Uploads go to `public/uploads/` and become part of the clone. This keeps the
+deployment to one pipeline and one account, but it does not scale indefinitely.
+At a few hundred images, move to object storage; nothing else needs to change
+apart from the upload path in `lib/cms/write.ts`.
+
+Each image should be resized and compressed before upload. The admin does not do
+it for you — it validates type and size only.
+
+## Rate limiting is per instance
+
+Enquiry and login throttling use in-memory maps. They reset on deploy and are not
+shared between serverless instances. They deter casual abuse and password
+guessing against a single instance; they are not a defence against a distributed
+attack. If that matters, put a WAF or a shared store in front.
+
+## One account, no roles
+
+There is a single admin identity from environment variables. There is no
+invitation flow, no second user, and no per-field permissions. The git history of
+`content/site.json` is the audit log.
+
+## Fonts
+
+The site self-hosts two WOFF2 files in `app/fonts/`. They are loaded through
+`next/font/local`, which inlines the CSS and emits the font files as build
+assets. Do not move them to `public/` without also dropping `next/font/local`,
+or they will be requested twice.
+
+## Statistics on the site are unverified
+
+The figures carried over from the owner's brief — 50+ clients, 5,000+ students
+taught, 15 mentees — have not been independently confirmed. They are marked in
+the content for review. Any statistic that ships needs a visible source note;
+anything that cannot be sourced should be removed rather than softened.
+
+## Testing
+
+There is no automated test suite. `npx tsc --noEmit` and `npx next build` are the
+gates; `qa/smoke.sh` exercises the routes. Visual checks were done against
+server-rendered HTML and CSS, because this environment has no headless browser.
+A pass on a real device — phone, small laptop, slow connection — is still owed
+before launch.

@@ -6,3 +6,6 @@ node_modules/
 qa/*.png
 qa/test-export.json
 qa/temporary-test-hash.txt
+google_drive/
+.work/
+inbox.enc.json

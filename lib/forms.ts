@@ -321,3 +321,23 @@ export const FORMS: Record<string, FormDef> = {
 };
 
 export const FORM_KINDS = Object.keys(FORMS);
+
+/** Where each purpose-built form lives. The directory on /contact links here,
+ *  jumping straight to the form panel on the destination page. */
+export const FORM_ROUTES: Record<string, string> = {
+  website: '/services/website-design-development#form',
+  ai: '/services/ai-agent-development#form',
+  seo: '/services/seo-optimisation#form',
+  graphic: '/services/graphic-design#form',
+  branding: '/services/branding#form',
+  video: '/services/video-editing#form',
+  mentorship: '/services/mentorship#form',
+  music: '/collaborate/music#form',
+  'spoken-word': '/collaborate/spoken-word#form',
+  poetry: '/collaborate/poetry#form',
+  speaking: '/collaborate/speaking#form',
+  general: '#general',
+};
+
+export const SERVICE_FORM_KINDS = ['website', 'ai', 'seo', 'graphic', 'branding', 'video', 'mentorship'];
+export const CREATIVE_FORM_KINDS = ['music', 'spoken-word', 'poetry', 'speaking'];

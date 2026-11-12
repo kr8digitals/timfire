@@ -102,7 +102,7 @@ export default async function ServiceLandingPage({ params }: { params: Promise<{
         </div>
 
         <section className="section" id="enquiry">
-          <div className="form-panel">
+          <div className="form-panel" id="form">
             <div className="form-panel-head">
               <span className="eyebrow">Enquiry</span>
               <h2>{page.title} {page.accent}</h2>

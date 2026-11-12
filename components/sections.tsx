@@ -9,6 +9,7 @@ import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
 import { Price, CurrencySelect } from '@/components/currency';
 import { servicePageByServiceId } from '@/lib/services-content';
+import { FORMS, FORM_ROUTES, SERVICE_FORM_KINDS, CREATIVE_FORM_KINDS } from '@/lib/forms';
 
 const pageCopy: Record<string, { eyebrow: string; title: string; accent: string; description: string }> = {
   about: {
@@ -61,9 +62,9 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
   },
   contact: {
     eyebrow: 'Let’s talk',
-    title: 'Have something',
-    accent: 'in mind?',
-    description: 'Send a message, email me directly, or start a conversation on WhatsApp.',
+    title: 'Eleven doors,',
+    accent: 'one inbox.',
+    description: 'Every kind of enquiry has a form of its own, asking only what that work needs. Choose yours — or take the general form at the bottom.',
   },
 };
 
@@ -915,20 +916,40 @@ function Journal() {
 
 function Timeline() {
   const { data } = useStore();
+  const entries = data.timeline.filter((x) => x.isPublic);
   return (
     <>
+      <Reveal>
+        <p className="page-lead" style={{ maxWidth: 700, marginBottom: 40 }}>
+          The record so far — school, stage, studio and startup, in the order it happened.{' '}
+          <span className="mono" style={{ color: 'var(--orange)' }}>
+            {entries.length} entries
+          </span>
+          , newest at the bottom, the way it was lived.
+        </p>
+      </Reveal>
       <div className="timeline">
-        {data.timeline
-          .filter((x) => x.isPublic)
-          .map((x, i) => (
-            <Reveal key={x.id} delay={Math.min(i * 0.04, 0.2)}>
-              <article className="timeline-item">
-                <time>{x.year}</time>
-                <h2>{x.title}</h2>
-                <p className="muted">{x.description}</p>
-              </article>
-            </Reveal>
-          ))}
+        {entries.map((x, i) => (
+          <Reveal key={x.id} delay={Math.min(i * 0.04, 0.2)}>
+            <article className="timeline-item">
+              <time>{x.year}</time>
+              <h2>{x.title}</h2>
+              <p className="muted">{x.description}</p>
+            </article>
+          </Reveal>
+        ))}
+        <Reveal delay={0.2}>
+          <article className="timeline-item timeline-next">
+            <time>Next</time>
+            <h2>This entry is being written.</h2>
+            <p className="muted">
+              Whatever the coming months hold, it lands here first — and on the Now page while it is still in progress.
+            </p>
+            <Link href="/now" className="text-link">
+              What I am doing now <ArrowUpRight size={18} />
+            </Link>
+          </article>
+        </Reveal>
       </div>
       <Related links={[['About', '/about'], ['Now', '/now'], ['Journal', '/journal']]} />
     </>
@@ -969,14 +990,55 @@ function Now() {
 
 function Contact() {
   const { data } = useStore();
+  const dirGroup = (kinds: string[]) =>
+    kinds.map((kind) => {
+      const def = FORMS[kind];
+      return (
+        <Link className="card dir-card" href={FORM_ROUTES[kind]} key={kind}>
+          <h3>{def.title}</h3>
+          <p className="muted">{def.intro}</p>
+          <span className="text-link">
+            Open the form <ArrowUpRight size={16} />
+          </span>
+        </Link>
+      );
+    });
   return (
     <>
-      <div className="contact-layout">
-        <Reveal>
-          <ContactForm />
-        </Reveal>
+      <Reveal>
+        <p className="page-lead" style={{ maxWidth: 760, marginBottom: 44 }}>
+          Every kind of enquiry gets its own form, asking only what that kind of work actually needs. Choose the door
+          that matches yours — the questions on the other side are the ones I would ask you on a call.
+        </p>
+      </Reveal>
+
+      <section className="section" style={{ paddingTop: 0 }} aria-label="Purpose-built enquiry forms">
+        <div className="sectionhead">
+          <div>
+            <span className="eyebrow">Service enquiries</span>
+            <h2 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
+              Seven forms for <em>the work.</em>
+            </h2>
+          </div>
+          <p>Website, AI, search, design, brand, video and mentorship — each with questions of its own.</p>
+        </div>
+        <div className="dir-grid">{dirGroup(SERVICE_FORM_KINDS)}</div>
+
+        <div className="sectionhead" style={{ marginTop: 56 }}>
+          <div>
+            <span className="eyebrow">Creative collaborations</span>
+            <h2 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
+              Four forms for <em>the art.</em>
+            </h2>
+          </div>
+          <p>Music, spoken word, poetry and the stage — collaboration starts with the right conversation.</p>
+        </div>
+        <div className="dir-grid">{dirGroup(CREATIVE_FORM_KINDS)}</div>
+      </section>
+
+      <section className="section" style={{ paddingTop: 0 }} aria-label="Other ways to reach TIMFIRE">
         <div className="stack">
-          <Reveal delay={0.08}>
+          <Reveal>
             <article className="card light">
               <span className="icon-badge">
                 <Mail size={20} />
@@ -988,7 +1050,7 @@ function Contact() {
               </a>
             </article>
           </Reveal>
-          <Reveal delay={0.16}>
+          <Reveal delay={0.08}>
             <article className="card">
               <span className="icon-badge">
                 <MessageCircle size={20} />
@@ -1000,7 +1062,7 @@ function Contact() {
               </a>
             </article>
           </Reveal>
-          <Reveal delay={0.24}>
+          <Reveal delay={0.16}>
             <article className="card">
               <h3>Elsewhere.</h3>
               <p className="muted">Social spaces where the work and the process show up.</p>
@@ -1016,7 +1078,30 @@ function Contact() {
             </article>
           </Reveal>
         </div>
-      </div>
+      </section>
+
+      <section className="section" id="general" style={{ paddingTop: 0 }} aria-label="General enquiry form">
+        <div className="contact-layout">
+          <Reveal>
+            <div>
+              <span className="eyebrow">Anything else</span>
+              <h2 style={{ fontSize: 'clamp(1.9rem,3.4vw,3rem)', margin: '12px 0 14px' }}>
+                The general form, <em>last on purpose.</em>
+              </h2>
+              <p className="muted" style={{ maxWidth: 560 }}>
+                If none of the eleven doors above fits, this one opens everywhere. Say what is on your mind and it will
+                reach the same inbox — with a topic tag so I know which hat to wear when I reply.
+              </p>
+              <p className="muted" style={{ maxWidth: 560 }}>
+                Prefer a human channel? The email and WhatsApp cards above land in the same place, faster.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <ContactForm />
+          </Reveal>
+        </div>
+      </section>
       <Related links={[['Services', '/services'], ['Work', '/work'], ['About', '/about']]} />
     </>
   );

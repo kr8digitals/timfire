@@ -129,7 +129,7 @@ export default async function CollaboratePage({ params }: { params: Promise<{ ki
               <Link href="/work">Selected work ↗</Link>
             </nav>
           </div>
-          <div className="form-panel">
+          <div className="form-panel" id="form">
             <div className="form-panel-head">
               <span className="eyebrow">Enquiry</span>
               <h2>{form.title}</h2>

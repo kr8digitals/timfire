@@ -145,6 +145,18 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 .ventures-photo img,.face-first{object-position:center 6%!important;max-height:660px}
 @media(max-width:800px){.ventures-hero{padding-top:56px}}
 
+/* ---------- Subscribe moment ---------- */
+.sub-overlay{position:fixed;inset:0;z-index:95;background:rgba(7,4,3,.72);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
+.sub-card{position:relative;width:min(560px,100%);background:#201510;border:1px solid #73513b;border-radius:24px;padding:34px 30px;box-shadow:0 40px 90px rgba(0,0,0,.5);animation:sub-in .35s ease}
+@keyframes sub-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sub-close{position:absolute;top:14px;right:14px}
+.sub-body h3{font-size:clamp(1.6rem,4vw,2.3rem);margin:10px 0 14px}
+.sub-body p{color:var(--muted)}
+.sub-reasons{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:10px}
+.sub-reasons li{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:15.5px;line-height:1.5}
+.sub-reasons li svg{color:var(--orange);flex:0 0 auto;margin-top:2px}
+@media(prefers-reduced-motion:reduce){.sub-card{animation:none}}
+
 /* ---------- Contact directory ---------- */
 .dir-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 @media(max-width:1020px){.dir-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

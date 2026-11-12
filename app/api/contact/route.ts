@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { enquiryInbox } from '@/lib/enquiry';
 import { insertEnquiry } from '@/lib/db';
+import { OWNER_EMAIL, sendTemplated } from '@/lib/email';
 import { FORMS, FORM_KINDS } from '@/lib/forms';
 
 /**
@@ -84,5 +85,18 @@ export async function POST(req: NextRequest) {
     inbox.unshift({ id, kind, name, email, answers, at: new Date().toISOString() });
     if (inbox.length > 200) inbox.length = 200;
   }
+
+  // Two branded emails, both best-effort: the structured forward to the owner
+  // (Reply-To set to the visitor) and an instant, named acknowledgement back.
+  const formTitle = FORMS[kind].title.toLowerCase();
+  const answersBlock = Object.entries(answers)
+    .filter(([, v]) => v.trim())
+    .map(([k, v]) => `${k}: ${v}`)
+    .join('\n');
+  await Promise.all([
+    sendTemplated('owner_forward', OWNER_EMAIL, { name, email, form_title: formTitle, answers_block: answersBlock }, { replyTo: email }),
+    sendTemplated('ack', email, { name, form_title: formTitle }),
+  ]);
+
   return NextResponse.json({ ok: true }, { status: 200, headers: { 'Cache-Control': 'no-store' } });
 }

@@ -103,7 +103,7 @@ export default function Section({ section }: { section: string }) {
   const { data } = useStore();
   return (
     <main id="main">
-      {section !== 'work' && section !== 'ventures' && <Heading section={section} />}
+      {section !== 'work' && section !== 'ventures' && section !== 'about' && <Heading section={section} />}
       <div className="shell">
         {section === 'about' && <About />}
         {section === 'work' && <Work />}
@@ -123,29 +123,19 @@ function About() {
   const { data } = useStore();
   return (
     <>
-      <div className="two-col">
+      <section className="shell work-hero about-hero">
         <Reveal>
-          <div className="photo-card">
-            <PImage src="/images/founder.webp" alt="TIMFIRE, also known as Kenneth Timothy Iziogo, in a dark suit" />
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="copy-panel">
-            <span className="eyebrow">TIMFIRE</span>
-            <h2>
-              My name is <em>Timfire.</em>
-            </h2>
-            <p>
-              I am Kenneth Timothy Iziogo, based in Abakaliki, Ebonyi State, Nigeria. I work remotely for anyone,
-              anywhere.
+          <div>
+            <span className="eyebrow">About</span>
+            <h1>
+              The name behind
+              <br />
+              <em>the work.</em>
+            </h1>
+            <p className="page-lead">
+              I am Kenneth Timothy Iziogo — Timfire to the internet. A developer, writer and speaker from Abakaliki,
+              Ebonyi State, Nigeria, building for anyone, anywhere.
             </p>
-            <p>{data.profile.about}</p>
-            <p>
-              I attended Nnodo Secondary School, Abakaliki, from September 2018 until graduating in 2024. In 2026, I
-              wrote the JAMB UTME and was admitted to study Linguistics at Ebonyi State University.
-            </p>
-            {data.settings.showJambScore && data.settings.jambScore && <p>JAMB UTME score: {data.settings.jambScore}</p>}
-            <p>In 2023, I was a finalist in Coal City University’s national essay competition on Drug Abuse. [ADD: certificate scan]</p>
             <div className="role-list">
               <span className="badge">
                 <Code2 size={15} /> Website developer
@@ -157,12 +147,42 @@ function About() {
                 <GraduationCap size={15} /> Founder &amp; CEO, KR8 DIGITALS
               </span>
             </div>
-            <Link href="/timeline" className="text-link">
-              Explore the timeline <ArrowUpRight size={18} />
-            </Link>
+            <div className="actions">
+              <Link href="/timeline" className="button primary">
+                Explore the timeline <ArrowUpRight size={18} />
+              </Link>
+              <Link href="/work" className="button ghost">
+                See the work first <ArrowUpRight size={18} />
+              </Link>
+            </div>
           </div>
         </Reveal>
-      </div>
+        <Reveal delay={0.1}>
+          <div className="photo-card about-photo">
+            <PImage src="/images/founder.webp" alt="TIMFIRE, also known as Kenneth Timothy Iziogo, in a dark suit" width={928} height={1152} />
+          </div>
+        </Reveal>
+      </section>
+
+      <Reveal>
+        <div className="copy-panel about-story">
+          <span className="eyebrow">The short version</span>
+          <h2>
+            My name is <em>Timfire.</em>
+          </h2>
+          <p>
+            I am Kenneth Timothy Iziogo, based in Abakaliki, Ebonyi State, Nigeria. I work remotely for anyone,
+            anywhere.
+          </p>
+          <p>{data.profile.about}</p>
+          <p>
+            I attended Nnodo Secondary School, Abakaliki, from September 2018 until graduating in 2024. In 2026, I
+            wrote the JAMB UTME and was admitted to study Linguistics at Ebonyi State University.
+          </p>
+          {data.settings.showJambScore && data.settings.jambScore && <p>JAMB UTME score: {data.settings.jambScore}</p>}
+          <p>In 2023, I was a finalist in Coal City University’s national essay competition on Drug Abuse. [ADD: certificate scan]</p>
+        </div>
+      </Reveal>
 
       <div className="two-col section">
         <Reveal>

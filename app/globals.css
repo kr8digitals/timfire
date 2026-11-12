@@ -143,6 +143,14 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 .ventures-photo img,.face-first{object-position:center 6%!important;max-height:660px}
 @media(max-width:800px){.ventures-hero{padding-top:56px}}
 
+/* ---------- About hero ---------- */
+.about-hero{padding-top:76px}
+.about-hero h1{font-size:clamp(2.6rem,4.8vw,4.9rem)}
+.about-photo img{object-position:center 16%!important}
+.about-story{max-width:860px;margin-top:70px}
+.about-story h2{font-size:clamp(1.9rem,3.4vw,3rem)}
+@media(max-width:800px){.about-hero{padding-top:56px}.about-story{margin-top:44px}}
+
 /* ---------- Gallery ---------- */
 .masonry{columns:3;column-gap:20px}
 @media(max-width:1020px){.masonry{columns:2}}

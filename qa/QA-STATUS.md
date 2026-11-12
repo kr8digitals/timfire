@@ -25,6 +25,9 @@ added the animation, contact form, visitor bar and inbox work.
 | Reduced motion | `useReducedMotion` short-circuits every animation; CSS also clamps animation/transition durations | Pass |
 | Security headers | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and production-only `X-Frame-Options` served on all routes | Pass |
 | Currency | Locale detection, manual switch, 24h `localStorage` rate cache, USD fallback when the Frankfurter request fails | Pass |
+| Header nav | Desktop shows six primary links plus an accessible “More” menu covering Journal, Timeline, Now and Contact; mobile menu lists all ten | Pass |
+| Contact fallback | Success state offers a prefilled `mailto:` (name, email, topic, message) and WhatsApp, so delivery never depends on the session inbox | Pass |
+| QA script | `./qa/smoke.sh` — all route, API, header and hero-copy assertions pass | Pass |
 
 ## Not verified
 

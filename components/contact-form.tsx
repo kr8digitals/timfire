@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, AlertCircle, Mail } from 'lucide-react';
 
 const TOPICS = [
   'Website design & development',
@@ -24,6 +24,7 @@ export default function ContactForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [serverMessage, setServerMessage] = useState('');
+  const [lastSent, setLastSent] = useState({ name: '', email: '', topic: TOPICS[0], message: '' });
 
   // Pre-select topic from ?service=... (e.g. Work page "Request one" CTA).
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function ContactForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
+        setLastSent({ name: name.trim(), email: email.trim(), topic, message: message.trim() });
         setStatus('sent');
         setName('');
         setEmail('');
@@ -77,18 +79,29 @@ export default function ContactForm() {
   }
 
   if (status === 'sent') {
+    const mailto =
+      'mailto:hi@kutimfire.com' +
+      '?subject=' + encodeURIComponent('Website enquiry — ' + lastSent.topic) +
+      '&body=' + encodeURIComponent(
+        'Name: ' + lastSent.name + '\nEmail: ' + lastSent.email + '\n\n' + lastSent.message,
+      );
     return (
       <div className="card light contact-success" role="status">
         <CheckCircle2 size={28} aria-hidden="true" />
         <h3>Message received.</h3>
         <p>
-          Thank you — your message has been saved. For a guaranteed reply, email <a href="mailto:hi@kutimfire.com">hi@kutimfire.com</a> or
-          send a WhatsApp message.
+          Thank you, {lastSent.name.split(' ')[0] || 'friend'} — your message has been saved and I will reply to the
+          address you gave. To make sure it reaches my inbox straight away, send the same message by email or WhatsApp.
         </p>
-        <a className="text-link" style={{ color: '#842e00' }} href="https://wa.me/2348166552758" target="_blank" rel="noopener noreferrer">
-          Open WhatsApp <ArrowUpRight size={18} />
-        </a>
-        <div className="actions" style={{ marginTop: 18 }}>
+        <div className="actions" style={{ marginTop: 6 }}>
+          <a className="button primary" href={mailto}>
+            <Mail size={18} aria-hidden="true" /> Send by email
+          </a>
+          <a className="button ghost" href="https://wa.me/2348166552758" target="_blank" rel="noopener noreferrer">
+            WhatsApp <ArrowUpRight size={18} />
+          </a>
+        </div>
+        <div className="actions" style={{ marginTop: 10 }}>
           <button type="button" className="button ghost" onClick={() => setStatus('idle')}>
             Send another message
           </button>
@@ -101,7 +114,7 @@ export default function ContactForm() {
     <form className="card contact-form" onSubmit={onSubmit} noValidate>
       <span className="eyebrow">Send a message</span>
       <h3 style={{ margin: '10px 0 4px' }}>Tell me what you are building.</h3>
-      <p className="muted" style={{ marginTop: 0 }}>Fields marked * are required. I reply by email.</p>
+      <p className="muted" style={{ marginTop: 0 }}>Fields marked * are required. I reply by email or WhatsApp.</p>
 
       <label className="form-label" htmlFor="contact-name">Your name *</label>
       <input id="contact-name" name="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'contact-name-error' : undefined} />

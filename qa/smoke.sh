@@ -11,18 +11,27 @@ check() { # path expected
   if [ "$code" != "$2" ]; then echo "FAIL $1 (expected $2, got $code)"; fail=1; else echo "ok   $1 $code"; fi
 }
 
-for p in / /about /work /ventures /services /creative /journal /timeline /now /contact /admin /sitemap.xml /robots.txt; do
+for p in / /about /work /ventures /services /creative /journal /gallery /timeline /now /contact /admin /sitemap.xml /robots.txt \
+  /services/website-design-development /services/ai-agent-development /services/seo-optimisation /services/graphic-design \
+  /services/branding /services/video-editing /services/mentorship \
+  /collaborate/music /collaborate/spoken-word /collaborate/poetry /collaborate/speaking; do
   check "$p" 200
 done
 check /definitely-not-a-page 404
 
-echo "-- contact api"
-valid='{"name":"QA","email":"qa@example.com","topic":"Website design & development","message":"This is an automated smoke test message."}'
+echo "-- contact api (per-form schema)"
+valid='{"kind":"general","name":"QA","email":"qa@example.com","answers":{"topic":"Something else","message":"This is an automated smoke test message."},"website":""}'
 code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Content-Type: application/json' -d "$valid")
 [ "$code" = "200" ] && echo "ok   valid post 200" || { echo "FAIL valid post ($code)"; fail=1; }
 
-code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Content-Type: application/json' -d '{"name":"","email":"x","topic":"","message":"hi"}')
-[ "$code" = "400" ] && echo "ok   invalid post 400" || { echo "FAIL invalid post ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Content-Type: application/json' -d '{"kind":"general","name":"QA","email":"qa@example.com","answers":{},"website":""}')
+[ "$code" = "400" ] && echo "ok   missing required fields 400" || { echo "FAIL missing-fields post ($code)"; fail=1; }
+
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Content-Type: application/json' -d '{"kind":"nope","name":"QA","email":"qa@example.com","answers":{},"website":""}')
+[ "$code" = "400" ] && echo "ok   unknown kind 400" || { echo "FAIL unknown kind ($code)"; fail=1; }
+
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/contact" -H 'Content-Type: application/json' -d '{"kind":"general","name":"QA","email":"qa@example.com","answers":{"topic":"Something else","message":"honeypot filled"},"website":"http://spam.example"}')
+[ "$code" = "200" ] && echo "ok   honeypot silent 200" || { echo "FAIL honeypot ($code)"; fail=1; }
 
 code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/admin/inbox")
 [ "$code" = "401" ] && echo "ok   inbox requires auth 401" || { echo "FAIL inbox auth ($code)"; fail=1; }

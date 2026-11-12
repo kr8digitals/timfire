@@ -192,7 +192,7 @@ function About() {
       <section className="section">
         <Reveal>
           <h2>
-            Certificates<em>.</em>
+            Certificates
           </h2>
           <p className="muted" style={{ maxWidth: 620 }}>
             Scans are added here once they have been supplied and checked.
@@ -387,7 +387,7 @@ function Ventures() {
           <div>
             <span className="eyebrow">The ecosystem</span>
             <h2>
-              Three ways KR8 <em>keeps the door open.</em>
+              Inside the KR8 <em>ecosystem.</em>
             </h2>
           </div>
           <p>Commercial work funds the free work. The free work builds the next builders.</p>

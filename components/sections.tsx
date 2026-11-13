@@ -193,11 +193,10 @@ function About() {
           </p>
           <p>
             Nnodo Secondary School, Abakaliki, from September 2018 until graduating in 2024; the JAMB UTME in 2026 and
-            a place to read Linguistics at Ebonyi State University; a finalist in Coal City University’s national
+            a place to read Linguistics at Ebonyi State University; a finalist in Coal City University’s 2023 national
             essay competition on drug abuse. [ADD: certificate scan]
           </p>
           {data.settings.showJambScore && data.settings.jambScore && <p>JAMB UTME score: {data.settings.jambScore}</p>}
-          <p>In 2023, I was a finalist in Coal City University’s national essay competition on Drug Abuse. [ADD: certificate scan]</p>
         </div>
       </Reveal>
 

@@ -10,6 +10,10 @@ const TOPICS = [
   'Branding',
   'Video editing',
   'One-on-one mentorship',
+  'Music & production',
+  'Spoken word & stage',
+  'Poetry & writing',
+  'Speaking engagement',
   'Something else',
 ];
 
@@ -87,7 +91,7 @@ export default function ContactForm() {
   if (status === 'sent') {
     const mailto =
       'mailto:hi@kutimfire.com' +
-      '?subject=' + encodeURIComponent('Website enquiry — ' + lastSent.topic) +
+      '?subject=' + encodeURIComponent('TIMFIRE enquiry — ' + lastSent.topic) +
       '&body=' + encodeURIComponent(
         'Name: ' + lastSent.name + '\nEmail: ' + lastSent.email + '\n\n' + lastSent.message,
       );
@@ -119,8 +123,8 @@ export default function ContactForm() {
   return (
     <form className="card contact-form" onSubmit={onSubmit} noValidate>
       <span className="eyebrow">Send a message</span>
-      <h3 style={{ margin: '10px 0 4px' }}>Tell me what you are building.</h3>
-      <p className="muted" style={{ marginTop: 0 }}>Fields marked * are required. I reply by email or WhatsApp.</p>
+      <h3 style={{ margin: '10px 0 4px' }}>Tell me what you are carrying.</h3>
+      <p className="muted" style={{ marginTop: 0 }}>Pick the closest topic and write freely — I will ask the rest myself. Fields marked * are required.</p>
 
       <label className="form-label" htmlFor="contact-name">Your name *</label>
       <input id="contact-name" name="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'contact-name-error' : undefined} />

@@ -20,6 +20,7 @@ const ADDRESSES: Record<string, string> = {
 const FROM_NAME = 'TIMFIRE';
 
 export type TemplateSlug =
+  | 'admin_code'
   | 'welcome'
   | 'ack'
   | 'owner_forward'
@@ -29,6 +30,11 @@ export type TemplateSlug =
   | 'broadcast_offer';
 
 const DEFAULT_TEMPLATES: Record<TemplateSlug, { sender: 'hello' | 'enquiries'; subject: string; body: string }> = {
+  admin_code: {
+    sender: 'enquiries',
+    subject: 'Your TIMFIRE sign-in code.',
+    body: 'Someone who knows the password just asked to sign in to the TIMFIRE dashboard.\n\nYour code: {{code}}\n\nIt expires in ten minutes, and this mailbox is the proof that the dashboard belongs to you. If this was not you, change the password and ignore this mail.\n\n— Timfire',
+  },
   welcome: {
     sender: 'hello',
     subject: 'You are on the list, {{name}}.',
@@ -166,7 +172,7 @@ export async function sendTemplated(slug: TemplateSlug, to: string, vars: Record
     to,
     subject: fill(t.subject, vars),
     text: fill(t.body, vars),
-    preview: slug === 'owner_forward' ? 'New enquiry' : slug === 'ack' ? 'Message received' : slug === 'welcome' ? 'Welcome to the list' : 'An update for you',
+    preview: slug === 'owner_forward' ? 'New enquiry' : slug === 'ack' ? 'Message received' : slug === 'welcome' ? 'Welcome to the list' : slug === 'admin_code' ? 'Your sign-in code' : 'An update for you',
     ...extra,
   });
 }

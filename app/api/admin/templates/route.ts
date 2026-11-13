@@ -6,7 +6,7 @@ import type { TemplateSlug } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
-const SLUGS: TemplateSlug[] = ['welcome', 'ack', 'owner_forward', 'publish_notice', 'broadcast_newsletter', 'broadcast_new_work', 'broadcast_offer'];
+const SLUGS: TemplateSlug[] = ['admin_code', 'welcome', 'ack', 'owner_forward', 'publish_notice', 'broadcast_newsletter', 'broadcast_new_work', 'broadcast_offer'];
 
 const saveSchema = z.object({
   slug: z.string().refine((s): s is TemplateSlug => (SLUGS as string[]).includes(s), 'Unknown template.'),

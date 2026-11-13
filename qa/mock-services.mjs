@@ -33,6 +33,7 @@ const PRIMARY_KEYS = {
   enquiries: ['id'],
   site_content: ['collection', 'id'],
   site_singletons: ['key'],
+  admin_credentials: ['key'],
 };
 
 /** Column defaults the real database supplies, so inserts behave the same. */
@@ -63,8 +64,8 @@ function withDefaults(table, row) {
   return out;
 }
 
-function matches(row, filters) {
-  return [...filters].every(([column, [op, raw]]) => {
+function matchCond(row, [column, [op, raw]]) {
+  {
     const value = row[column];
     switch (op) {
       case 'eq':
@@ -95,7 +96,24 @@ function matches(row, filters) {
       default:
         return true;
     }
-  });
+  }
+}
+
+function matches(row, filters) {
+  return [...filters].every((filter) =>
+    filter[0] === '__or' ? filter[1].some((cond) => matchCond(row, cond)) : matchCond(row, filter),
+  );
+}
+
+/** `key.like.pw:%,key.like.req:%` — one condition inside an .or() group. */
+function parseCond(text) {
+  const dot = String(text).indexOf('.');
+  if (dot < 0) return null;
+  const column = String(text).slice(0, dot);
+  const rest = String(text).slice(dot + 1);
+  const dot2 = rest.indexOf('.');
+  if (dot2 < 0) return null;
+  return [column, [rest.slice(0, dot2), rest.slice(dot2 + 1)]];
 }
 
 function filtersOf(params) {
@@ -103,9 +121,17 @@ function filtersOf(params) {
   const out = [];
   for (const [key, value] of params) {
     if (reserved.has(key)) continue;
-    const dot = String(value).indexOf('.');
-    if (dot < 0) continue;
-    out.push([key, [String(value).slice(0, dot), String(value).slice(dot + 1)]]);
+    if (key === 'or') {
+      // or=(key.like.pw:%,key.like.req:%) — any one condition may match. An
+      // unknown filter here must never silently match every row: a delete
+      // with a dropped filter is a delete of the whole table.
+      const inner = String(value).replace(/^\(|\)$/g, '');
+      const conds = inner.split(',').map(parseCond).filter(Boolean);
+      if (conds.length) out.push(['__or', conds]);
+      continue;
+    }
+    const cond = parseCond(`${key}.${value}`);
+    if (cond) out.push(cond);
   }
   return out;
 }

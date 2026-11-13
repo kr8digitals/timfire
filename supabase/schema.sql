@@ -90,6 +90,16 @@ comment on column public.admin_signins.key is
 comment on column public.admin_signins.code_hash is
   'sha256 of the six-digit code. The code itself is never stored.';
 
+create table if not exists public.admin_credentials (
+  key        text primary key,
+  value      text not null,
+  updated_at timestamptz not null default now()
+);
+comment on table public.admin_credentials is
+  'The owner''s password hash (base64 bcrypt), changeable from the dashboard. ADMIN_PASSWORD_HASH in the environment is only the bootstrap fallback for when no row exists yet.';
+comment on column public.admin_credentials.value is
+  'base64 of the bcrypt hash: Next .env parsing truncates raw $2 hashes.';
+
 -- Top up columns on a database created before they existed.
 alter table public.subscribers add column if not exists name text not null default '';
 
@@ -138,3 +148,4 @@ alter table public.subscribers     enable row level security;
 alter table public.email_templates enable row level security;
 alter table public.email_log       enable row level security;
 alter table public.admin_signins   enable row level security;
+alter table public.admin_credentials enable row level security;

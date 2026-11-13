@@ -14,7 +14,7 @@ Services index, a full Creative rebuild, a new Gallery page, a Ventures hero tha
 promise, an About hero, a Timeline polish, a Supabase-backed content store, a Resend email engine,
 a two-step admin sign-in whose state lives in the database, a Contact page that keeps its machinery
 private, a deliberate mobile pass, one public inbox (`hello@`) replacing the dead `hi@`, and a
-subscription strip that gives the list a permanent home on every page. The old stats line and the "Explore my world" cards stay removed, per your instruction. No
+subscription band that gives the list a permanent home at the foot of every page, directly above the footer — never a badge at the top. The old stats line and the "Explore my world" cards stay removed, per your instruction. No
 statistics were invented anywhere; unknown facts remain visible `[ADD: …]` markers.
 
 ## 2. Page map and CTA routing
@@ -121,8 +121,10 @@ but it never stops the mail, because a missing audit row is a smaller problem th
 Until the `purpose` constraint was fixed (section 3) that log was empty no matter what happened,
 which is exactly why nobody could say whether mail was going out.
 
-The subscription has three doors, and one form behind all of them: a strip above the header on every
-page (section 8), the footer link, and the intentional pop-up that waits for real scrolling.
+The subscription has two doors, and one form behind both: a band of its own between the page and the
+footer on every page (section 8), and the intentional pop-up that waits for real scrolling. The
+footer no longer carries a subscribe button of its own — one invitation per page, in the place a
+convinced reader actually reaches.
 
 ## 7. Admin access: password, then a code that proves the mailbox
 
@@ -158,10 +160,21 @@ prevent, and it cost four attempts and a lockout before it was diagnosed.
 
 **Password format:** Next's `.env` parser expands the `$` characters inside a raw bcrypt hash and
 truncates it, which made logins impossible even with the right password. Hashes travel base64:
-generate one with `npm run make-admin-password -- "your password"` and store the printed value in
-`ADMIN_PASSWORD_HASH`. Vercel treats it as a sensitive variable, which cannot be edited in place (or
-read back) — delete it and create it again. `lib/auth.ts` accepts both base64 and raw `$2…` values.
-Changing the password invalidates every existing session, because the signature is keyed by the hash.
+generate one with `npm run make-admin-password -- "your password"`. `lib/auth.ts` accepts both
+base64 and raw `$2…` values.
+
+**Where the hash lives:** the `admin_credentials` table (row `key = 'password_hash'`) is the source
+of truth; `ADMIN_PASSWORD_HASH` in the Vercel environment is only the bootstrap fallback for the
+moment the database is unreachable or the row does not exist yet. Vercel treats it as a sensitive
+variable, which cannot be edited in place (or read back) — delete it and create it again.
+
+**Changing it:** the dashboard's Security tab is the intended route — `POST /api/admin/password`
+with `{ current, next }`, signed in only. It checks the current password, refuses anything under
+eight characters or equal to the current one, hashes the new one into the database, clears the
+failed-attempt windows, and hands back a cookie signed with the new hash so the browser that made
+the change stays signed in. Every other session dies with the old hash, because the cookie
+signature is keyed by it. The sign-in form and the Security form both have an eye toggle: a
+password you can look at is a password you can type correctly.
 
 ## 8. Mobile: the phone gets its own decisions
 
@@ -187,11 +200,13 @@ their padding, and the footer clears the floating WhatsApp button.
 Anchor targets (`#form`, `#general`, `#behind`) carry `scroll-margin-top` so they no longer land
 under the header after a jump.
 
-The subscription strip (section 6) is built for the phone first: under 860px it keeps one short line
-("Stay close. New poems, new work and the occasional offer") and drops the longer clause; under 520px
-the sentence and the close button share the first row and the button takes the full width of the
-second, so the tap target is never squeezed between two other things. It is dismissible, the
-dismissal is remembered, and it retires itself the moment anyone subscribes.
+The subscription band (section 6) is built for the phone first: under 800px the two columns stack —
+copy first, then a full-width button — so the tap target is never squeezed beside the words. It is
+not dismissible on purpose: it is a section of the page, not an overlay, and it sits where a reader
+looks last rather than where they look first. It retires itself the moment anyone subscribes, and
+it never renders on `/admin` or `/unsubscribe`. `qa/smoke.sh` fails the build if a subscription
+surface ever appears above the header again, or if the band lands anywhere but between the header
+and the footer.
 
 ## 9. QA suite and results
 
@@ -201,12 +216,12 @@ Six suites, all offline except the route crawler, which needs a running server:
 | --- | --- | --- |
 | Types | `npx tsc --noEmit` | no type errors |
 | Build | `npm run build` | 34 routes — 21 pages, 13 API |
-| Routes + behaviour | `./qa/smoke.sh http://127.0.0.1:3100` | 91 checks: routes, per-form validation, honeypot, subscription surfaces, two-step sign-in refusals, contact-page secrecy, one public inbox, the strip on every page, the mobile zoom fixes |
+| Routes + behaviour | `./qa/smoke.sh http://127.0.0.1:3100` | 119 checks: routes, per-form validation, honeypot, subscription surfaces and their position between header and footer, two-step sign-in refusals, contact-page secrecy, one public inbox, footer wording, no role badges, sounds-and-music wording, hero photographs, the mobile zoom fixes |
 | Links | `node qa/link-audit.mjs <url>` | every internal CTA resolves; every referenced image exists |
 | SEO | `node qa/seo-probe.mjs <url>` | titles, descriptions, canonicals, OG, `/admin` noindex |
 | Schema contract | `npm run qa:schema` | every column the code names exists in `supabase/schema.sql`, every value it writes is one the database accepts, and the loggable purposes are exactly `TemplateSlug` |
 | Email contract | `npm run qa:email` | the body Resend actually receives carries sender, recipient, subject, html and `reply_to` |
-| Sign-in + subscribe | `npm run qa:auth` | 60 checks through the real built server against a mock Resend and a mock Supabase that refuses what the real database refuses |
+| Sign-in + subscribe | `npm run qa:auth` | 71 checks through the real built server against a mock Resend and a mock Supabase that refuses what the real database refuses — including changing the password from the dashboard and watching every older session die |
 
 `npm run qa` runs the three contracts. To run the whole thing:
 

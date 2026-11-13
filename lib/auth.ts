@@ -58,25 +58,43 @@ async function clearState(key:string){
   if(error)console.error('[auth] could not clear the sign-in state:',error.message);
 }
 
-function credentials(){
-  const email=process.env.ADMIN_EMAIL,raw=process.env.ADMIN_PASSWORD_HASH;
-  if(!email||!raw)return null;
-  // Next's env parser treats `$` as a variable reference and truncates bcrypt
-  // hashes pasted into .env files, so the supported format is the base64 of the
-  // hash (no `$` characters to expand). A raw `$2…` value is accepted too, for
-  // hosts that inject the variable without expansion.
+/** The password hash lives in the database (`admin_credentials`) so the owner
+ *  can change it from the dashboard without a redeploy. `ADMIN_PASSWORD_HASH` in
+ *  the environment is only the bootstrap fallback: a fresh database with no row
+ *  yet, or one that cannot be reached. Base64 in both places, because Next's env
+ *  parser treats `$` as a variable reference and truncates raw bcrypt hashes. */
+async function storedHash():Promise<string|null>{
+  const supa=db();
+  if(!supa)return null;
+  const {data,error}=await supa.from('admin_credentials').select('value').eq('key','password_hash').maybeSingle();
+  if(error){console.error('[auth] could not read the stored password hash:',error.message);return null}
+  const raw=(data as {value:string}|null)?.value;
+  if(!raw)return null;
   let hash=raw;
   try{const decoded=Buffer.from(raw,'base64').toString('utf8');if(decoded.startsWith('$2'))hash=decoded}catch{/* keep raw */}
-  if(!hash.startsWith('$2'))return null;
+  return hash.startsWith('$2')?hash:null;
+}
+function envHash():string|null{
+  const raw=process.env.ADMIN_PASSWORD_HASH;
+  if(!raw)return null;
+  let hash=raw;
+  try{const decoded=Buffer.from(raw,'base64').toString('utf8');if(decoded.startsWith('$2'))hash=decoded}catch{/* keep raw */}
+  return hash.startsWith('$2')?hash:null;
+}
+async function credentials(){
+  const email=process.env.ADMIN_EMAIL;
+  if(!email)return null;
+  const hash=(await storedHash())??envHash();
+  if(!hash)return null;
   return {email,hash};
 }
 function sign(payload:string,secret:string){return createHmac('sha256',secret).update(payload).digest('base64url')}
-async function issueCookie(){const config=credentials();if(!config)return null;const exp=Date.now()+TTL;const payload=Buffer.from(JSON.stringify({exp,nonce:randomBytes(16).toString('hex')})).toString('base64url');const token=payload+'.'+sign(payload,config.hash);(await cookies()).set(NAME,token,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',path:'/',maxAge:TTL/1000});return exp}
+async function issueCookie(){const config=await credentials();if(!config)return null;const exp=Date.now()+TTL;const payload=Buffer.from(JSON.stringify({exp,nonce:randomBytes(16).toString('hex')})).toString('base64url');const token=payload+'.'+sign(payload,config.hash);(await cookies()).set(NAME,token,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',path:'/',maxAge:TTL/1000});return exp}
 
 /** Step one: the password. On success a six-digit code is emailed through
  *  Resend, proving the mailbox belongs to the owner. No cookie yet. */
 export async function login(email:string,password:string,key:string){
-  const config=credentials();
+  const config=await credentials();
   if(!config)return {ok:false,code:503,message:'Login is not configured.'};
   const now=Date.now();
   const pwKey='pw:'+key;
@@ -110,7 +128,7 @@ export async function login(email:string,password:string,key:string){
 
 /** Step two: the emailed code. On success the five-day remembering cookie is set. */
 export async function verify(email:string,code:string){
-  const config=credentials();
+  const config=await credentials();
   if(!config)return {ok:false,code:503,message:'Login is not configured.'};
   if(email.trim().toLowerCase()!==config.email.trim().toLowerCase())return {ok:false,code:401,message:'Email or password is incorrect.'};
   const pending=await loadState('code','memory');
@@ -134,9 +152,37 @@ export async function verify(email:string,code:string){
 async function revoked(nonce:string):Promise<boolean>{const state=await loadState('revoked:'+nonce,'db');return !!state}
 async function revoke(raw:string){try{const [payload]=raw.split('.');if(!payload)return;const v=JSON.parse(Buffer.from(payload,'base64url').toString());if(!v.nonce)return;await saveState('revoked:'+String(v.nonce),{tries:0,tally:0,expiresAt:Number(v.exp)>Date.now()?Number(v.exp):Date.now()+TTL})}catch{/* nothing to revoke */}}
 
-export async function session(){const config=credentials();const raw=(await cookies()).get(NAME)?.value;if(!config||!raw)return null;const [payload,sig]=raw.split('.');if(!payload||!sig)return null;const expected=sign(payload,config.hash);const a=Buffer.from(sig),b=Buffer.from(expected);if(a.length!==b.length||!timingSafeEqual(a,b))return null;try{const v=JSON.parse(Buffer.from(payload,'base64url').toString());if(!(v.exp>Date.now()))return null;
+export async function session(){const config=await credentials();const raw=(await cookies()).get(NAME)?.value;if(!config||!raw)return null;const [payload,sig]=raw.split('.');if(!payload||!sig)return null;const expected=sign(payload,config.hash);const a=Buffer.from(sig),b=Buffer.from(expected);if(a.length!==b.length||!timingSafeEqual(a,b))return null;try{const v=JSON.parse(Buffer.from(payload,'base64url').toString());if(!(v.exp>Date.now()))return null;
  if(v.nonce&&await revoked(String(v.nonce)))return null;
  // Sliding window: any authenticated activity remembers the browser for
  // another five days from now.
  const exp=await issueCookie();return {expires:exp??v.exp};}catch{return null}}
+/** The dashboard can change the password: the new hash is written to the
+ *  database, the failed-attempt windows are cleared so a fresh start follows,
+ *  and the caller re-issues the cookie — the signature is keyed by the hash, so
+ *  the old cookie (and the old password) stop working the moment this lands. */
+export async function changePassword(current:string,next:string){
+  const config=await credentials();
+  if(!config)return {ok:false,code:503,message:'Login is not configured.'};
+  let ok=false;
+  try{ok=await bcrypt.compare(current,config.hash)}catch{return {ok:false,code:503,message:'Login is not configured.'}}
+  if(!ok)return {ok:false,code:401,message:'The current password is not right.'};
+  if(next.length<8)return {ok:false,code:400,message:'Choose at least eight characters, so it stays yours alone.'};
+  if(next===current)return {ok:false,code:400,message:'The new password must be a different one.'};
+  const supa=db();
+  if(!supa)return {ok:false,code:503,message:'The database is unreachable, so the password cannot be changed right now.'};
+  const hash=bcrypt.hashSync(next,12);
+  const {error}=await supa.from('admin_credentials').upsert({key:'password_hash',value:Buffer.from(hash,'utf8').toString('base64'),updated_at:new Date().toISOString()},{onConflict:'key'});
+  if(error){console.error('[auth] could not store the new password hash:',error.message);return {ok:false,code:503,message:'Could not save the new password. Try again.'}}
+  for(const key of [...mem.keys()])if(key.startsWith('pw:')||key.startsWith('req:'))mem.delete(key);
+  const {error:cleared}=await supa.from('admin_signins').delete().or('key.like.pw:%,key.like.req:%');
+  if(cleared)console.error('[auth] could not clear the attempt windows:',cleared.message);
+  return {ok:true,code:200,message:'Password changed.'};
+}
+
+/** After a password change the old cookie is signed with the old hash, so the
+ *  route that changed it calls this to hand back a cookie signed with the new
+ *  one — the owner stays signed in through the change. */
+export async function reissue(){return issueCookie()}
+
 export async function logout(){const raw=(await cookies()).get(NAME)?.value;if(raw)await revoke(raw);(await cookies()).delete(NAME)}

@@ -1,20 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  ArrowUpRight,
-  ArrowDown,
-  Code2,
-  PenLine,
-  Bot,
-  GraduationCap,
-  Music2,
-  Mic2,
-  Feather,
-  Presentation,
-  Search,
-  Palette,
-} from 'lucide-react';
+import {ArrowUpRight, ArrowDown, Code2, Bot, Music2, Mic2, Feather, Presentation, Search, Palette, } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { Reveal, HeroItem, FloatingShapes } from '@/components/motion';
 import HeroScenes from '@/components/scenes';
@@ -49,7 +36,7 @@ export default function Home() {
             <HeroItem delay={0.7}>
               <p className="hero-lead">
                 Websites and AI agents built to work — fast on the phone in your hand, clear on the first screen.
-                And when the laptop closes: poetry, spoken word, music and piano.
+                And when the laptop closes: poetry, spoken word, sounds and music.
               </p>
               <p className="hero-lead-short">Websites and AI agents that work on the phone in your hand.</p>
             </HeroItem>
@@ -283,7 +270,8 @@ export default function Home() {
               </h2>
               <p>
                 Code is not the only thing I make. I write poetry and spoken word, sing and write my own music, play
-                piano and keyboard, and speak in front of rooms when there is something worth saying.
+                whatever instrument the song asks for, and speak in front of rooms when there is something worth
+                saying.
               </p>
               <p>
                 This is not a hobby shelf. The ear for rhythm and plain language that makes a webpage readable was
@@ -291,7 +279,7 @@ export default function Home() {
               </p>
               <div className="chip-row">
                 <Link href="/creative#music" className="chip">
-                  <Music2 size={15} /> Music &amp; piano
+                  <Music2 size={15} /> Sounds and music
                 </Link>
                 <Link href="/creative#spoken-word" className="chip">
                   <Mic2 size={15} /> Spoken word
@@ -341,14 +329,6 @@ export default function Home() {
                 Graduates join the KR8 Tribe, a community of 3,000+ creators. Nobody pays tuition. The client work pays
                 for it.
               </p>
-              <div className="role-list">
-                <span className="badge">
-                  <GraduationCap size={15} /> Founder &amp; CEO, KR8 DIGITALS
-                </span>
-                <span className="badge">
-                  <PenLine size={15} /> KR8 Academy · tuition-free
-                </span>
-              </div>
               <Link className="text-link" href="/ventures">
                 Inside KR8 <ArrowUpRight size={18} />
               </Link>

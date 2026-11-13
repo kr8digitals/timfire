@@ -106,16 +106,49 @@ fi
 html=$(curl -s "$BASE/")
 echo "$html" | grep -q 'hero-lead-short' && echo "ok   mobile hero keeps one short line" || { echo "FAIL mobile hero lead missing"; fail=1; }
 
-echo "-- one public inbox, and the list on every page"
+echo "-- one public inbox, and the list at the foot of every page"
 for p in / /about /work /services /creative /journal /gallery /contact /now; do
   html=$(curl -s "$BASE$p")
   echo "$html" | grep -q 'hi@kutimfire.com' && { echo "FAIL $p still advertises the dead hi@ mailbox"; fail=1; } || echo "ok   $p does not mention hi@"
   echo "$html" | grep -q 'hello@kutimfire.com' && echo "ok   $p offers hello@kutimfire.com" || { echo "FAIL $p has no public inbox"; fail=1; }
-  echo "$html" | grep -q 'sub-bar' && echo "ok   $p carries the subscription strip" || { echo "FAIL $p has no subscription strip"; fail=1; }
+  echo "$html" | grep -q 'sub-band' && echo "ok   $p carries the subscription band" || { echo "FAIL $p has no subscription band"; fail=1; }
+  # A badge must never sit at the top: the band lives between the header and the footer.
+  top=$(printf '%s' "$html" | grep -ob -m1 '<header' | head -1 | cut -d: -f1)
+  band=$(printf '%s' "$html" | grep -ob -m1 'sub-band' | head -1 | cut -d: -f1)
+  foot=$(printf '%s' "$html" | grep -ob -m1 '<footer' | head -1 | cut -d: -f1)
+  if [ -n "$top" ] && [ -n "$band" ] && [ -n "$foot" ] && [ "$band" -gt "$top" ] && [ "$band" -lt "$foot" ]; then
+    echo "ok   $p band sits before the footer, never at the top"
+  else
+    echo "FAIL $p subscription band is not between header and footer"; fail=1
+  fi
+  echo "$html" | grep -q 'sub-bar' && { echo "FAIL $p still renders the old top strip"; fail=1; } || echo "ok   $p has no top strip"
 done
 # The two pages where an invitation makes no sense.
 for p in /admin /unsubscribe; do
-  curl -s "$BASE$p" | grep -q 'sub-bar' && { echo "FAIL $p invites the reader to subscribe"; fail=1; } || echo "ok   $p carries no subscription strip"
+  curl -s "$BASE$p" | grep -q 'sub-band' && { echo "FAIL $p invites the reader to subscribe"; fail=1; } || echo "ok   $p carries no subscription band"
 done
+
+echo "-- footer says what it should, and nothing twice"
+html=$(curl -s "$BASE/")
+echo "$html" | grep -qi 'think it' && { echo "FAIL the KR8 tagline is back on the site"; fail=1; } || echo "ok   no KR8 tagline on the site"
+echo "$html" | grep -q 'All rights reserved' && echo "ok   copyright line present" || { echo "FAIL copyright line missing"; fail=1; }
+echo "$html" | grep -q 'Built and owned by' && echo "ok   ownership line present" || { echo "FAIL ownership line missing"; fail=1; }
+
+echo "-- no role badges parked in front of the calls to action"
+for p in / /about; do
+  curl -s "$BASE$p" | grep -q 'role-list' && { echo "FAIL $p still shows role badges"; fail=1; } || echo "ok   $p has no role badge row"
+done
+
+echo "-- sounds and music, one phrase everywhere"
+html=$(curl -s "$BASE/creative")
+echo "$html" | grep -q 'Music &amp; piano' && { echo "FAIL creative page still says Music & piano"; fail=1; } || echo "ok   creative page dropped Music & piano"
+echo "$html" | grep -q 'Sounds and music' && echo "ok   creative page says sounds and music" || { echo "FAIL creative page missing sounds and music"; fail=1; }
+
+echo "-- services and journal heroes carry a photograph and one description"
+for p in /services /journal; do
+  html=$(curl -s "$BASE$p")
+  echo "$html" | grep -q 'hero-split' && echo "ok   $p hero is a split with a photo" || { echo "FAIL $p hero has no photo"; fail=1; }
+done
+curl -s "$BASE/services" | grep -q 'The final scope and cost depend on your requirements' && { echo "FAIL services still carries the vague first description"; fail=1; } || echo "ok   services vague description gone"
 
 exit $fail

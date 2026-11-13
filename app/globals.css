@@ -214,3 +214,63 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 .field-hint{color:#a8968c;font-size:.86rem;margin:2px 0 6px}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:800px){.row-2{grid-template-columns:1fr}}
+
+/* ---------- Mobile pass ----------
+   Most visitors arrive on a phone, so the phone gets its own decisions instead
+   of a squeezed desktop layout. */
+
+/* The unwanted zooming had three separate causes; each is closed here.
+   1. iOS "inflates" text (and re-fits the page) when it decides a page is not
+      mobile-optimised — text-size-adjust stops it deciding anything for us.
+   2. A double tap on anything tappable zooms in, and every tap waits ~300 ms
+      in case a second one is coming — touch-action: manipulation removes both
+      while leaving pinch-zoom intact for anyone who needs it.
+   3. Anything even one pixel wider than the screen makes the whole document
+      pannable, which phones show as the page jumping out to fit. body clips
+      that sideways, and the rotated Work-page shots are pulled back inside. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:clip}
+a,button,input,select,textarea,label,.icon-btn,.shot-btn,.chip{touch-action:manipulation}
+/* Under 16px, iOS Safari zooms the whole page the moment a field is focused. */
+input,select,textarea{font-size:16px}
+/* Anchors (#form, #general, #behind) land under the header without this. */
+[id]{scroll-margin-top:96px}
+
+/* Hero: the long description stays on the desktop and gives way to one line on
+   a phone, so the first screen is a face, a name and a next step. */
+.hero-lead-short{display:none}
+@media(max-width:800px){
+  .hero-lead{display:none}
+  .hero-lead-short{display:block;color:var(--muted);font-family:var(--font-display);font-size:1.02rem;line-height:1.5;margin:14px 0 0;max-width:34ch}
+  .hero-art{min-height:330px;height:330px;margin-top:6px}
+  .hero-art img{max-height:340px}
+  .hero-name{font-size:clamp(1.3rem,5.4vw,1.8rem)}
+  .hero-copy .actions{margin-top:26px}
+  .hero-copy .actions .button{flex:1 1 auto;min-width:150px}
+}
+
+/* Rotated Work-page shots: keep the tilt, lose the 5px of sideways overflow
+   that was making every page on the site pannable on a phone. */
+@media(max-width:900px){
+  .work-hero-art .shot.a{left:3%}
+  .work-hero-art .shot.b{right:5%;width:60%}
+  .live-tag{left:8%}
+}
+
+/* Proof cards become a swipe rail on a phone — three wide cards stacked full
+   width read as a wall, a rail reads as a gallery. */
+@media(max-width:680px){
+  .proof-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:8px;scrollbar-width:none}
+  .proof-grid::-webkit-scrollbar{display:none}
+  .proof-grid>div{scroll-snap-align:start;min-width:0}
+  .proof-card img{height:132px}
+  .proof-card.tint{min-height:0}
+  .svc-row{gap:12px;padding:15px 4px}
+  .svc-copy strong{font-size:1rem}
+  .icon-badge.small{width:36px;height:36px}
+  .sub-card{padding:26px 20px}
+  .card{padding:22px}
+  .card-image{width:calc(100% + 44px);margin:-22px -22px 20px}
+  /* The floating WhatsApp button must never sit on top of the last line. */
+  .footer{padding-bottom:calc(30px + 74px)}
+}

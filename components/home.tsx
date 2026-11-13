@@ -51,6 +51,7 @@ export default function Home() {
                 Websites and AI agents built to work — fast on the phone in your hand, clear on the first screen.
                 And when the laptop closes: poetry, spoken word, music and piano.
               </p>
+              <p className="hero-lead-short">Websites and AI agents that work on the phone in your hand.</p>
             </HeroItem>
             <HeroItem delay={0.9}>
               <div className="actions">
@@ -143,7 +144,7 @@ export default function Home() {
                 alt="Screenshot of the AFRISTEM Global website homepage"
                 width={730}
                 height={375}
-                sizes="(max-width: 800px) 90vw, 30vw"
+                sizes="(max-width: 680px) 80vw, (max-width: 800px) 90vw, 30vw"
                 loading="lazy"
               />
               <span className="proof-meta">
@@ -160,7 +161,7 @@ export default function Home() {
                 alt="Screenshot of the KR8 DIGITALS website homepage"
                 width={1340}
                 height={625}
-                sizes="(max-width: 800px) 90vw, 30vw"
+                sizes="(max-width: 680px) 80vw, (max-width: 800px) 90vw, 30vw"
                 loading="lazy"
               />
               <span className="proof-meta">

@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { db } from './db';
-import { SITE_ORIGIN } from './site';
+import { OWNER_EMAIL, PUBLIC_EMAIL, SITE_ORIGIN } from './site';
 
 /**
  * The email engine. Two professional voices on the verified domain:
@@ -12,7 +12,8 @@ import { SITE_ORIGIN } from './site';
  * addressed by name. All sends are logged to email_log and every failure is
  * swallowed by design: mail must never break the site.
  */
-export const OWNER_EMAIL = 'kutimfire001@gmail.com';
+/** Re-exported so the server routes keep one import; the value lives in lib/site.ts. */
+export { OWNER_EMAIL };
 const ADDRESSES: Record<string, string> = {
   hello: 'hello@kutimfire.com',
   enquiries: 'enquiries@kutimfire.com',
@@ -43,7 +44,7 @@ const DEFAULT_TEMPLATES: Record<TemplateSlug, { sender: 'hello' | 'enquiries'; s
   ack: {
     sender: 'enquiries',
     subject: 'I received your {{form_title}}, {{name}}.',
-    body: '{{name}}, thank you — your {{form_title}} reached me.\n\nI read every message myself and answer from hi@kutimfire.com, usually within a day or two. If yours is urgent, WhatsApp reaches me fastest.\n\n— Timfire',
+    body: `{{name}}, thank you — your {{form_title}} reached me.\n\nI read every message myself and answer from ${PUBLIC_EMAIL}, usually within a day or two. If yours is urgent, WhatsApp reaches me fastest.\n\n— Timfire`,
   },
   owner_forward: {
     sender: 'enquiries',
@@ -79,7 +80,8 @@ export function fill(template: string, vars: Record<string, string>): string {
 export async function templateFor(slug: TemplateSlug) {
   const supa = db();
   if (supa) {
-    const { data } = await supa.from('email_templates').select('sender,subject,body').eq('slug', slug).maybeSingle();
+    const { data, error } = await supa.from('email_templates').select('sender,subject,body').eq('slug', slug).maybeSingle();
+    if (error) console.error('[email] could not read the template, falling back to the built-in wording:', error.message);
     if (data) return { sender: data.sender as 'hello' | 'enquiries', subject: data.subject as string, body: data.body as string };
   }
   return DEFAULT_TEMPLATES[slug];
@@ -111,15 +113,20 @@ function shell(paragraphs: string[], preview: string, unsubToken?: string): stri
 
 async function logEmail(row: { purpose: string; recipient: string; subject: string; status: string; resend_id?: string; error?: string; meta?: Record<string, unknown> }) {
   const supa = db();
-  if (!supa) return null;
-  const { data } = await supa.from('email_log').insert({ ...row, meta: row.meta ?? {} }).select('id').single();
+  if (!supa) {
+    console.error('[email] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY missing — the send is not being logged');
+    return null;
+  }
+  const { data, error } = await supa.from('email_log').insert({ ...row, meta: row.meta ?? {} }).select('id').single();
+  if (error) console.error('[email] could not log the send:', error.message);
   return data?.id as string | undefined;
 }
 
 async function markEmail(id: string | null, patch: { status: string; resend_id?: string; error?: string }) {
   const supa = db();
   if (!supa || !id) return;
-  await supa.from('email_log').update(patch).eq('id', id);
+  const { error } = await supa.from('email_log').update(patch).eq('id', id);
+  if (error) console.error('[email] could not update the log row:', error.message);
 }
 
 export type SendInput = {
@@ -143,13 +150,19 @@ export async function sendEmail(input: SendInput): Promise<boolean> {
     return false;
   }
   try {
-    const resend = new Resend(key);
+    // RESEND_BASE_URL (the SDK option is baseUrl) exists so qa/auth-flow.mjs can drive the real send path
+    // against a local mock. Unset in every real environment.
+    const resend = new Resend(key, process.env.RESEND_BASE_URL ? { baseUrl: process.env.RESEND_BASE_URL } : undefined);
     const result = await resend.emails.send({
       from: `${FROM_NAME} <${ADDRESSES[input.sender]}>`,
       to: [input.to],
       subject: input.subject,
       html: shell(input.text.split('\n\n'), input.preview, input.unsubToken),
-      ...(input.replyTo ? { reply_to: input.replyTo } : {}),
+      // The SDK maps `replyTo` onto the API's `reply_to` and silently drops a
+      // snake_case key, so it must be camelCase here. enquiries@ sends but
+      // cannot receive, so a reply always goes to the public inbox unless the
+      // caller names a better one — a visitor's own address, on a forward.
+      replyTo: input.replyTo || PUBLIC_EMAIL,
     });
     if (result.error) {
       await markEmail(id ?? null, { status: 'failed', error: result.error.message });
@@ -183,17 +196,25 @@ export type Subscriber = { id: string; name: string; email: string; status: stri
 
 export async function addSubscriber(name: string, email: string): Promise<Subscriber | null> {
   const supa = db();
-  if (!supa) return null;
+  if (!supa) {
+    console.error('[subscribers] database unavailable — the subscription cannot be saved');
+    return null;
+  }
   const existing = await supa.from('subscribers').select('*').ilike('email', email).maybeSingle();
+  if (existing.error) console.error('[subscribers] lookup failed:', existing.error.message);
   if (existing.data) {
     const row = existing.data as Subscriber;
     if (row.status !== 'active' || row.name !== name) {
-      await supa.from('subscribers').update({ status: 'active', name, unsubscribed_at: null }).eq('id', row.id);
-      return { ...row, status: 'active', name };
+      const up = await supa.from('subscribers').update({ status: 'active', name, unsubscribed_at: null }).eq('id', row.id).select('*').single();
+      if (up.error) console.error('[subscribers] re-activating failed:', up.error.message);
+      return (up.data as Subscriber) ?? { ...row, status: 'active', name };
     }
     return row;
   }
   const created = await supa.from('subscribers').insert({ name, email: email.toLowerCase() }).select('*').single();
+  // A failure here used to be silent: the visitor saw "the list is unavailable"
+  // and nothing in any log said why. It says why now.
+  if (created.error) console.error('[subscribers] insert failed:', created.error.message);
   return (created.data as Subscriber) ?? null;
 }
 
@@ -219,10 +240,11 @@ export async function allSubscribers(): Promise<Subscriber[]> {
 export async function unsubscribeByToken(token: string): Promise<boolean> {
   const supa = db();
   if (!supa || !token) return false;
-  const { data } = await supa
+  const { data, error } = await supa
     .from('subscribers')
     .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString() })
     .eq('unsub_token', token)
     .select('id');
+  if (error) console.error('[subscribers] unsubscribe failed:', error.message);
   return !!data?.length;
 }

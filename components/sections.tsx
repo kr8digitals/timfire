@@ -9,7 +9,6 @@ import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
 import { Price, CurrencySelect } from '@/components/currency';
 import { servicePageByServiceId } from '@/lib/services-content';
-import { FORMS, FORM_ROUTES, SERVICE_FORM_KINDS, CREATIVE_FORM_KINDS } from '@/lib/forms';
 
 const pageCopy: Record<string, { eyebrow: string; title: string; accent: string; description: string }> = {
   about: {
@@ -62,9 +61,9 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
   },
   contact: {
     eyebrow: 'Let’s talk',
-    title: 'Eleven doors,',
-    accent: 'one inbox.',
-    description: 'Every kind of enquiry has a form of its own, asking only what that work needs. Choose yours — or take the general form at the bottom.',
+    title: 'You bring',
+    accent: 'the thought.',
+    description: 'One message, every kind of work — a build, a brand, a collaboration, or just a question. Tell me what you are carrying and I will answer it myself.',
   },
 };
 
@@ -990,111 +989,113 @@ function Now() {
 
 function Contact() {
   const { data } = useStore();
-  const dirGroup = (kinds: string[]) =>
-    kinds.map((kind) => {
-      const def = FORMS[kind];
-      return (
-        <Link className="card dir-card" href={FORM_ROUTES[kind]} key={kind}>
-          <h3>{def.title}</h3>
-          <p className="muted">{def.intro}</p>
-          <span className="text-link">
-            Open the form <ArrowUpRight size={16} />
-          </span>
-        </Link>
-      );
-    });
   return (
     <>
       <Reveal>
-        <p className="page-lead" style={{ maxWidth: 760, marginBottom: 44 }}>
-          Every kind of enquiry gets its own form, asking only what that kind of work actually needs. Choose the door
-          that matches yours — the questions on the other side are the ones I would ask you on a call.
+        <p className="page-lead" style={{ maxWidth: 780, marginBottom: 46 }}>
+          Most people arrive here carrying something: an idea that needs a shape, a project that has stalled, a room
+          that needs a voice, or simply a hello that has been waiting too long. Whatever you are carrying, this page is
+          where you set it down.
         </p>
       </Reveal>
 
-      <section className="section" style={{ paddingTop: 0 }} aria-label="Purpose-built enquiry forms">
-        <div className="sectionhead">
-          <div>
-            <span className="eyebrow">Service enquiries</span>
-            <h2 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
-              Seven forms for <em>the work.</em>
-            </h2>
-          </div>
-          <p>Website, AI, search, design, brand, video and mentorship — each with questions of its own.</p>
-        </div>
-        <div className="dir-grid">{dirGroup(SERVICE_FORM_KINDS)}</div>
-
-        <div className="sectionhead" style={{ marginTop: 56 }}>
-          <div>
-            <span className="eyebrow">Creative collaborations</span>
-            <h2 style={{ fontSize: 'clamp(1.6rem,3vw,2.4rem)' }}>
-              Four forms for <em>the art.</em>
-            </h2>
-          </div>
-          <p>Music, spoken word, poetry and the stage — collaboration starts with the right conversation.</p>
-        </div>
-        <div className="dir-grid">{dirGroup(CREATIVE_FORM_KINDS)}</div>
-      </section>
-
-      <section className="section" style={{ paddingTop: 0 }} aria-label="Other ways to reach TIMFIRE">
-        <div className="stack">
+      <section className="section" style={{ paddingTop: 0 }} aria-label="Reasons to reach out">
+        <div className="dir-grid">
           <Reveal>
-            <article className="card light">
+            <article className="card">
               <span className="icon-badge">
-                <Mail size={20} />
+                <Sparkles size={20} />
               </span>
-              <h3>Send an email.</h3>
-              <p>Reach me at hi@kutimfire.com.</p>
-              <a className="text-link" style={{ color: '#842e00' }} href="mailto:hi@kutimfire.com">
-                Email TIMFIRE <ArrowUpRight size={18} />
-              </a>
+              <h3>An idea that needs a shape.</h3>
+              <p className="muted">
+                A website, a brand, a system, a song — something exists in your head and not yet in the world. Describe
+                it roughly; making it precise is half of what I do.
+              </p>
             </article>
           </Reveal>
           <Reveal delay={0.08}>
             <article className="card">
               <span className="icon-badge">
-                <MessageCircle size={20} />
+                <Code2 size={20} />
               </span>
-              <h3>Message on WhatsApp.</h3>
-              <p className="muted">Start a conversation directly. Fastest for quick questions.</p>
-              <a className="text-link" href="https://wa.me/2348166552758" target="_blank" rel="noopener noreferrer">
-                Open WhatsApp <ArrowUpRight size={18} />
-              </a>
+              <h3>Something stuck or broken.</h3>
+              <p className="muted">
+                A site that lost its way, work that stopped delivering, a search that never finds you. Bring it tired —
+                we will look at it together and decide what deserves fixing.
+              </p>
             </article>
           </Reveal>
           <Reveal delay={0.16}>
             <article className="card">
-              <h3>Elsewhere.</h3>
-              <p className="muted">Social spaces where the work and the process show up.</p>
-              <div className="socials">
-                {data.socials
-                  .filter((x) => x.isPublic && safeUrl(x.url))
-                  .map((x) => (
-                    <a href={safeUrl(x.url)} key={x.id} target="_blank" rel="noopener noreferrer">
-                      {x.name} ↗
-                    </a>
-                  ))}
-              </div>
+              <span className="icon-badge">
+                <PenLine size={20} />
+              </span>
+              <h3>A room, a stage, a collaboration.</h3>
+              <p className="muted">
+                Music, spoken word, poetry, speaking, or a build too strange for a category. Some of the best work I
+                have done began as a message from a stranger with an unusual ask.
+              </p>
             </article>
           </Reveal>
         </div>
       </section>
 
-      <section className="section" id="general" style={{ paddingTop: 0 }} aria-label="General enquiry form">
+      <Reveal>
+        <div className="cta-block" style={{ marginBottom: 56 }}>
+          <div>
+            <span className="eyebrow">How I answer</span>
+            <h2 style={{ fontSize: 'clamp(1.7rem,3vw,2.5rem)' }}>
+              I read every message <em>myself.</em>
+            </h2>
+            <p className="muted" style={{ maxWidth: 620, marginTop: 12 }}>
+              No assistants, no queues. Replies come from hi@kutimfire.com, usually within two days. If yours is urgent,
+              WhatsApp reaches me fastest — and if writing is not your thing, say hello there and we will take it from
+              there.
+            </p>
+          </div>
+          <a className="button ghost" href="https://wa.me/2348166552758" target="_blank" rel="noopener noreferrer">
+            <MessageCircle size={18} /> WhatsApp me
+          </a>
+        </div>
+      </Reveal>
+
+      <section className="section" id="general" style={{ paddingTop: 0 }} aria-label="Send a message">
         <div className="contact-layout">
           <Reveal>
             <div>
-              <span className="eyebrow">Anything else</span>
+              <span className="eyebrow">The form</span>
               <h2 style={{ fontSize: 'clamp(1.9rem,3.4vw,3rem)', margin: '12px 0 14px' }}>
-                The general form, <em>last on purpose.</em>
+                Tell me what <em>you are carrying.</em>
               </h2>
               <p className="muted" style={{ maxWidth: 560 }}>
-                If none of the eleven doors above fits, this one opens everywhere. Say what is on your mind and it will
-                reach the same inbox — with a topic tag so I know which hat to wear when I reply.
+                One form, every kind of work. Choose the topic closest to yours and write as much or as little as you
+                like — I will ask the right follow-up questions myself.
               </p>
-              <p className="muted" style={{ maxWidth: 560 }}>
-                Prefer a human channel? The email and WhatsApp cards above land in the same place, faster.
-              </p>
+              <div className="stack" style={{ marginTop: 26, maxWidth: 420 }}>
+                <article className="card light">
+                  <span className="icon-badge">
+                    <Mail size={20} />
+                  </span>
+                  <h3>Prefer email?</h3>
+                  <p>hi@kutimfire.com lands in the same inbox.</p>
+                  <a className="text-link" style={{ color: '#842e00' }} href="mailto:hi@kutimfire.com">
+                    Email TIMFIRE <ArrowUpRight size={18} />
+                  </a>
+                </article>
+                <article className="card">
+                  <h3>Elsewhere.</h3>
+                  <p className="muted">The work and the process, in public.</p>
+                  <div className="socials">
+                    {data.socials
+                      .filter((x) => x.isPublic && safeUrl(x.url))
+                      .map((x) => (
+                        <a href={safeUrl(x.url)} key={x.id} target="_blank" rel="noopener noreferrer">
+                          {x.name} ↗
+                        </a>
+                      ))}
+                  </div>
+                </article>
+              </div>
             </div>
           </Reveal>
           <Reveal delay={0.08}>

@@ -1,0 +1,2 @@
+import {NextRequest,NextResponse} from 'next/server';import {verify} from '@/lib/auth';import {z} from 'zod';
+export async function POST(req:NextRequest){try{const body=z.object({email:z.string().email().max(254),code:z.string().trim().length(6)}).parse(await req.json());const out=await verify(body.email,body.code);return NextResponse.json(out,{status:out.code,headers:{'Cache-Control':'no-store'}})}catch{return NextResponse.json({message:'Enter the six-digit code from the email.'},{status:400})}}

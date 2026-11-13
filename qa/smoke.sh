@@ -106,4 +106,16 @@ fi
 html=$(curl -s "$BASE/")
 echo "$html" | grep -q 'hero-lead-short' && echo "ok   mobile hero keeps one short line" || { echo "FAIL mobile hero lead missing"; fail=1; }
 
+echo "-- one public inbox, and the list on every page"
+for p in / /about /work /services /creative /journal /gallery /contact /now; do
+  html=$(curl -s "$BASE$p")
+  echo "$html" | grep -q 'hi@kutimfire.com' && { echo "FAIL $p still advertises the dead hi@ mailbox"; fail=1; } || echo "ok   $p does not mention hi@"
+  echo "$html" | grep -q 'hello@kutimfire.com' && echo "ok   $p offers hello@kutimfire.com" || { echo "FAIL $p has no public inbox"; fail=1; }
+  echo "$html" | grep -q 'sub-bar' && echo "ok   $p carries the subscription strip" || { echo "FAIL $p has no subscription strip"; fail=1; }
+done
+# The two pages where an invitation makes no sense.
+for p in /admin /unsubscribe; do
+  curl -s "$BASE$p" | grep -q 'sub-bar' && { echo "FAIL $p invites the reader to subscribe"; fail=1; } || echo "ok   $p carries no subscription strip"
+done
+
 exit $fail

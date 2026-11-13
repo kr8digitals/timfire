@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, AlertCircle, Mail } from 'lucide-react';
+import { PUBLIC_EMAIL } from '@/lib/site';
 
 const TOPICS = [
   'Website design & development',
@@ -90,7 +91,7 @@ export default function ContactForm() {
 
   if (status === 'sent') {
     const mailto =
-      'mailto:hi@kutimfire.com' +
+      'mailto:' + PUBLIC_EMAIL +
       '?subject=' + encodeURIComponent('TIMFIRE enquiry — ' + lastSent.topic) +
       '&body=' + encodeURIComponent(
         'Name: ' + lastSent.name + '\nEmail: ' + lastSent.email + '\n\n' + lastSent.message,
@@ -162,7 +163,7 @@ export default function ContactForm() {
         <button className="button primary" type="submit" disabled={status === 'sending'}>
           {status === 'sending' ? 'Sending…' : 'Send message'}
         </button>
-        <a className="button ghost" href="mailto:hi@kutimfire.com">Email instead</a>
+        <a className="button ghost" href={'mailto:' + PUBLIC_EMAIL}>Email instead</a>
       </div>
     </form>
   );

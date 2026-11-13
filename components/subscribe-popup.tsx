@@ -71,6 +71,7 @@ export default function SubscribePopup() {
         return;
       }
       localStorage.setItem('tf-sub-done', '1');
+      window.dispatchEvent(new Event('tf-sub-done'));
       setStatus('ok');
     } catch {
       setStatus('error');

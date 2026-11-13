@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Bot, GraduationCap, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
 import { isPublished } from '@/lib/content';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
+import { PUBLIC_EMAIL } from '@/lib/site';
 import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
 import { Price, CurrencySelect } from '@/components/currency';
@@ -1048,7 +1049,7 @@ function Contact() {
               I read every message <em>myself.</em>
             </h2>
             <p className="muted" style={{ maxWidth: 620, marginTop: 12 }}>
-              No assistants, no queues. Replies come from hi@kutimfire.com, usually within two days. If yours is urgent,
+              No assistants, no queues. Replies come from hello@kutimfire.com, usually within two days. If yours is urgent,
               WhatsApp reaches me fastest — and if writing is not your thing, say hello there and we will take it from
               there.
             </p>
@@ -1077,8 +1078,8 @@ function Contact() {
                     <Mail size={20} />
                   </span>
                   <h3>Prefer email?</h3>
-                  <p>hi@kutimfire.com lands in the same inbox.</p>
-                  <a className="text-link" style={{ color: '#842e00' }} href="mailto:hi@kutimfire.com">
+                  <p>{PUBLIC_EMAIL} lands in the same inbox.</p>
+                  <a className="text-link" style={{ color: '#842e00' }} href={'mailto:' + PUBLIC_EMAIL}>
                     Email TIMFIRE <ArrowUpRight size={18} />
                   </a>
                 </article>

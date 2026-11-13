@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { FORMS } from '@/lib/forms';
+import { PUBLIC_EMAIL } from '@/lib/site';
 
 /**
  * EnquiryForm — renders whichever purpose-built form definition it is given.
@@ -153,7 +154,7 @@ export default function EnquiryForm({ kind }: { kind: string }) {
         {status === 'sending' ? 'Sending…' : def.submitLabel} <ArrowUpRight size={17} />
       </button>
       <p className="small muted" style={{ marginTop: 10 }}>
-        Or skip the form: <a href="mailto:hi@kutimfire.com">hi@kutimfire.com</a> ·{' '}
+        Or skip the form: <a href={'mailto:' + PUBLIC_EMAIL}>{PUBLIC_EMAIL}</a> ·{' '}
         <a href="https://wa.me/2348166552758" target="_blank" rel="noopener noreferrer">WhatsApp</a>
       </p>
     </form>

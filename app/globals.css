@@ -51,7 +51,6 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 @media(prefers-reduced-motion:reduce){.shape,.scroll-cue-icon{animation:none!important}}
 
 /* ---------- Section building blocks ---------- */
-.role-list{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 6px}
 .quote-panel{margin:64px 0 0;border-left:3px solid var(--orange);padding:6px 0 6px 26px}
 .quote-panel p{font-family:var(--font-editorial),serif;font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.45;margin:0;color:var(--paper)}
 .quote-panel footer{margin-top:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:16px}
@@ -275,27 +274,34 @@ input,select,textarea{font-size:16px}
   .footer{padding-bottom:calc(30px + 74px)}
 }
 
-/* ---------- The list has a permanent home on every page ----------
-   One slim strip above the header, on every page but the dashboard and the
-   unsubscribe page. It opens the same dialog the scroll moment uses, so there
-   is one way to join and three ways to find it: this strip, the footer, and the
-   invitation that arrives once someone has actually read something. */
-.sub-bar{background:linear-gradient(96deg,#1b110c,#251710 52%,#1b110c);border-bottom:1px solid #35261f;position:relative;z-index:21}
-.sub-bar-in{display:flex;align-items:center;gap:14px;padding:10px 0;min-height:54px}
-.sub-bar-dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex:0 0 auto;box-shadow:0 0 0 4px #f27a1a21}
-.sub-bar p{margin:0;flex:1 1 auto;min-width:0;color:#cbbcb2;font-size:15.5px;line-height:1.45}
-.sub-bar p strong{color:var(--paper);font-family:var(--font-display);letter-spacing:-.02em}
-.sub-bar .button{flex:0 0 auto;min-height:42px;padding:9px 18px;font-size:15px}
-.sub-bar-close{flex:0 0 auto;min-width:38px;min-height:38px;color:#a29086}
-.sub-bar-close:hover{color:var(--orange);border-color:#795c4a}
-@media(max-width:860px){
-  .sub-bar-more{display:none}
-  .sub-bar-in{gap:10px;padding:9px 0;min-height:0}
-  .sub-bar p{font-size:14.5px}
-  .sub-bar .button{min-height:40px;padding:9px 14px;font-size:14.5px;gap:7px}
-}
-@media(max-width:520px){
-  .sub-bar-in{flex-wrap:wrap;row-gap:9px;padding:10px 0}
-  .sub-bar-close{order:2;margin-left:auto}
-  .sub-bar .button{order:3;flex:1 1 100%}
+/* ---------- The list has a home at the foot of every page ----------
+   A band of its own directly above the footer, on every page but the
+   dashboard and the unsubscribe page: the place a reader reaches once the
+   page has convinced them, rather than a badge pinned over the doorway. It
+   opens the same dialog the scroll moment uses, so there is still exactly
+   one way to join. */
+.sub-band{border-top:1px solid var(--border);background:radial-gradient(900px 420px at 12% -30%,#f27a1a14,transparent 60%),linear-gradient(180deg,#170f0b,#1d130d)}
+.sub-band-in{display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(24px,5vw,70px);align-items:center;padding:clamp(44px,6vw,74px) 0}
+.sub-band-copy h2{font-size:clamp(2rem,4vw,3.4rem);margin:14px 0 12px}
+.sub-band-copy p{margin:0;max-width:520px;color:var(--muted)}
+.sub-band-act{display:flex;justify-content:flex-end}
+.sub-band-act .button{min-height:52px;padding:14px 26px}
+.sub-band-done{display:flex;align-items:center;gap:9px;margin:0;color:var(--orange);font-family:var(--font-display)}
+
+/* A password you can look at is a password you can type correctly. */
+.pw-field{position:relative}
+.pw-field input{padding-right:52px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#b7a496;min-width:40px;min-height:40px;display:inline-grid;place-items:center;border-radius:10px}
+.pw-eye:hover{color:var(--orange)}
+
+/* Page heroes that carry a photograph of their own. */
+.page-hero.hero-split{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,64px);align-items:center;padding:76px 0 44px}
+.page-hero.hero-split h1{margin:15px 0 20px}
+.page-hero.hero-split .hero-photo img{max-height:560px}
+@media(max-width:800px){
+  .sub-band-in{grid-template-columns:1fr;padding:44px 0}
+  .sub-band-act{justify-content:flex-start}
+  .sub-band-act .button{width:100%}
+  .page-hero.hero-split{grid-template-columns:1fr;padding:56px 0 34px}
+  .page-hero.hero-split .hero-photo img{max-height:430px}
 }

@@ -22,11 +22,11 @@ const COLLABS: Collab[] = [
     eyebrow: 'Collaboration · Music',
     title: 'Let’s make something',
     accent: 'worth hearing.',
-    lead: 'Singing, songwriting, keyboard and piano — one practice, four doors. Tell me which one you are knocking on.',
+    lead: 'Singing, songwriting, playing, performing — one practice, many doors. Tell me which one you are knocking on.',
     what: [
       'Features and collaborations on your record or mine',
       'Songwriting: lyrics, melody, or the whole song',
-      'Piano and keyboard sessions for your project',
+      'Sessions on your project, whatever it needs played',
       'Live performance where the room deserves it',
     ],
     next: 'I reply personally, usually within a day. If the fit is right we set up a call or a studio session, and you get a written scope before anything is scheduled.',

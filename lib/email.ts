@@ -105,7 +105,7 @@ function shell(paragraphs: string[], preview: string, unsubToken?: string): stri
 <div style="padding:30px 30px 8px;">${body}</div>
 <div style="padding:0 30px 30px;">
   <div style="height:3px;width:54px;background:#f27a1a;border-radius:2px;margin:6px 0 14px;"></div>
-  <p style="margin:0;font-size:13px;line-height:1.6;color:#8a7a6f;">Kenneth Timothy Iziogo · KR8 DIGITALS · Abakaliki, Nigeria<br/>Think it. KR8 it.</p>
+  <p style="margin:0;font-size:13px;line-height:1.6;color:#8a7a6f;">Kenneth Timothy Iziogo · TIMFIRE · Abakaliki, Nigeria</p>
   ${unsub}
 </div>
 </div></body></html>`;

@@ -1,5 +1,26 @@
 # QA status
 
+## Copy, placement and admin-password batch — branch `arena/ba0afa77-timfire` (2026-11-13)
+
+Run against the production build (`npm run build` + `next start -p 3100`) with the offline mocks
+(`qa/mock-services.mjs`) standing in for Resend and Supabase:
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `npx tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 34 routes |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — 119/119. New since last run: the subscription band sits between header and footer on every page and never above the header; the old top strip is gone; the footer carries the rewritten description, "All rights reserved" and "Built and owned by …" with no KR8 tagline; no role-badge row on `/` or `/about`; `/creative` says "Sounds and music" and no longer "Music & piano"; `/services` and `/journal` heroes carry a photograph and `/services` lost its vague first description |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes, 23 internal targets, 30 referenced images exist (the cropped About portrait among them) |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — titles unique, descriptions present, canonicals correct, OG set, `/admin` noindex |
+| Schema contract | `node qa/schema-contract.mjs` | Pass — 36 columns / 28 values across all 8 tables, `admin_credentials` included |
+| Email contract | `node qa/email-contract.mjs` | Pass |
+| Sign-in + subscribe | `node qa/auth-flow.mjs` | Pass — 71/71, including the new Security-tab route: anonymous 401, wrong current password 401, short or unchanged next password 400, a successful change stores a base64 hash in `admin_credentials`, clears the attempt windows, re-issues the cookie for the changing browser and kills every older session |
+
+The mock Supabase learned two things for this batch: the `admin_credentials` table (so the
+password change can be exercised offline) and PostgREST's `or=(…)` filter syntax — a delete whose
+filter the mock silently dropped was a delete of the whole table, which is precisely the class of
+blind spot `checkViolation` was added to close.
+
 ## Rebuild verification — branch `arena/42f61ac6-timfire` (2026-11-12)
 
 Run against the **production build** (`npm run build` + `next start`) and the dev server:

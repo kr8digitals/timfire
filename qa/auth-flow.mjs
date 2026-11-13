@@ -252,9 +252,51 @@ try {
     eq('a bad subscription is still refused', res.status, 400);
   }
 
-  /* ---------- 6. logout ---------- */
+  /* ---------- 6. changing the password from the dashboard ---------- */
+  let rotated = '';
+  let NEXT = '';
   {
-    const res = await post('/api/auth/logout', {}, { cookie });
+    const anon = await post('/api/admin/password', { current: PASSWORD, next: 'Changed-123!' });
+    eq('the password route refuses an anonymous visitor', anon.status, 401);
+    const wrong = await post('/api/admin/password', { current: 'not-the-password', next: 'Changed-123!' }, { cookie });
+    eq('a wrong current password changes nothing', wrong.status, 401);
+    const short = await post('/api/admin/password', { current: PASSWORD, next: 'short' }, { cookie });
+    eq('a next password under eight characters is refused', short.status, 400);
+    const same = await post('/api/admin/password', { current: PASSWORD, next: PASSWORD }, { cookie });
+    eq('and so is re-saving the password already in use', same.status, 400);
+  }
+  {
+    NEXT = `qa-rotated-${Date.now()}!`;
+    const res = await post('/api/admin/password', { current: PASSWORD, next: NEXT }, { cookie });
+    eq('the owner can change the password while signed in', res.status, 200);
+    rotated = sessionCookie(res) ?? '';
+    check(
+      'and keeps the session: a cookie signed with the new hash comes straight back',
+      rotated.startsWith('timfire_admin='),
+      rotated.slice(0, 60),
+    );
+    const stored = mocks.table('admin_credentials').find((r) => r.key === 'password_hash');
+    check(
+      'the new hash is stored in the database, base64 so .env parsing cannot truncate it',
+      !!stored && /^[A-Za-z0-9+/=]+$/.test(stored.value ?? ''),
+      JSON.stringify(stored ?? null),
+    );
+    const counters = mocks
+      .table('admin_signins')
+      .filter((r) => r.key.startsWith('pw:') || r.key.startsWith('req:'));
+    eq('the failed-attempt windows were cleared with the old password', counters.length, 0);
+    const dead = await fetch(`${APP}/api/auth/session`, { headers: { cookie } });
+    eq('every older session dies with the old hash', (await dead.json()).authenticated, false);
+    const oldLogin = await post('/api/auth/login', { email: ADMIN_EMAIL, password: PASSWORD }, { 'X-Forwarded-For': '203.0.113.40' });
+    eq('the old password no longer opens step two', oldLogin.status, 401);
+    const newLogin = await post('/api/auth/login', { email: ADMIN_EMAIL, password: NEXT }, { 'X-Forwarded-For': '203.0.113.40' });
+    eq('the new one does', newLogin.status, 200);
+    await newLogin.json();
+  }
+
+  /* ---------- 7. logout ---------- */
+  {
+    const res = await post('/api/auth/logout', {}, { cookie: rotated || cookie });
     const cleared = sessionCookie(res);
     check(
       'the browser is told to delete the cookie',
@@ -263,11 +305,12 @@ try {
     );
     // A signed cookie stays valid until it expires, so deleting it client-side
     // is not enough: replaying the old value must be refused too.
-    const replay = await fetch(`${APP}/api/auth/session`, { headers: { cookie } });
+    const live = rotated || cookie;
+    const replay = await fetch(`${APP}/api/auth/session`, { headers: { cookie: live } });
     eq('a replayed cookie is refused after logout', (await replay.json()).authenticated, false);
-    const admin = await fetch(`${APP}/api/admin/templates`, { headers: { cookie } });
+    const admin = await fetch(`${APP}/api/admin/templates`, { headers: { cookie: live } });
     eq('and no longer opens the admin routes', admin.status, 401);
-    const again = await post('/api/auth/login', { email: ADMIN_EMAIL, password: PASSWORD }, { 'X-Forwarded-For': '203.0.113.11' });
+    const again = await post('/api/auth/login', { email: ADMIN_EMAIL, password: NEXT || PASSWORD }, { 'X-Forwarded-For': '203.0.113.11' });
     eq('signing in again starts from the password', again.status, 200);
     await again.json();
   }

@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Bot, GraduationCap, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
 import { isPublished } from '@/lib/content';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
 import { PUBLIC_EMAIL } from '@/lib/site';
@@ -11,7 +11,8 @@ import ContactForm from '@/components/contact-form';
 import { Price, CurrencySelect } from '@/components/currency';
 import { servicePageByServiceId } from '@/lib/services-content';
 
-const pageCopy: Record<string, { eyebrow: string; title: string; accent: string; description: string }> = {
+type HeroImage = { src: string; alt: string; width: number; height: number };
+const pageCopy: Record<string, { eyebrow: string; title: string; accent: string; description: string; image?: HeroImage }> = {
   about: {
     eyebrow: 'The person behind the work',
     title: 'A little more',
@@ -26,27 +27,39 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
   },
   ventures: {
     eyebrow: 'Founder · KR8 DIGITALS',
-    title: 'Think it.',
-    accent: 'KR8 it.',
-    description: 'A creative ecosystem of services, free digital skills training and community.',
+    title: 'Client work that',
+    accent: 'pays for teaching.',
+    description: 'A studio, a tuition-free academy and a community of creators — one paying for the next.',
   },
   services: {
     eyebrow: 'Ways to work together',
     title: 'Make the idea',
     accent: 'real.',
-    description: 'Clear starting prices. The final scope and cost depend on your requirements.',
+    description: '',
+    image: {
+      src: '/images/technology.webp',
+      alt: 'TIMFIRE at work with a laptop, building websites and AI agents',
+      width: 1280,
+      height: 1600,
+    },
   },
   creative: {
     eyebrow: 'The creative space',
     title: 'Code is one',
     accent: 'of my languages.',
-    description: 'Poetry, spoken word, music, piano and the stage — the practices that teach the ear everything the keyboard later uses.',
+    description: 'Poetry, spoken word, sounds and music, and the stage — the practices that train the ear every homepage later answers to.',
   },
   journal: {
     eyebrow: 'The journal',
     title: 'Published',
     accent: 'and forthcoming.',
     description: 'Poems, spoken word, articles, books and announcements — indexed for search the moment they go live.',
+    image: {
+      src: '/images/writing.webp',
+      alt: 'TIMFIRE smiling with an open book on his lap, among shelves of old books',
+      width: 1280,
+      height: 1920,
+    },
   },
   timeline: {
     eyebrow: 'The journey',
@@ -71,14 +84,21 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
 export function Heading({ section }: { section: string }) {
   const x = pageCopy[section];
   return (
-    <section className="shell page-hero">
-      <span className="eyebrow">{x.eyebrow}</span>
-      <h1>
-        {x.title}
-        <br />
-        <em>{x.accent}</em>
-      </h1>
-      <p className="page-lead">{x.description}</p>
+    <section className={'shell page-hero' + (x.image ? ' hero-split' : '')}>
+      <div>
+        <span className="eyebrow">{x.eyebrow}</span>
+        <h1>
+          {x.title}
+          <br />
+          <em>{x.accent}</em>
+        </h1>
+        {x.description ? <p className="page-lead">{x.description}</p> : null}
+      </div>
+      {x.image ? (
+        <div className="photo-card hero-photo">
+          <PImage src={x.image.src} alt={x.image.alt} width={x.image.width} height={x.image.height} />
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -134,20 +154,9 @@ function About() {
               <em>the work.</em>
             </h1>
             <p className="page-lead">
-              I am Kenneth Timothy Iziogo — Timfire to the internet. A developer, writer and speaker from Abakaliki,
-              Ebonyi State, Nigeria, building for anyone, anywhere.
+              I am Kenneth Timothy Iziogo — Timfire to the internet. I build websites and AI agents that work on the
+              phone in your hand, and I write the words they carry.
             </p>
-            <div className="role-list">
-              <span className="badge">
-                <Code2 size={15} /> Website developer
-              </span>
-              <span className="badge">
-                <Bot size={15} /> AI agent developer
-              </span>
-              <span className="badge">
-                <GraduationCap size={15} /> Founder &amp; CEO, KR8 DIGITALS
-              </span>
-            </div>
             <div className="actions">
               <Link href="/timeline" className="button primary">
                 Explore the timeline <ArrowUpRight size={18} />
@@ -160,7 +169,12 @@ function About() {
         </Reveal>
         <Reveal delay={0.1}>
           <div className="photo-card about-photo">
-            <PImage src="/images/founder.webp" alt="TIMFIRE, also known as Kenneth Timothy Iziogo, in a dark suit" width={928} height={1152} />
+            <PImage
+              src="/images/about/founder-chest.webp"
+              alt="TIMFIRE, also known as Kenneth Timothy Iziogo, in a dark suit, framed from the chest up"
+              width={704}
+              height={880}
+            />
           </div>
         </Reveal>
       </section>
@@ -171,14 +185,16 @@ function About() {
           <h2>
             My name is <em>Timfire.</em>
           </h2>
-          <p>
-            I am Kenneth Timothy Iziogo, based in Abakaliki, Ebonyi State, Nigeria. I work remotely for anyone,
-            anywhere.
-          </p>
           <p>{data.profile.about}</p>
           <p>
-            I attended Nnodo Secondary School, Abakaliki, from September 2018 until graduating in 2024. In 2026, I
-            wrote the JAMB UTME and was admitted to study Linguistics at Ebonyi State University.
+            I study Linguistics at Ebonyi State University, which turns out to be an unusual advantage: most websites
+            fail on language long before they fail on code. So I edit a homepage the way I edit a verse — cut until
+            only the line that matters is left standing.
+          </p>
+          <p>
+            Nnodo Secondary School, Abakaliki, from September 2018 until graduating in 2024; the JAMB UTME in 2026 and
+            a place to read Linguistics at Ebonyi State University; a finalist in Coal City University’s national
+            essay competition on drug abuse. [ADD: certificate scan]
           </p>
           {data.settings.showJambScore && data.settings.jambScore && <p>JAMB UTME score: {data.settings.jambScore}</p>}
           <p>In 2023, I was a finalist in Coal City University’s national essay competition on Drug Abuse. [ADD: certificate scan]</p>
@@ -193,8 +209,8 @@ function About() {
               A developer with a <em>creative life.</em>
             </h2>
             <p>
-              The same care I bring to a website goes into words and music. Poetry, spoken word and piano are not a
-              side note — they are part of how I think, notice and build.
+              The same care I bring to a website goes into sound. If I sing it, dance it, play it or speak it, it is
+              music — one practice with many doors, and none of them a side note.
             </p>
             <p>
               Through KR8 DIGITALS I also teach: free digital skills cohorts through KR8 Academy, and a community of
@@ -693,14 +709,14 @@ function Creative() {
       <section id="music" className="two-col section" style={{ paddingTop: 10 }}>
         <Reveal>
           <div className="copy-panel">
-            <span className="eyebrow">Music · singing · songwriting · keyboard · piano</span>
+            <span className="eyebrow">Sounds and music</span>
             <h2>
               Music is where I am <em>least in a hurry.</em>
             </h2>
             <p>
-              I sing, I write songs, and I play piano and keyboard. Not four activities — one practice with four doors.
-              A melody arrives before the words, or a line of lyric demands a chord under it, and the keyboard is where
-              the two argue until they agree.
+              I sing, I dance, I write songs, I play whatever instrument the song asks for. Not a list of separate
+              skills — one practice: sound. A melody arrives before the words, or a line of lyric demands a chord
+              under it, and the instrument is where the two argue until they agree.
             </p>
             <p>
               Music is also where my ear for language was trained: rhythm, restraint, knowing when a verse has one line
@@ -719,7 +735,7 @@ function Creative() {
           </div>
         </Reveal>
       </section>
-      <CreativePieces category="Music & piano" />
+      <CreativePieces category="Sounds and music" />
 
       <section id="spoken-word" className="two-col section">
         <Reveal delay={0.05}>

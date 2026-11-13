@@ -230,7 +230,7 @@ export const FORMS: Record<string, FormDef> = {
   music: {
     kind: 'music',
     title: 'Music collaboration',
-    intro: 'Singing, songwriting, keyboard and piano — tell me the shape of the project.',
+    intro: 'Singing, songwriting, playing, performing — tell me the shape of the project.',
     submitLabel: 'Send music enquiry',
     fields: [
       { name: 'organisation', label: 'Your name or artist name', type: 'text', required: true },
@@ -239,7 +239,7 @@ export const FORMS: Record<string, FormDef> = {
         label: 'What are you inviting me into?',
         type: 'select',
         required: true,
-        options: ['A collaboration / feature', 'Songwriting', 'Piano or keyboard session', 'Production of my song', 'A live performance'],
+        options: ['A collaboration / feature', 'Songwriting', 'A session on your project', 'Production of my song', 'A live performance'],
       },
       { name: 'genre', label: 'Genre or reference tracks', type: 'text', required: false },
       { name: 'idea', label: 'Describe the project and what you have so far', type: 'textarea', required: true },

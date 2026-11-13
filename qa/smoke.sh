@@ -64,4 +64,46 @@ for needle in "You&#x27;re the one I&#x27;ve been expecting." "Welcome to my spa
 done
 echo "$html" | grep -qi "little flame" && { echo "FAIL forbidden phrase present"; fail=1; } || echo "ok   forbidden phrase absent"
 
+echo "-- admin sign-in (password, then an emailed code)"
+# One request, two checks, from a documentation-range IP so repeated QA runs
+# never spend the real owner's attempt budget or lock their address out.
+QA_IP="203.0.113.7"
+hdr=$(curl -s -D - -o /dev/null -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' -H "X-Forwarded-For: $QA_IP" -d '{"email":"nobody@example.com","password":"not-the-password"}')
+code=$(printf '%s\n' "$hdr" | head -1 | awk '{print $2}')
+[ "$code" = "401" ] && echo "ok   wrong password 401" || { echo "FAIL wrong password ($code)"; fail=1; }
+# A password alone must never hand back a session: the emailed code is the proof.
+printf '%s\n' "$hdr" | grep -qi 'set-cookie: timfire_admin' && { echo "FAIL login issued a session cookie without a code"; fail=1; } || echo "ok   no session cookie without the code"
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' -H "X-Forwarded-For: $QA_IP" -d '{"email":"nobody@example.com","password":"still-not-it"}')
+[ "$code" = "401" ] && echo "ok   a second wrong password stays 401 (not locked)" || { echo "FAIL second wrong password ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/verify" -H 'Content-Type: application/json' -d '{"email":"nobody@example.com","code":"000000"}')
+[ "$code" = "401" ] && echo "ok   verify with no live code 401" || { echo "FAIL verify ($code)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/verify" -H 'Content-Type: application/json' -d '{"email":"not-an-email","code":"12"}')
+[ "$code" = "400" ] && echo "ok   verify validates its shape 400" || { echo "FAIL verify shape ($code)"; fail=1; }
+curl -s "$BASE/api/auth/session" | grep -q '"authenticated":false' && echo "ok   anonymous session reports signed out" || { echo "FAIL anonymous session"; fail=1; }
+
+echo "-- contact page keeps the purpose-built forms its own secret"
+html=$(curl -s "$BASE/contact")
+echo "$html" | grep -q 'contact-form' && echo "ok   the general form is on the page" || { echo "FAIL contact form missing"; fail=1; }
+echo "$html" | grep -q 'Tell me what' && echo "ok   contact gives a reason to write" || { echo "FAIL contact lead missing"; fail=1; }
+for needle in "Open the form" "/services/website-design-development#form" "/collaborate/music#form" "dir-card"; do
+  echo "$html" | grep -q "$needle" && { echo "FAIL contact page advertises $needle"; fail=1; } || echo "ok   contact hides $needle"
+done
+# The deep links themselves must still work, reached from the pages that own them.
+for p in "/services/website-design-development" "/collaborate/music"; do
+  curl -s "$BASE$p" | grep -q 'id="form"' && echo "ok   $p still hosts its own form" || { echo "FAIL $p lost its #form anchor"; fail=1; }
+done
+
+echo "-- mobile pass"
+csshref=$(curl -s "$BASE/" | grep -o '/_next/static/css/[^"]*\.css' | head -1)
+if [ -n "$csshref" ]; then
+  css=$(curl -s "$BASE$csshref")
+  echo "$css" | grep -q 'touch-action:manipulation' && echo "ok   double-tap zoom disabled" || { echo "FAIL touch-action:manipulation missing"; fail=1; }
+  echo "$css" | grep -q 'text-size-adjust:100%' && echo "ok   iOS text inflation disabled" || { echo "FAIL text-size-adjust missing"; fail=1; }
+  echo "$css" | grep -q 'overflow-x:clip' && echo "ok   sideways overflow clipped at the root" || { echo "FAIL overflow-x guard missing"; fail=1; }
+else
+  echo "FAIL could not locate the stylesheet"; fail=1
+fi
+html=$(curl -s "$BASE/")
+echo "$html" | grep -q 'hero-lead-short' && echo "ok   mobile hero keeps one short line" || { echo "FAIL mobile hero lead missing"; fail=1; }
+
 exit $fail

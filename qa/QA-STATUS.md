@@ -51,3 +51,32 @@ visitor bar and inbox work. Superseded by the matrix above; kept for history.
 | Security headers | CSP, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and production-only `X-Frame-Options` served on all routes | Pass |
 | Header nav | Desktop primary links plus an accessible “More” menu; mobile menu lists all pages | Pass |
 | Contact fallback | Success state offers a prefilled `mailto:` and WhatsApp, so delivery never depends on the session inbox | Pass |
+
+## Admin sign-in, contact secrecy and the mobile pass — branch `arena/6e17201a-timfire` (2026-11-12)
+
+Run against the **production build** (`npm run build` + `next start -p 3100`):
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `npx tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 23 page routes + 6 API routes (adds `POST /api/auth/verify`) |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — 62/62 checks |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes crawled, 23 internal targets resolve, 30 images exist |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — 22 unique titles, descriptions, canonicals, OG, `/admin` noindex |
+
+New smoke coverage in this pass:
+
+- **Two-step sign-in:** wrong password → 401 with **no** `set-cookie: timfire_admin` (the password
+  alone never grants a session); a second wrong password stays 401 rather than locking;
+  `POST /api/auth/verify` with no live code → 401; malformed verify body → 400;
+  `/api/auth/session` reports `authenticated:false` for an anonymous visitor. QA sends its failures
+  from `203.0.113.7` (documentation range) so repeated runs never spend the owner's attempt budget.
+- **Contact secrecy:** `/contact` renders the general form and a reason to write, and must **not**
+  contain `Open the form`, `dir-card`, or any `/services/<slug>#form` or `/collaborate/<kind>#form`
+  link; the pages that own those forms must still host their `id="form"` anchor.
+- **Mobile zoom fixes:** the built stylesheet must contain `touch-action:manipulation`,
+  `text-size-adjust:100%` and `overflow-x:clip`; the homepage must carry `hero-lead-short`.
+
+Not provable in the sandbox: the sandbox cannot reach `api.resend.com` or `supabase.co`, so the
+sign-in code email, the database writes and every real send must be confirmed on production
+(sign in at `/admin`, then "Send test email" in the Emails tab).

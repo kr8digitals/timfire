@@ -14,9 +14,16 @@
  * Everything captured stays in this process, so a test can read the email that
  * "went out" and the rows that were written — including asserting that the
  * sign-in code was stored as a hash and never as plaintext.
+ *
+ * It also refuses what the real database refuses. The CHECK constraints declared
+ * in supabase/schema.sql are enforced here (qa/schema-domains.mjs), because a mock
+ * that nods along to every write is how `email_log.purpose` went unnoticed: the
+ * column existed, the values were rejected, the error was dropped, and every test
+ * that never touched a real database passed.
  */
 import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { checkViolation } from './schema-domains.mjs';
 
 const PRIMARY_KEYS = {
   admin_signins: ['key'],
@@ -184,6 +191,8 @@ export async function startMocks({ resendPort, dbPort }) {
       const written = [];
       for (const item of incoming) {
         const row = withDefaults(table, item);
+        const violation = checkViolation(table, row);
+        if (violation) return send(409, violation);
         const at = rows(table).findIndex((existing) => keys.every((key) => String(existing[key]) === String(row[key])));
         if (at >= 0 && upsert) {
           rows(table)[at] = { ...rows(table)[at], ...row };
@@ -199,6 +208,8 @@ export async function startMocks({ resendPort, dbPort }) {
     }
 
     if (req.method === 'PATCH') {
+      const violation = checkViolation(table, body);
+      if (violation) return send(409, violation);
       const changed = [];
       for (const row of rows(table)) {
         if (matches(row, filters)) {

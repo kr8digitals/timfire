@@ -146,6 +146,16 @@ try {
     check('the plaintext code is nowhere in that row', !JSON.stringify(row ?? {}).includes(code));
     const ttl = new Date(row.expires_at).getTime() - Date.now();
     check('the code expires in about ten minutes', ttl > 9 * 60_000 && ttl <= 10 * 60_000, `${Math.round(ttl / 1000)}s`);
+
+    // The log is the only way anyone can tell a mail actually left, so it is
+    // asserted as hard as the send. This was the silent one: email_log.purpose
+    // carried a CHECK list without 'admin_code', every insert was rejected, the
+    // error was dropped, and the table stayed empty through two real enquiries.
+    const logged = mocks.table('email_log').filter((r) => r.purpose === 'admin_code');
+    eq('the code email is logged', logged.length, 1);
+    eq('as sent', logged[0]?.status, 'sent');
+    eq('to the dashboard address', logged[0]?.recipient, ADMIN_EMAIL);
+    check('with the Resend id that proves it left', !!logged[0]?.resend_id, JSON.stringify(logged[0] ?? null));
   }
 
   {
@@ -235,6 +245,7 @@ try {
     const logged = mocks.table('email_log').filter((r) => r.purpose === 'welcome');
     eq('the send is logged', logged.length, 1);
     eq('as sent', logged[0]?.status, 'sent');
+    check('with the Resend id that proves it left', !!logged[0]?.resend_id, JSON.stringify(logged[0] ?? null));
   }
   {
     const res = await post('/api/subscribe', { name: '', email: 'not-an-email' });

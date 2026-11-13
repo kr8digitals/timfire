@@ -35,12 +35,28 @@ sign-in code and its rate-limit windows, section 7). Row Level Security is on ev
 public policies** — the site reads and writes through the service-role key held in
 `SUPABASE_SERVICE_ROLE_KEY`, server-side only.
 
-**`supabase/schema.sql` is the record of that shape, and `qa/schema-contract.mjs` checks the code
-against it on every run.** It exists because `subscribers.name` was missing from the live table while
-the code wrote it: every subscription failed with a 503, the visitor was told "the list is
-unavailable", and nothing anywhere said why. A schema that lives only inside a migration tool nobody
-reads drifts. After any migration, update that file — and `npm run qa:schema` fails loudly if the
-code and the schema disagree. `lib/db.ts` is the connection,
+**`supabase/schema.sql` is the record of that shape — columns, CHECK constraints and indexes — and
+`qa/schema-contract.mjs` checks the code against it on every run.** It exists because of two bugs of
+the same family, both invisible at the call site:
+
+1. `subscribers.name` was missing from the live table while the code wrote it, so every subscription
+   failed with a 503 and the visitor was told "the list is unavailable".
+2. `email_log.purpose` carried a CHECK constraint allowing only `form_notice`, `welcome`,
+   `publish_notice` and `broadcast`, while the code logged six other purposes. **Every log insert was
+   rejected (23514), the error was discarded, and the table stayed empty** through two real enquiries
+   and every sign-in code. The column existed; the *value* was refused. That is why `email_log` had
+   never shown a row while the site was plainly being used.
+
+So the guard checks values as well as names, in both directions: every literal the code writes to a
+constrained column must be one the database accepts, and the purposes `email_log` accepts must be
+exactly the `TemplateSlug` union in `lib/email.ts`. The mock database in `qa/mock-services.mjs` reads
+the same file and refuses the same writes, so the end-to-end harness fails too — wound back to the
+constraint that shipped, it reports "the code email is logged — expected 1, got 0".
+
+After any migration, update that file. `npm run qa:schema` fails loudly if the code and the schema
+disagree; `supabase.execute_query` with `select conname, pg_get_constraintdef(oid) from pg_constraint
+where connamespace='public'::regnamespace and contype='c'` is how to read what the live database
+actually enforces. `lib/db.ts` is the connection,
 `lib/store.tsx` the client seam, `app/api/content` the public read (drafts filtered out) and
 `app/api/admin/content` the authenticated write. `supabase/seed.sql` reproduces the shipped
 content; migrations were applied with the Supabase tooling and are idempotent. When the database is
@@ -98,6 +114,12 @@ subscriber (`announceFreshlyPublished` in `app/api/admin/content/route.ts`). Eve
 `email_log` (queued → sent/failed, Resend id, error) and no mail failure can break a page — but a
 failure now also writes to the server log, because "the list is unavailable" with nothing in any log
 is how the subscription bug below stayed invisible.
+
+**The log is now trustworthy.** A send is written to `email_log` before it goes out and updated to
+`sent` or `failed` after, and a logging failure is written to the server log rather than dropped —
+but it never stops the mail, because a missing audit row is a smaller problem than an unsent letter.
+Until the `purpose` constraint was fixed (section 3) that log was empty no matter what happened,
+which is exactly why nobody could say whether mail was going out.
 
 The subscription has three doors, and one form behind all of them: a strip above the header on every
 page (section 8), the footer link, and the intentional pop-up that waits for real scrolling.
@@ -182,9 +204,9 @@ Six suites, all offline except the route crawler, which needs a running server:
 | Routes + behaviour | `./qa/smoke.sh http://127.0.0.1:3100` | 91 checks: routes, per-form validation, honeypot, subscription surfaces, two-step sign-in refusals, contact-page secrecy, one public inbox, the strip on every page, the mobile zoom fixes |
 | Links | `node qa/link-audit.mjs <url>` | every internal CTA resolves; every referenced image exists |
 | SEO | `node qa/seo-probe.mjs <url>` | titles, descriptions, canonicals, OG, `/admin` noindex |
-| Schema contract | `npm run qa:schema` | every column the code names exists in `supabase/schema.sql` |
+| Schema contract | `npm run qa:schema` | every column the code names exists in `supabase/schema.sql`, every value it writes is one the database accepts, and the loggable purposes are exactly `TemplateSlug` |
 | Email contract | `npm run qa:email` | the body Resend actually receives carries sender, recipient, subject, html and `reply_to` |
-| Sign-in + subscribe | `npm run qa:auth` | 55 checks through the real built server against a mock Resend and a mock Supabase |
+| Sign-in + subscribe | `npm run qa:auth` | 60 checks through the real built server against a mock Resend and a mock Supabase that refuses what the real database refuses |
 
 `npm run qa` runs the three contracts. To run the whole thing:
 

@@ -84,13 +84,15 @@ sign-in code email, the database writes and every real send must be confirmed on
 ## Debugging the live reports — branch `arena/c8d298c9-timfire` (2026-11-13)
 
 Three things were reported broken on production. All three are diagnosed, fixed and now covered by a
-check that fails if they regress.
+check that fails if they regress. Verifying the third one against the live database turned up a
+fourth cause underneath it, which is the real answer to "have the emails been sending".
 
 | Report | Root cause | Proof |
 | --- | --- | --- |
 | "The list is unavailable right now" | `subscribers.name` did not exist in the live table while `addSubscriber()` wrote it, so every insert errored and the route answered 503. Nothing logged it. | Reproduced the exact error against the database (`42703: column "name" of relation "subscribers" does not exist`), added the column by migration, then inserted and removed a probe row using the code's own shape. `npm run qa:schema` now fails if code and schema disagree. |
 | "Email or password is incorrect" ×4, then a lockout | The dashboard was configured for `kutimfire001@mail.com` and the owner typed `kutimfire001@gmail.com`. One message covered both halves, so nothing distinguished them. `ADMIN_EMAIL` is now the gmail address. | `qa/auth-flow.mjs` asserts a wrong password is refused silently, and that a right password at the wrong address names the address the dashboard uses. |
 | "I haven't confirmed the other ones are sending" | Never tested: no email had ever left production (`email_log` was empty). Two real bugs were sitting in that path — the Resend SDK drops `reply_to`, so forwarded enquiries went out with no Reply-To, and the welcome letter had no unsubscribe link. | `npm run qa:email` drives the real SDK with HTTP stubbed and asserts the body it would send, including that snake_case `reply_to` is dropped and `replyTo` is not. `npm run qa:auth` asserts the welcome letter greets the subscriber by name and carries their own token. |
+| …and the reason the log was empty | **`email_log.purpose` carried a CHECK constraint** allowing only `form_notice`, `welcome`, `publish_notice` and `broadcast`. The code logs `owner_forward`, `ack`, `admin_code` and three `broadcast_*` purposes, so **every one of those inserts was rejected with 23514** and the discarded error left no trace. Two real enquiries reached the database at 00:56 and 01:06 UTC on 2026-11-13 with nothing logged for either. | Found by reading `pg_constraint`, not the columns: `select conname, pg_get_constraintdef(oid) from pg_constraint where connamespace='public'::regnamespace and contype='c'`. Reproduced by inserting as `service_role` inside a rolled-back transaction — `purpose='rls-probe'` failed with 23514, `purpose='owner_forward'` succeeded after the migration `fix_email_log_purpose_values`. `pg_stat_user_tables` confirmed the diagnosis independently: `email_log.n_tup_ins = 0` while `enquiries.n_tup_ins = 2`. |
 
 Also found and fixed while in there:
 
@@ -103,6 +105,14 @@ Also found and fixed while in there:
   it client-side was the only thing happening. The nonce is now written to a revocation list that
   `session()` checks, and `qa/auth-flow.mjs` proves a replayed cookie is refused after logout.
 - Database failures in the mail and subscriber paths were silent; they now write to the server log.
+- **The mock database refused nothing.** `qa/mock-services.mjs` accepted every write, so a value the
+  production database rejects looked fine offline. It now reads the CHECK constraints out of
+  `supabase/schema.sql` (via `qa/schema-domains.mjs`, the same parser the schema guard uses) and
+  answers 409/23514 exactly as PostgREST does. Wound back to the constraint that shipped,
+  `npm run qa:auth` now fails with "the code email is logged — expected 1, got 0" — the production
+  bug, reproduced offline.
+- `qa/auth-flow.mjs` treats the audit trail as part of the contract: a send that is not written to
+  `email_log` as `sent` with a Resend id is a failure, not a passing test with a missing row.
 
 ### Results, against the production build
 
@@ -113,10 +123,16 @@ Also found and fixed while in there:
 | Routes + behaviour | `./qa/smoke.sh http://127.0.0.1:3100` | **91/91** |
 | Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — every internal CTA resolves; all 30 referenced images exist |
 | SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — titles unique, descriptions present, canonicals correct, OG set, `/admin` noindex |
-| Schema contract | `npm run qa:schema` | Pass — 7 tables, 33 columns the code names |
+| Schema contract | `npm run qa:schema` | Pass — 7 tables, 33 columns, 28 constrained values, and the loggable purposes are exactly `TemplateSlug` |
 | Email contract | `npm run qa:email` | Pass — 7 checks |
-| Sign-in + subscribe | `npm run qa:auth` | **55/55** — real built server, mock Resend, mock Supabase |
+| Sign-in + subscribe | `npm run qa:auth` | **60/60** — real built server, mock Resend, mock Supabase that refuses what the real database refuses |
 
 Still only provable on production: a real Resend delivery (sign in at `/admin` and the code arrives in
-the gmail inbox), and mail arriving *at* `hello@kutimfire.com`, which needs the MX records in
-`HANDOVER.md` section 11 before anything can receive there.
+the gmail inbox, then `email_log` shows a `sent` row with a Resend id), and mail arriving *at*
+`hello@kutimfire.com`, which needs the MX records in `HANDOVER.md` section 11 before anything can
+receive there.
+
+One thing worth knowing about those two enquiries from 2026-11-13: the log insert failed, but the send
+itself was still attempted afterwards, because a missing audit row must never stop a letter. So the
+owner may well have received both forwards in his gmail with no record here. `markEmail()` had no row
+to update either way, which is why nothing — success or failure — was ever recorded.

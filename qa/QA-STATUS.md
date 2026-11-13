@@ -80,3 +80,43 @@ New smoke coverage in this pass:
 Not provable in the sandbox: the sandbox cannot reach `api.resend.com` or `supabase.co`, so the
 sign-in code email, the database writes and every real send must be confirmed on production
 (sign in at `/admin`, then "Send test email" in the Emails tab).
+
+## Debugging the live reports — branch `arena/c8d298c9-timfire` (2026-11-13)
+
+Three things were reported broken on production. All three are diagnosed, fixed and now covered by a
+check that fails if they regress.
+
+| Report | Root cause | Proof |
+| --- | --- | --- |
+| "The list is unavailable right now" | `subscribers.name` did not exist in the live table while `addSubscriber()` wrote it, so every insert errored and the route answered 503. Nothing logged it. | Reproduced the exact error against the database (`42703: column "name" of relation "subscribers" does not exist`), added the column by migration, then inserted and removed a probe row using the code's own shape. `npm run qa:schema` now fails if code and schema disagree. |
+| "Email or password is incorrect" ×4, then a lockout | The dashboard was configured for `kutimfire001@mail.com` and the owner typed `kutimfire001@gmail.com`. One message covered both halves, so nothing distinguished them. `ADMIN_EMAIL` is now the gmail address. | `qa/auth-flow.mjs` asserts a wrong password is refused silently, and that a right password at the wrong address names the address the dashboard uses. |
+| "I haven't confirmed the other ones are sending" | Never tested: no email had ever left production (`email_log` was empty). Two real bugs were sitting in that path — the Resend SDK drops `reply_to`, so forwarded enquiries went out with no Reply-To, and the welcome letter had no unsubscribe link. | `npm run qa:email` drives the real SDK with HTTP stubbed and asserts the body it would send, including that snake_case `reply_to` is dropped and `replyTo` is not. `npm run qa:auth` asserts the welcome letter greets the subscriber by name and carries their own token. |
+
+Also found and fixed while in there:
+
+- **Sign-in state lived in process memory.** A serverless function is many short-lived instances, so
+  the code emailed by one instance was invisible to the instance that received the verify request, and
+  the rate-limit counters reset whenever an instance was recycled. State now lives in `admin_signins`
+  (the code as a sha256 hash, never plaintext), with memory as a same-instance fast path and as the
+  fallback if the database is unreachable.
+- **Logout did not end the session.** A signed stateless cookie stays valid until it expires; deleting
+  it client-side was the only thing happening. The nonce is now written to a revocation list that
+  `session()` checks, and `qa/auth-flow.mjs` proves a replayed cookie is refused after logout.
+- Database failures in the mail and subscriber paths were silent; they now write to the server log.
+
+### Results, against the production build
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `npx tsc --noEmit` | Pass |
+| Build | `npm run build` | Pass |
+| Routes + behaviour | `./qa/smoke.sh http://127.0.0.1:3100` | **91/91** |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — every internal CTA resolves; all 30 referenced images exist |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — titles unique, descriptions present, canonicals correct, OG set, `/admin` noindex |
+| Schema contract | `npm run qa:schema` | Pass — 7 tables, 33 columns the code names |
+| Email contract | `npm run qa:email` | Pass — 7 checks |
+| Sign-in + subscribe | `npm run qa:auth` | **55/55** — real built server, mock Resend, mock Supabase |
+
+Still only provable on production: a real Resend delivery (sign in at `/admin` and the code arrives in
+the gmail inbox), and mail arriving *at* `hello@kutimfire.com`, which needs the MX records in
+`HANDOVER.md` section 11 before anything can receive there.

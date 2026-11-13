@@ -274,3 +274,28 @@ input,select,textarea{font-size:16px}
   /* The floating WhatsApp button must never sit on top of the last line. */
   .footer{padding-bottom:calc(30px + 74px)}
 }
+
+/* ---------- The list has a permanent home on every page ----------
+   One slim strip above the header, on every page but the dashboard and the
+   unsubscribe page. It opens the same dialog the scroll moment uses, so there
+   is one way to join and three ways to find it: this strip, the footer, and the
+   invitation that arrives once someone has actually read something. */
+.sub-bar{background:linear-gradient(96deg,#1b110c,#251710 52%,#1b110c);border-bottom:1px solid #35261f;position:relative;z-index:21}
+.sub-bar-in{display:flex;align-items:center;gap:14px;padding:10px 0;min-height:54px}
+.sub-bar-dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex:0 0 auto;box-shadow:0 0 0 4px #f27a1a21}
+.sub-bar p{margin:0;flex:1 1 auto;min-width:0;color:#cbbcb2;font-size:15.5px;line-height:1.45}
+.sub-bar p strong{color:var(--paper);font-family:var(--font-display);letter-spacing:-.02em}
+.sub-bar .button{flex:0 0 auto;min-height:42px;padding:9px 18px;font-size:15px}
+.sub-bar-close{flex:0 0 auto;min-width:38px;min-height:38px;color:#a29086}
+.sub-bar-close:hover{color:var(--orange);border-color:#795c4a}
+@media(max-width:860px){
+  .sub-bar-more{display:none}
+  .sub-bar-in{gap:10px;padding:9px 0;min-height:0}
+  .sub-bar p{font-size:14.5px}
+  .sub-bar .button{min-height:40px;padding:9px 14px;font-size:14.5px;gap:7px}
+}
+@media(max-width:520px){
+  .sub-bar-in{flex-wrap:wrap;row-gap:9px;padding:10px 0}
+  .sub-bar-close{order:2;margin-left:auto}
+  .sub-bar .button{order:3;flex:1 1 100%}
+}

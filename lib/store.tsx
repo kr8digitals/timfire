@@ -30,8 +30,16 @@ export function StoreProvider({children}:{children:React.ReactNode}) {
   const incoming=validate(d);localStorage.setItem(BACKUP,JSON.stringify(data));
   if(mode==='replace'){await save(incoming);return}
   const merged={...data,...incoming};
-  const lists=['stats','services','websites','agents','creative','journal','timeline','certificates','testimonials','socials','media'] as const;
-  for(const key of lists){const byId=new Map<string,unknown>(); for(const item of data[key])byId.set(item.id,item);for(const item of incoming[key])byId.set(item.id,item);(merged as unknown as Record<string,unknown>)[key]=[...byId.values()]}
+  const lists=['stats','services','websites','agents','creative','journal','features','timeline','certificates','testimonials','socials','media'] as const;
+  for(const key of lists){
+   // A collection neither side carries is one this payload has never heard of;
+   // materialising it as an empty list would tell the database to delete its rows.
+   if(!data[key]&&!incoming[key])continue;
+   const byId=new Map<string,unknown>();
+   for(const item of data[key]??[])byId.set(item.id,item);
+   for(const item of incoming[key]??[])byId.set(item.id,item);
+   (merged as unknown as Record<string,unknown>)[key]=[...byId.values()];
+  }
   await save(merged);
  }
  return <Context.Provider value={{data,ready,source,save,restore}}>{children}</Context.Provider>;

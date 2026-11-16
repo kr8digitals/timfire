@@ -34,7 +34,7 @@ async function announceFreshlyPublished(prev: SiteData, next: SiteData) {
   const jobs: Promise<unknown>[] = [];
   for (const item of fresh) {
     const isArticle = typeof item.summary === 'string';
-    const link = SITE_ORIGIN + (isArticle ? '/journal/' : '/creative/') + item.slug;
+    const link = SITE_ORIGIN + (isArticle ? '/me/' : '/creative/') + item.slug;
     const summaryLine = (item.summary || item.body || '').slice(0, 180);
     for (const person of people) {
       jobs.push(

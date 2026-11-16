@@ -2,12 +2,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Sparkles, PenLine, Users, BookOpen } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, Lock, MessageCircle, Mail, Code2, Sparkles, PenLine, Users, BookOpen, Play } from 'lucide-react';
 import { isPublished } from '@/lib/content';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
 import { PUBLIC_EMAIL } from '@/lib/site';
 import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
+import { FeaturedThisWeek, FeatureApplication } from '@/components/feature';
 import { Price, CurrencySelect } from '@/components/currency';
 import { servicePageByServiceId } from '@/lib/services-content';
 
@@ -50,10 +51,10 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
     description: 'Poetry, spoken word, sounds and music, and the stage — the practices that train the ear every homepage later answers to.',
   },
   journal: {
-    eyebrow: 'The journal',
-    title: 'Published',
-    accent: 'and forthcoming.',
-    description: 'The wall posts that outgrew the wall: poems, spoken word, penlight essays and Good Reports — indexed for search the moment they go live.',
+    eyebrow: 'Me',
+    title: 'This page',
+    accent: 'is for you.',
+    description: 'Everything I write lands here — poems, spoken word, penlight essays and Good Reports — posted for whoever needs it. Read it, then tell me what it did to you.',
     image: {
       src: '/images/writing.webp',
       alt: 'TIMFIRE smiling with an open book on his lap, among shelves of old books',
@@ -191,7 +192,7 @@ function About() {
             Iziogo Thomas, whose hands delivered a thousand first breaths; the mentor who gave twenty-one days and
             still calls to ask if I am still becoming; the colleague who bought a premium bread because a joke made
             her feel at home. The first poem I ever wrote, &ldquo;He&rsquo;s got a queen,&rdquo; went out on 13
-            December 2023 beside five photographs, and it still opens the journal here. Gratitude is not a section of
+            December 2023 beside five photographs, and it still opens on the Me page. Gratitude is not a section of
             my life. It is the ledger I write everything else in.
           </p>
           <p>
@@ -781,15 +782,15 @@ function Creative() {
             </h2>
             <p>
               Poetry is compression: the most feeling in the fewest words. I write poems the way I write everything else
-              now — in the open, in the Journal, revised in public when a revision is honest.
+              now — in the open, on the Me page, revised in public when a revision is honest.
             </p>
             <p>Commissions, publication and joint work all begin the same way: with the subject, and why it matters to you.</p>
             <div className="actions">
               <Link href="/collaborate/poetry" className="button primary">
                 Commission or collaborate <ArrowUpRight size={18} />
               </Link>
-              <Link href="/journal" className="button ghost">
-                Read the Journal <ArrowUpRight size={18} />
+              <Link href="/me" className="button ghost">
+                Read what I publish <ArrowUpRight size={18} />
               </Link>
             </div>
           </div>
@@ -829,7 +830,7 @@ function Creative() {
         </Reveal>
       </section>
 
-      <Related links={[['Journal', '/journal'], ['About', '/about'], ['Now', '/now']]} />
+      <Related links={[['Me', '/me'], ['About', '/about'], ['Now', '/now']]} />
     </>
   );
 }
@@ -848,11 +849,12 @@ function Journal() {
     <>
       <Reveal>
         <p className="page-lead" style={{ maxWidth: 720 }}>
-          Everything I ever posted that deserved to stay: the first poem, the penlight essays, the Good Reports for
-          the people who poured into me. Search below, or wander — and every frame in the gallery leads back to its
-          story here.
+          This page is the reason I keep writing: whoever is reading it. The first poem, the penlight essays, the Good
+          Reports for the people who poured into me — all of it posted for the person who needs it today. Search below,
+          or wander; every frame in the gallery leads back to its story here.
         </p>
       </Reveal>
+      <FeaturedThisWeek />
       <div className="page-grid section" style={{ paddingTop: 0 }}>
         <div>
           <label htmlFor="journal-search" className="form-label">
@@ -890,7 +892,14 @@ function Journal() {
         {found.slice(0, count).map((x, i) => (
           <Reveal key={x.id} delay={Math.min(i * 0.05, 0.25)}>
             <article className="card light">
-              {x.image ? <img className="card-image journal-thumb" src={x.image} alt={x.imageAlt || x.title} loading="lazy" /> : null}
+              {x.image ? (
+                <img className="card-image journal-thumb" src={x.image} alt={x.imageAlt || x.title} loading="lazy" />
+              ) : x.videoSrc || x.videoExternal ? (
+                <div className="card-image card-video-flag">
+                  <Play size={26} aria-hidden="true" />
+                  <span>{x.videoCaption || 'This one plays'}</span>
+                </div>
+              ) : null}
               <span className="badge">{x.category}</span>
               <h3>{x.title}</h3>
               <p>{x.summary}</p>
@@ -901,7 +910,7 @@ function Journal() {
                 </span>
               ))}
               <br />
-              <Link className="text-link" style={{ color: '#842e00' }} href={'/journal/' + encodeURIComponent(x.slug)}>
+              <Link className="text-link" style={{ color: '#842e00' }} href={'/me/' + encodeURIComponent(x.slug)}>
                 Read article <ArrowUpRight size={18} />
               </Link>
             </article>
@@ -934,6 +943,7 @@ function Journal() {
           Load more
         </button>
       )}
+      <FeatureApplication />
       <Related links={[['Creative', '/creative'], ['Timeline', '/timeline'], ['About', '/about']]} />
     </>
   );
@@ -976,7 +986,7 @@ function Timeline() {
           </article>
         </Reveal>
       </div>
-      <Related links={[['About', '/about'], ['Now', '/now'], ['Journal', '/journal']]} />
+      <Related links={[['About', '/about'], ['Now', '/now'], ['Me', '/me']]} />
     </>
   );
 }

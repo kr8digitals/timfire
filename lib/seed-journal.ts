@@ -118,13 +118,12 @@ export const ARCHIVE_JOURNAL: Article[] = [
     status: 'published',
     visibility: 'public',
     publishAt: '',
-    image: '/images/archive/rehearsal-still.webp',
-    imageWidth: 300, imageHeight: 640,
-    imageAlt: 'TIMFIRE looking up at a microphone hanging from the ceiling during rehearsal',
+    // No lead photograph: the frame that used to sit here was a still from the
+    // Facebook rehearsal clip, not from this video, so it said something the
+    // post did not. The owner's call was the video alone, on the right.
     origin: 'First posted on my Facebook wall, 4 September 2025, as a spoken-word video.',
     videoExternal: 'https://www.tiktok.com/@kutimfire/video/7644259695053589778',
-    videoPoster: '/images/archive/rehearsal-still.webp',
-    videoCaption: 'Hear me sing it — the poem, out loud on my TikTok',
+    videoCaption: 'This is what I can do: me singing, breaking the doubt.',
   },
   {
     id: 'a-storm',

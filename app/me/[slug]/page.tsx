@@ -13,16 +13,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { data } = await loadSiteData();
   const post = publicView(data).journal.find((x) => x.slug === decodeURIComponent(slug));
-  if (!post) return { title: 'Journal', robots: { index: false, follow: false } };
+  if (!post) return { title: 'Me', robots: { index: false, follow: false } };
   return {
     title: post.title,
     description: post.summary,
-    alternates: { canonical: `/journal/${post.slug}` },
+    alternates: { canonical: `/me/${post.slug}` },
     openGraph: {
       type: 'article',
       title: `${post.title} | TIMFIRE`,
       description: post.summary,
-      url: `${SITE_ORIGIN}/journal/${post.slug}`,
+      url: `${SITE_ORIGIN}/me/${post.slug}`,
       tags: post.tags,
     },
     robots: { index: true, follow: true },

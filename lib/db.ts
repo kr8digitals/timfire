@@ -27,6 +27,7 @@ export const COLLECTIONS = [
   'certificates',
   'creative',
   'journal',
+  'features',
   'timeline',
   'testimonials',
   'socials',
@@ -36,7 +37,7 @@ type Collection = (typeof COLLECTIONS)[number];
 
 function seedOrder(collection: Collection): Map<string, number> {
   const map = new Map<string, number>();
-  (seed[collection] as { id: string }[]).forEach((item, i) => map.set(item.id, i));
+  ((seed[collection] as { id: string }[] | undefined) ?? []).forEach((item, i) => map.set(item.id, i));
   return map;
 }
 
@@ -73,7 +74,7 @@ export async function loadSiteData(): Promise<{ data: SiteData; source: 'db' | '
     }
   } else {
     for (const collection of COLLECTIONS) {
-      (data[collection] as unknown[]) = [];
+      (data as unknown as Record<string, unknown>)[collection] = [];
     }
     const rowsByCollection = new Map<string, { id: string; data: unknown }[]>();
     for (const row of content.data ?? []) {
@@ -86,7 +87,7 @@ export async function loadSiteData(): Promise<{ data: SiteData; source: 'db' | '
       const order = seedOrder(collection);
       const rows = rowsByCollection.get(collection) ?? [];
       rows.sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999));
-      (data[collection] as unknown[]) = rows.map((r) => r.data);
+      (data as unknown as Record<string, unknown>)[collection] = rows.map((r) => r.data);
     }
   }
   for (const row of singletons.data ?? []) {
@@ -124,7 +125,12 @@ export async function saveSiteData(next: SiteData): Promise<boolean> {
     }
   }
   for (const collection of COLLECTIONS) {
-    const items = next[collection] as { id: string }[];
+    const items = next[collection] as { id: string }[] | undefined;
+    // A collection the payload does not carry at all is one the sender has never
+    // heard of — an older dashboard tab, an import file from before it existed.
+    // Deleting its rows because of that is how the site once lost 42 of them, so
+    // absence is left alone and only an explicit empty list clears a collection.
+    if (items === undefined) continue;
     const rows = items.map((item) => ({ collection, id: item.id, data: item, updated_at: new Date().toISOString() }));
     if (rows.length) {
       const up = await supa.from('site_content').upsert(rows, { onConflict: 'collection,id' });

@@ -8,7 +8,7 @@ const exits: [string, string][] = [
   ['Ventures', '/ventures'],
   ['Services', '/services'],
   ['Creative', '/creative'],
-  ['Journal', '/journal'],
+  ['Me', '/me'],
   ['Timeline', '/timeline'],
   ['Now', '/now'],
   ['Contact', '/contact'],

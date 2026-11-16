@@ -57,7 +57,7 @@ const COLLABS: Collab[] = [
       'A performance piece written for a specific voice',
       'Joint work with another writer',
     ],
-    next: 'Tell me the subject and the deadline. Published and forthcoming pieces live in the Journal, so you can read the voice before you commission it.',
+    next: 'Tell me the subject and the deadline. Published and forthcoming pieces live on the Me page, so you can read the voice before you commission it.',
   },
   {
     kind: 'speaking',
@@ -125,7 +125,7 @@ export default async function CollaboratePage({ params }: { params: Promise<{ ki
             <nav className="related" aria-label="Related pages" style={{ marginTop: 34 }}>
               <strong>Keep exploring</strong>
               <Link href="/creative">The creative space ↗</Link>
-              <Link href="/journal">The Journal ↗</Link>
+              <Link href="/me">Me ↗</Link>
               <Link href="/work">Selected work ↗</Link>
             </nav>
           </div>

@@ -302,6 +302,51 @@ export const FORMS: Record<string, FormDef> = {
       { name: 'audience', label: 'Expected audience size', type: 'text', required: false },
     ],
   },
+  feature: {
+    kind: 'feature',
+    title: 'Be featured on the Me page',
+    intro:
+      'One reader a week gets this page: your story in your words, with the handles you want people to find you on. Tell me who you are — if I pick you, I email you the questions.',
+    submitLabel: 'Send my application',
+    fields: [
+      {
+        name: 'handle',
+        label: 'The name you want on the page',
+        type: 'text',
+        required: true,
+        hint: 'A handle is a name. Use whatever you are known by — it does not have to be your legal name.',
+      },
+      { name: 'where', label: 'Where are you writing from?', type: 'text', required: false, placeholder: 'City, country' },
+      {
+        name: 'story',
+        label: 'What is your story right now?',
+        type: 'textarea',
+        required: true,
+        hint: 'A paragraph is enough: what you are building, carrying, learning or surviving.',
+      },
+      {
+        name: 'socials',
+        label: 'Where can people find you?',
+        type: 'text',
+        required: false,
+        hint: 'Instagram, TikTok, X — handles or links, separated by commas.',
+      },
+      {
+        name: 'photo',
+        label: 'A photograph of you',
+        type: 'url',
+        required: false,
+        placeholder: 'https://…',
+        hint: 'Only if you want one up beside your story.',
+      },
+      {
+        name: 'post',
+        label: 'Which piece on this page brought you here?',
+        type: 'text',
+        required: false,
+      },
+    ],
+  },
   general: {
     kind: 'general',
     title: 'Send a message',
@@ -336,6 +381,7 @@ export const FORM_ROUTES: Record<string, string> = {
   'spoken-word': '/collaborate/spoken-word#form',
   poetry: '/collaborate/poetry#form',
   speaking: '/collaborate/speaking#form',
+  feature: '/me#featured',
   general: '#general',
 };
 

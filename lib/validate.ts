@@ -11,6 +11,8 @@ const agent = z.object({ id: s, name: s, description: s, buildType: z.enum(['Liv
 const creative = z.object({ id: s, title: s, slug: s, category: z.enum(['Poetry', 'Spoken word', 'Sounds and music']), body: s, mediaUrl: s, captionUrl: s.default(''), mediaType: z.enum(['none', 'audio', 'video', 'external']), status, visibility, publishAt: s });
 const article = z.object({ id: s, title: s, slug: s, category: s, tags: z.array(s), summary: s, body: s, status, visibility, publishAt: s, image: s.optional(), imageAlt: s.optional(), imageWidth: z.number().int().positive().optional(), imageHeight: z.number().int().positive().optional(), origin: s.optional(), sourceUrl: s.optional(), videoSrc: s.optional(), videoPoster: s.optional(), videoExternal: s.optional(), videoCaption: s.optional() });
 
+const feature = z.object({ id: s, name: s, handle: s.default(''), blurb: s.default(''), story: s.default(''), image: s.default(''), imageAlt: s.default(''), socials: z.array(s).default([]), weekOf: s.default(''), isPublic: b });
+
 export const schema = z.object({
   version: z.literal(1),
   profile: z.object({ name: s, location: s, intro: s, heroLine: s, heroWelcome: s, heroName: s, about: s }),
@@ -20,6 +22,7 @@ export const schema = z.object({
   agents: z.array(agent),
   creative: z.array(creative),
   journal: z.array(article),
+  features: z.array(feature).optional(),
   timeline: z.array(z.object({ id: s, year: s, title: s, description: s, isPublic: b })),
   certificates: z.array(z.object({ id: s, title: s, description: s, image: s, isPublic: b })),
   testimonials: z.array(z.object({ id: s, quote: s, name: s, isPublic: b })),

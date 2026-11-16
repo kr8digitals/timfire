@@ -14,7 +14,11 @@
  *   1. every journal photograph carries its real pixel size, read here straight
  *      out of the WebP on disk — a stale or missing size is what lets a crop back in;
  *   2. the stylesheet still fits story photos whole (`contain`, never `cover`);
- *   3. card thumbnails keep a top-biased window, where faces are.
+ *   3. card thumbnails keep a top-biased window, where faces are;
+ *   4. a story page still opens as a split — what the piece is on the left, the
+ *      frame or clip that carries it on the right, the writing below both — and
+ *      the gallery viewer keeps the same rhythm;
+ *   5. the musician story still carries no lead photograph, only the clip.
  *
  * WebP dimensions are parsed from the file header rather than shelling out, so
  * the check needs nothing installed.
@@ -81,7 +85,22 @@ if (!res.ok) {
 const { journal } = await res.json();
 const illustrated = journal.filter((item) => typeof item.image === 'string' && item.image.startsWith('/images/'));
 
-check('the journal carries illustrated posts to measure', illustrated.length >= 15, `${illustrated.length} with images`);
+/* Fourteen, not fifteen: the musician story deliberately carries no lead
+   photograph. Its frame was a still from a different clip, so it said something
+   the post did not — the owner's call was the video alone, on the right. */
+check('the Me page carries illustrated posts to measure', illustrated.length >= 14, `${illustrated.length} with images`);
+
+const musician = journal.find((item) => item.id === 'a-musician');
+check('the musician story was found', !!musician, 'id a-musician missing from /api/content');
+if (musician) {
+  check('and carries no lead photograph', !musician.image, `image is still ${musician.image}`);
+  check(
+    'and its video says what the video actually is',
+    musician.videoCaption === 'This is what I can do: me singing, breaking the doubt.',
+    JSON.stringify(musician.videoCaption),
+  );
+  check('and the clip it points at is the TikTok post', /tiktok\.com\/@kutimfire\/video\/7644259695053589778/.test(musician.videoExternal || ''), musician.videoExternal);
+}
 
 let mismatches = 0;
 for (const item of illustrated) {
@@ -119,6 +138,21 @@ if (!mismatches) console.log(`     (${illustrated.length} frames measured agains
 const story = rule('.photo-card.article-photo img');
 check('a story photo is fitted whole, never cropped', story.includes('object-fit:contain'), story.slice(0, 160));
 check('and is allowed to be as tall as it is', !/max-height:650px/.test(story), story.slice(0, 160));
+
+/* The layout the owner asked for: what the piece is on the left, the frame or
+   the clip that carries it on the right, and the writing below both. Asserted
+   here because a regression is invisible to every other suite — the page still
+   renders, it just goes back to dumping a full-width photograph under a title. */
+const split = rule('.story-split{');
+check('a story opens as two columns, text and media side by side', /grid-template-columns:minmax\(0,1\.02fr\) minmax\(0,\.98fr\)/.test(split), split.slice(0, 200));
+check('and a story with no media falls back to one column', rule('.story-split.single{').includes('grid-template-columns:minmax(0,1fr)'), rule('.story-split.single{').slice(0, 160));
+check('the media column exists and centres its frame', rule('.story-media{').includes('justify-items:center'), rule('.story-media{').slice(0, 160));
+const stacked = css.slice(css.indexOf('@media(max-width:900px){.story-split'));
+check('and on a phone the two columns stack', /^\{grid-template-columns:1fr/.test(stacked.slice('@media(max-width:900px){.story-split'.length)), stacked.slice(0, 120));
+
+const box = rule('.lightbox-figure{');
+check('the gallery viewer keeps the same rhythm: words left, frame right', /grid-template-columns:minmax\(0,300px\) minmax\(0,1fr\)/.test(box), box.slice(0, 200));
+check('and its frame sits in the right-hand column', rule('.lightbox-figure img{').includes('grid-column:2'), rule('.lightbox-figure img{').slice(0, 160));
 
 const thumb = rule('.card-image.journal-thumb');
 const bias = /object-position:center (\d+)%/.exec(thumb);

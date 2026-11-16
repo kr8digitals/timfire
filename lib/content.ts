@@ -22,6 +22,37 @@ export interface Article {
   /** Hybrid video: a self-hosted file in /media, or a card linking out with a poster still. */
   videoSrc?:string; videoPoster?:string; videoExternal?:string; videoCaption?:string;
 }
+/**
+ * One reader, featured for a week on the Me page. The owner picks who goes up
+ * from the people who asked to be featured, emails them the questions, and
+ * publishes their answers here — their story, in their words, with the handles
+ * they want people to find them on.
+ *
+ * `name` is the name they chose, not necessarily a legal one: the page belongs
+ * to readers, and a reader gets to be whoever they are on the internet.
+ */
+export interface Feature {
+  id:string;
+  /** The name they want on the page. A handle is a name. */
+  name:string;
+  /** Their handle, for the profile page at /me/@handle. */
+  handle:string;
+  /** One line: who they are and where they are writing from. */
+  blurb:string;
+  /** Their story, in their words — the answers to the questions they were sent. */
+  story:string;
+  /** Their photograph, if they sent one and want it up. */
+  image:string; imageAlt:string;
+  /**
+   * Where people can find them: full URLs, or bare handles like @ada_writes.
+   * A URL renders as a link named for its site; a handle renders as text, so
+   * either form the owner pastes comes out readable.
+   */
+  socials:string[];
+  /** The Monday of the week they are up. Blank means 'whoever is newest'. */
+  weekOf:string;
+  isPublic:boolean;
+}
 export interface TimelineItem { id:string; year:string; title:string; description:string; isPublic:boolean }
 export interface Certificate { id:string; title:string; description:string; image:string; isPublic:boolean }
 export interface Testimonial { id:string; quote:string; name:string; isPublic:boolean }
@@ -30,7 +61,14 @@ export interface Revision { time:string; value:unknown }
 export interface SiteData {
  version:1; profile:{name:string;location:string;intro:string;heroLine:string;heroWelcome:string;heroName:string;about:string};
  stats:{id:string;value:string;label:string;isPublic:boolean}[]; services:Service[]; websites:Work[]; agents:Agent[];
- creative:Creative[]; journal:Article[]; timeline:TimelineItem[]; certificates:Certificate[]; testimonials:Testimonial[];
+ creative:Creative[]; journal:Article[];
+ /**
+  * Optional on purpose. `saveSiteData` deletes the rows of any collection a
+  * payload carries as an empty list, so a browser tab left open from before this
+  * collection existed would erase it on save. Absent means 'not part of this
+  * payload' and leaves the rows alone; an empty list means the owner removed them.
+  */
+ features?:Feature[]; timeline:TimelineItem[]; certificates:Certificate[]; testimonials:Testimonial[];
  now:{items:string[]; updated:string}; socials:{id:string;name:string;url:string;isPublic:boolean}[];
  settings:{jambScore:string;showJambScore:boolean;rates:Record<string,number>;ratesUpdated:string}; media:Media[]; revisions:Record<string,Revision[]>;
 }
@@ -62,7 +100,7 @@ export const seed:SiteData={
   {id:'goj',name:'Goj',description:'My personal study agent.',isPublic:true,buildType:'Private build',url:''},
   {id:'tenny',name:'Tenny',description:'My WhatsApp AI chief of staff, managing five other WhatsApp agents and checking they deliver.',isPublic:true,buildType:'Private build',url:''}],
  creative:[{id:'p1',title:'[ADD: poem 1]',slug:'poem-1',category:'Poetry',body:'[ADD: poem]',mediaUrl:'',captionUrl:'',mediaType:'none',status:'draft',visibility:'public',publishAt:''},{id:'p2',title:'[ADD: poem 2]',slug:'poem-2',category:'Poetry',body:'[ADD: poem]',mediaUrl:'',captionUrl:'',mediaType:'none',status:'draft',visibility:'public',publishAt:''},{id:'p3',title:'[ADD: poem 3]',slug:'poem-3',category:'Poetry',body:'[ADD: poem]',mediaUrl:'',captionUrl:'',mediaType:'none',status:'draft',visibility:'public',publishAt:''},{id:'s1',title:'[ADD: spoken word]',slug:'spoken-word',category:'Spoken word',body:'[ADD: spoken word]',mediaUrl:'',captionUrl:'',mediaType:'none',status:'draft',visibility:'public',publishAt:''},{id:'m1',title:'[ADD: song or sound]',slug:'music',category:'Sounds and music',body:'[ADD: song or sound]',mediaUrl:'',captionUrl:'',mediaType:'none',status:'draft',visibility:'public',publishAt:''}],
- journal:[...ARCHIVE_JOURNAL], timeline:[{id:'school',year:'2018',title:'Nnodo Secondary School',description:'Started secondary school in September.',isPublic:true},{id:'essay',year:'2023',title:'Coal City University essay competition',description:'Selected as a finalist in the national essay competition on Drug Abuse.',isPublic:true},{id:'graduation',year:'2024',title:'Graduated secondary school',description:'Completed studies at Nnodo Secondary School.',isPublic:true},{id:'founding',year:'[ADD: year]',title:'Founded KR8 DIGITALS',description:'Started KR8 DIGITALS. [ADD: exact founding month and year]',isPublic:true},{id:'jamb',year:'2026',title:'JAMB UTME',description:'Wrote the JAMB UTME.',isPublic:true},{id:'university',year:'2026',title:'Ebonyi State University',description:'Admitted to study Linguistics.',isPublic:true}],
+ journal:[...ARCHIVE_JOURNAL], features:[], timeline:[{id:'school',year:'2018',title:'Nnodo Secondary School',description:'Started secondary school in September.',isPublic:true},{id:'essay',year:'2023',title:'Coal City University essay competition',description:'Selected as a finalist in the national essay competition on Drug Abuse.',isPublic:true},{id:'graduation',year:'2024',title:'Graduated secondary school',description:'Completed studies at Nnodo Secondary School.',isPublic:true},{id:'founding',year:'[ADD: year]',title:'Founded KR8 DIGITALS',description:'Started KR8 DIGITALS. [ADD: exact founding month and year]',isPublic:true},{id:'jamb',year:'2026',title:'JAMB UTME',description:'Wrote the JAMB UTME.',isPublic:true},{id:'university',year:'2026',title:'Ebonyi State University',description:'Admitted to study Linguistics.',isPublic:true}],
  certificates:[{id:'essay-cert',title:'Coal City University essay competition',description:'[ADD: certificate scan; VERIFY: final result]',image:'',isPublic:false}],testimonials:[],
  now:{items:['Studying Linguistics.','Running KR8 DIGITALS.','Building AI agents and websites.','[ADD: what else is happening now]'],updated:''},
  socials:[{id:'facebook',name:'Facebook',url:'https://www.facebook.com/share/1EHJ272qmK/',isPublic:true},{id:'instagram',name:'Instagram',url:'https://www.instagram.com/timfire3/',isPublic:true},{id:'tiktok',name:'TikTok',url:'https://www.tiktok.com/@kutimfire',isPublic:true},{id:'linkedin',name:'LinkedIn',url:'',isPublic:false},{id:'x',name:'X',url:'',isPublic:false},{id:'youtube',name:'YouTube',url:'',isPublic:false}],
@@ -80,6 +118,7 @@ export function publicView(d:SiteData):SiteData {
   out.stats=pub(out.stats);out.websites=pub(out.websites);out.agents=pub(out.agents);
   out.certificates=pub(out.certificates);out.testimonials=pub(out.testimonials);out.socials=pub(out.socials);
   out.creative=out.creative.filter(isPublished);out.journal=out.journal.filter(isPublished);
+  out.features=pub(out.features??[]);
   out.revisions={};
   if(!out.settings.showJambScore)out.settings.jambScore='';
   return out;

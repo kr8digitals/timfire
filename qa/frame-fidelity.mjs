@@ -144,11 +144,42 @@ check('and is allowed to be as tall as it is', !/max-height:650px/.test(story), 
    here because a regression is invisible to every other suite — the page still
    renders, it just goes back to dumping a full-width photograph under a title. */
 const split = rule('.story-split{');
-check('a story opens as two columns, text and media side by side', /grid-template-columns:minmax\(0,1\.02fr\) minmax\(0,\.98fr\)/.test(split), split.slice(0, 200));
+/* The right-hand column is a fixed measure rather than a share of the page, so a
+   tall portrait or a 9:16 clip cannot grow into a wall next to a short title —
+   that was the owner's "the alignment is not good". */
+check('a story opens as two columns, text and media side by side', /grid-template-columns:minmax\(0,1fr\) minmax\(0,460px\)/.test(split), split.slice(0, 200));
+const mediaCol = rule('.story-media>*{');
+check('and everything in the media column is capped to that measure', mediaCol.includes('max-width:460px'), mediaCol.slice(0, 160));
+const clip = rule('.story-media .story-video{');
+check('a clip is capped by height, since it is taller than it is wide', /max-height:min\(72vh,680px\)/.test(clip), clip.slice(0, 160));
 check('and a story with no media falls back to one column', rule('.story-split.single{').includes('grid-template-columns:minmax(0,1fr)'), rule('.story-split.single{').slice(0, 160));
 check('the media column exists and centres its frame', rule('.story-media{').includes('justify-items:center'), rule('.story-media{').slice(0, 160));
 const stacked = css.slice(css.indexOf('@media(max-width:900px){.story-split'));
 check('and on a phone the two columns stack', /^\{grid-template-columns:1fr/.test(stacked.slice('@media(max-width:900px){.story-split'.length)), stacked.slice(0, 120));
+
+/* Likes and comments. The story body renders in the browser, so these are read
+   out of the source and the stylesheet: what the DOM looks like after hydration
+   is the same contract, and a curl of the page can only ever see "Loading…". */
+const detail = readFileSync(join(ROOT.pathname, 'components/detail.tsx'), 'utf8');
+const engage = readFileSync(join(ROOT.pathname, 'components/engage.tsx'), 'utf8');
+const sections = readFileSync(join(ROOT.pathname, 'components/sections.tsx'), 'utf8');
+const admin = readFileSync(join(ROOT.pathname, 'components/admin.tsx'), 'utf8');
+check('every story carries the comment box', detail.includes('<Engagement post={postKey(kind, item.slug)} />'), 'detail.tsx lost the Engagement block');
+check('a clip that cannot be embedded is a card that says where it goes', detail.includes('Watch on {platformOf(external)}'), 'detail.tsx lost the external-clip card');
+check('and no story leans on a player it cannot promise', !/tiktok\.com\/embed/.test(detail), 'detail.tsx is embedding TikTok again');
+check('the comment form promises what moderation actually does', engage.includes('It goes up immediately'), 'engage.tsx lost the post-moderation promise');
+check('a like is one per reader, held by a token in their browser', engage.includes('timfire-reader-token'), 'engage.tsx lost the reader token');
+for (const sel of ['.engagement{', '.engage-bar{', '.like-button{', '.comment-list{', '.comment{', '.comment-form{', '.card-counts{']) {
+  check(`the stylesheet frames ${sel.slice(0, -1)}`, rule(sel).length > 0, 'missing from app/globals.css');
+}
+check('every card on the Me page carries the two counts', sections.includes('<CardCounts counts={counts?.[postKey(') , 'sections.tsx lost CardCounts');
+check('and the shelf asks for them in one request, not one per card', sections.includes("fetch('/api/engagement'"), 'sections.tsx is not batching the counts');
+
+/* The owner's other note: the Me page described itself twice, and vaguely. */
+const journalFn = sections.slice(sections.indexOf('function Journal()'), sections.indexOf('function Timeline()'));
+check('the Me page describes itself once, in the hero only', !/page-lead/.test(journalFn), 'Journal() carries its own description again');
+check('the dashboard has a Comments tab', admin.includes("comments:'Comments'") && admin.includes('{tab===\'comments\'&&<CommentsEditor/>}'), 'admin.tsx lost the Comments tab');
+check('and moderation hides before it deletes', admin.includes('Hide first'), 'admin.tsx lost the hide-before-delete rule');
 
 const box = rule('.lightbox-figure{');
 check('the gallery viewer keeps the same rhythm: words left, frame right', /grid-template-columns:minmax\(0,300px\) minmax\(0,1fr\)/.test(box), box.slice(0, 200));

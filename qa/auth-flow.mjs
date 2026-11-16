@@ -19,6 +19,8 @@
  *   subscribing saves the name and sends a welcome letter that can unsubscribe
  *   an empty content table serves the seed, a save that would delete every row
  *   is refused, and removing one item still saves and still deletes
+ *   a reader can like and comment with no account, the owner can hide, restore
+ *   and delete, and no content save can touch what readers left
  *
  *   npm run build && node qa/auth-flow.mjs
  */
@@ -379,7 +381,85 @@ try {
     eq('so the public site now shows six services', reloaded.services.length, 6);
   }
 
-  /* ---------- 8. logout ---------- */
+  /* ---------- 8. what readers leave, and who may moderate it ---------- */
+  {
+    const live = rotated || cookie;
+    const key = 'journal:they-get-disappointed';
+    // A distinct address, because the rate limit counts one: this reader is not
+    // the one smoke.sh used, and must not inherit its allowance or its likes.
+    const reader = { 'X-Forwarded-For': '203.0.113.77' };
+
+    const liked = await post('/api/likes', { post: key, token: 'qa-reader-token-one', liked: true }, reader);
+    eq('a reader can like a piece without an account', liked.status, 200);
+    const said = await post(
+      '/api/comments',
+      { post: key, name: 'A reader', email: 'reader@example.test', body: 'This one landed.', website: '' },
+      reader,
+    );
+    eq('and can comment without an account', said.status, 201);
+    const written = (await said.json()).comment;
+    check('the comment comes back with the id moderation needs', !!written?.id, JSON.stringify(written));
+
+    const thread = await (await fetch(`${APP}/api/comments?post=${key}`)).json();
+    eq('it is on the page the moment it is written', thread.comments.length, 1);
+    eq('and the writer email is never handed to another reader', thread.comments[0].email, '');
+    eq('the counts travel with the thread', thread.counts.likes, 1);
+    eq('so the card and the page agree', thread.counts.comments, 1);
+
+    const closed = await fetch(`${APP}/api/admin/comments`);
+    eq('moderation is closed to a reader', closed.status, 401);
+    const forced = await post('/api/admin/comments', { id: written.id, action: 'delete' });
+    eq('and a reader cannot delete a comment by posting anyway', forced.status, 401);
+
+    const open = await fetch(`${APP}/api/admin/comments`, { headers: { cookie: live } });
+    eq('the owner can read every comment', open.status, 200);
+    const all = await open.json();
+    eq('including the email the page never shows', all.comments[0].email, 'reader@example.test');
+
+    const hidden = await post('/api/admin/comments', { id: written.id, action: 'hide' }, { cookie: live });
+    eq('hiding a comment answers', hidden.status, 200);
+    eq('and it leaves the page', (await (await fetch(`${APP}/api/comments?post=${key}`)).json()).comments.length, 0);
+    const after = await (await fetch(`${APP}/api/admin/comments`, { headers: { cookie: live } })).json();
+    eq('but stays on the dashboard, so a mistake can be undone', after.hidden, 1);
+    eq('and a hidden comment stops counting', (await (await fetch(`${APP}/api/comments?post=${key}`)).json()).counts.comments, 0);
+    eq('while the like it arrived with is untouched', (await (await fetch(`${APP}/api/comments?post=${key}`)).json()).counts.likes, 1);
+
+    const restored = await post('/api/admin/comments', { id: written.id, action: 'restore' }, { cookie: live });
+    eq('restoring it answers', restored.status, 200);
+    eq('and it is back on the page', (await (await fetch(`${APP}/api/comments?post=${key}`)).json()).comments.length, 1);
+
+    // The separation that makes this safe: comments are reader rows, not content
+    // rows, so the dashboard save that once deleted everything cannot reach them.
+    const read = await (await fetch(`${APP}/api/admin/content`, { headers: { cookie: live } })).json();
+    const saved = await fetch(`${APP}/api/admin/content`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: live },
+      body: JSON.stringify(read),
+    });
+    eq('a full dashboard save still succeeds', saved.status, 200);
+    eq('and leaves what readers wrote alone', mocks.table('post_comments').length, 1);
+    eq('and what they liked alone', mocks.table('post_likes').length, 1);
+
+    // The database, not the route, is what refuses a status nobody declared —
+    // the same blind spot that let email_log.purpose reject every insert.
+    const bogus = await fetch(`http://127.0.0.1:${DB_PORT}/rest/v1/post_comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post: key, name: 'x', body: 'y', status: 'deleted' }),
+    });
+    eq('a comment status outside live|hidden is refused at the table', bogus.status, 409);
+
+    const doomed = await post('/api/comments', { post: key, name: 'Spam', body: 'Buy things.', website: '' }, reader);
+    eq('a second comment goes up too', doomed.status, 201);
+    const second = (await doomed.json()).comment;
+    const gone = await post('/api/admin/comments', { id: second.id, action: 'delete' }, { cookie: live });
+    eq('deleting a comment answers', gone.status, 200);
+    eq('and the row really goes', mocks.table('post_comments').length, 1);
+    const final = await post('/api/admin/comments', { id: second.id, action: 'hide' }, { cookie: live });
+    eq('moderating a comment that is no longer there says so', final.status, 404);
+  }
+
+  /* ---------- 9. logout ---------- */
   {
     const res = await post('/api/auth/logout', {}, { cookie: rotated || cookie });
     const cleared = sessionCookie(res);

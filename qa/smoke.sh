@@ -56,6 +56,11 @@ echo "$html" | grep -q 'ADD: poem' && { echo "FAIL drafts leak to anonymous /api
 echo "-- headers"
 curl -sI "$BASE/" | grep -qi 'content-security-policy' && echo "ok   CSP present" || { echo "FAIL CSP missing"; fail=1; }
 curl -sI "$BASE/" | grep -qi 'x-content-type-options: nosniff' && echo "ok   nosniff present" || { echo "FAIL nosniff missing"; fail=1; }
+# Policy lists only what the site actually frames: a clip on somebody else's
+# player is a link, not an iframe, so nothing third-party needs framing here.
+csp=$(curl -sI "$BASE/" | grep -i '^content-security-policy')
+printf '%s' "$csp" | grep -q 'frame-src https://www.youtube-nocookie.com https://player.vimeo.com' && echo "ok   frame-src names the two players the site can host" || { echo "FAIL frame-src lost the players it uses"; fail=1; }
+printf '%s' "$csp" | grep -qi 'tiktok' && { echo "FAIL frame-src still allows TikTok, which nothing frames"; fail=1; } || echo "ok   and allows no player the site cannot promise"
 
 echo "-- hero copy"
 html=$(curl -s "$BASE/")
@@ -163,9 +168,76 @@ echo "-- the page is called Me, and it is aimed at the reader"
 html=$(curl -s "$BASE/me")
 echo "$html" | grep -q 'is for you' && echo "ok   the Me page says who it is for" || { echo "FAIL the Me page hero lost its point"; fail=1; }
 echo "$html" | grep -qi 'The journal' && { echo "FAIL the Me page still calls itself the journal"; fail=1; } || echo "ok   the Me page no longer calls itself the journal"
-echo "$html" | grep -q 'whoever is reading it' && echo "ok   and it speaks to the person reading" || { echo "FAIL the Me page lead was not rewritten"; fail=1; }
+# One description, not two: the hero carries it and nothing repeats it underneath.
+# Scoped to the hero, because `page-lead` is also the class the weekly-feature
+# blocks use for their own copy — counting the whole page blamed the wrong text.
+hero=$(printf '%s' "$html" | tr -d '\n' | sed 's/.*<section class="shell page-hero/page-hero/; s/<\/section>.*//')
+leads=$(printf '%s' "$hero" | grep -o 'page-lead' | wc -l | tr -d ' ')
+[ "$leads" = "1" ] && echo "ok   the Me hero describes the page once" || { echo "FAIL the Me hero carries $leads descriptions, expected 1"; fail=1; }
+echo "$html" | grep -q 'Read one, like it, and tell me under the page what it did to you' && echo "ok   and that description says what a reader can do here" || { echo "FAIL the Me page description is vague again"; fail=1; }
+echo "$html" | grep -q 'One week in seven this page belongs to a reader' && echo "ok   and it says what the weekly feature is" || { echo "FAIL the Me page description lost the weekly feature"; fail=1; }
 curl -s "$BASE/me" | grep -q '<title>Me | TIMFIRE</title>' && echo "ok   the tab is titled Me" || { echo "FAIL the Me page title is wrong"; fail=1; }
 
+echo "-- likes and comments, under every piece"
+# A fresh reader every run: the token is what makes a like one like, and the
+# address is what the rate limit counts, so a second run of this suite must not
+# inherit the first run's likes or spend its allowance.
+key=journal:they-get-disappointed
+tok="qasmoke${RANDOM}${RANDOM}"
+other="qasmoke${RANDOM}${RANDOM}"
+IP="203.0.113.$((RANDOM % 200 + 20))"   # TEST-NET-3: reserved for documentation
+as_reader=(-H "x-forwarded-for: $IP")
+likes_of() { curl -s "${as_reader[@]}" "$BASE/api/engagement?posts=$key" | sed 's/.*"likes":\([0-9]*\).*/\1/'; }
+like() { curl -s "${as_reader[@]}" -X POST "$BASE/api/likes" -H 'Content-Type: application/json' -d "{\"post\":\"$key\",\"token\":\"$1\",\"liked\":$2}"; }
+
+base=$(likes_of)
+like "$tok" true > /dev/null
+after=$(likes_of)
+[ "$after" = "$((base + 1))" ] && echo "ok   a like raises the count by one" || { echo "FAIL a like took the count from $base to $after"; fail=1; }
+
+body=$(like "$tok" true)
+again=$(likes_of)
+[ "$again" = "$after" ] && echo "ok   liking twice is still one like" || { echo "FAIL the same reader counted twice: $after -> $again ($body)"; fail=1; }
+echo "$body" | grep -q "\"liked\":true" && echo "ok   and the reader is told the like is theirs" || { echo "FAIL the like response lost its state: $body"; fail=1; }
+
+like "$other" true > /dev/null
+two=$(likes_of)
+[ "$two" = "$((after + 1))" ] && echo "ok   a second reader is a second like" || { echo "FAIL two readers gave $two likes, expected $((after + 1))"; fail=1; }
+
+like "$tok" false > /dev/null
+back=$(likes_of)
+[ "$back" = "$after" ] && echo "ok   withdrawing a like takes the number back down" || { echo "FAIL unliking left $back likes, expected $after"; fail=1; }
+
+code=$(curl -s "${as_reader[@]}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/likes" -H 'Content-Type: application/json' -d '{"post":"not-a-key","token":"qasmoketoken0003","liked":true}')
+[ "$code" = "400" ] && echo "ok   a malformed post key is refused" || { echo "FAIL malformed like answered $code, expected 400"; fail=1; }
+code=$(curl -s "${as_reader[@]}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/likes" -H 'Content-Type: application/json' -d '{"post":"journal:does-not-exist","token":"qasmoketoken0003","liked":true}')
+[ "$code" = "404" ] && echo "ok   liking a piece that is not published is refused" || { echo "FAIL like on an unpublished key answered $code, expected 404"; fail=1; }
+code=$(curl -s "${as_reader[@]}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/likes" -H 'Content-Type: application/json' -d "{\"post\":\"$key\",\"token\":\"short\",\"liked\":true}")
+[ "$code" = "400" ] && echo "ok   a reader id this site did not issue is refused" || { echo "FAIL a bad token answered $code, expected 400"; fail=1; }
+
+code=$(curl -s "${as_reader[@]}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/comments" -H 'Content-Type: application/json' -d "{\"post\":\"$key\",\"name\":\"\",\"body\":\"\",\"website\":\"\"}")
+[ "$code" = "400" ] && echo "ok   an empty comment is refused" || { echo "FAIL empty comment answered $code, expected 400"; fail=1; }
+body=$(curl -s "${as_reader[@]}" -X POST "$BASE/api/comments" -H 'Content-Type: application/json' -d "{\"post\":\"$key\",\"name\":\"QA Reader\",\"email\":\"qa-reader@example.com\",\"body\":\"This is an automated smoke test comment.\",\"website\":\"\"}")
+echo "$body" | grep -q 'QA Reader' && echo "ok   a comment goes up immediately" || { echo "FAIL the comment was not stored: $body"; fail=1; }
+echo "$body" | grep -q 'qa-reader@example.com' && { echo "FAIL the writer email came back to the reader"; fail=1; } || echo "ok   and the writer email is never sent back"
+listed=$(curl -s "${as_reader[@]}" "$BASE/api/comments?post=$key")
+echo "$listed" | grep -q 'automated smoke test comment' && echo "ok   the thread lists it" || { echo "FAIL the thread is missing the comment: $listed"; fail=1; }
+echo "$listed" | grep -q '"likes":' && echo "ok   and the thread arrives with its counts" || { echo "FAIL the thread carried no counts: $listed"; fail=1; }
+code=$(curl -s "${as_reader[@]}" -o /dev/null -w '%{http_code}' -X POST "$BASE/api/comments" -H 'Content-Type: application/json' -d "{\"post\":\"$key\",\"name\":\"QA Reader\",\"body\":\"honeypot filled\",\"website\":\"http://spam.example\"}")
+[ "$code" = "200" ] && echo "ok   a filled honeypot is answered and ignored" || { echo "FAIL honeypot answered $code, expected a silent 200"; fail=1; }
+listed=$(curl -s "${as_reader[@]}" "$BASE/api/comments?post=$key")
+n=$(printf '%s' "$listed" | grep -o 'honeypot filled' | wc -l | tr -d ' ')
+[ "$n" = "0" ] && echo "ok   and it is never stored" || { echo "FAIL the honeypot comment was stored ($n)"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/comments?post=nonsense")
+[ "$code" = "400" ] && echo "ok   a thread is only served for a real piece" || { echo "FAIL a nonsense thread key answered $code, expected 400"; fail=1; }
+
+echo "-- moderation belongs to the owner alone"
+for r in /api/admin/comments; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$r")
+  [ "$code" = "401" ] && echo "ok   $r requires auth 401" || { echo "FAIL $r answered $code to an anonymous reader"; fail=1; }
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE$r" -H 'Content-Type: application/json' -d '{"id":"00000000-0000-0000-0000-000000000000","action":"delete"}')
+  [ "$code" = "401" ] && echo "ok   $r refuses an anonymous write" || { echo "FAIL $r accepted an anonymous POST ($code)"; fail=1; }
+done
 echo "-- the homepage carries the owner's own positioning statement"
 html=$(curl -s "$BASE/")
 echo "$html" | grep -q 'A creative technologist, digital entrepreneur, founder, worshipper' && echo "ok   the hero says what he is" || { echo "FAIL the hero statement is missing"; fail=1; }

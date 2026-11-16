@@ -40,6 +40,39 @@ create table if not exists public.enquiries (
   created_at timestamptz not null default now()
 );
 
+-- Readers write these two, not the owner, so they live apart from site_content:
+-- a dashboard save rewrites content rows and must never be able to touch what
+-- somebody said about a poem. Post-moderation by design — a comment is live the
+-- moment it is written, and the owner hides or deletes it afterwards.
+create table if not exists public.post_comments (
+  id         uuid primary key default gen_random_uuid(),
+  post       text not null,
+  name       text not null,
+  email      text not null default '',
+  body       text not null,
+  status     text not null default 'live',
+  created_at timestamptz not null default now()
+);
+comment on column public.post_comments.post is
+  'The piece being commented on, as "<collection>:<slug>" — journal:they-get-disappointed.';
+comment on column public.post_comments.name is
+  'Whatever the writer wants to be called. A handle is a name; it need not be a legal one.';
+comment on column public.post_comments.email is
+  'Optional, never displayed, and never added to the mailing list. Only for reaching the writer about their own comment.';
+
+create table if not exists public.post_likes (
+  id         uuid primary key default gen_random_uuid(),
+  post       text not null,
+  token      text not null,
+  name       text not null default '',
+  created_at timestamptz not null default now(),
+  unique (post, token)
+);
+comment on column public.post_likes.token is
+  'Who liked it: a browser token for a guest, the member id once accounts exist. One like per token per post, which is what keeps a count honest.';
+comment on column public.post_likes.name is
+  'The handle a member likes with, shown beside the count. Empty for a guest, whose like is counted but not named.';
+
 create table if not exists public.subscribers (
   id              uuid primary key default gen_random_uuid(),
   email           text not null,
@@ -129,6 +162,9 @@ alter table public.email_templates add constraint email_templates_sender_check c
 alter table public.site_singletons drop constraint if exists site_singletons_key_check;
 alter table public.site_singletons add constraint site_singletons_key_check check (key in ('profile', 'now', 'settings', 'revisions'));
 
+alter table public.post_comments drop constraint if exists post_comments_status_check;
+alter table public.post_comments add constraint post_comments_status_check check (status in ('live', 'hidden'));
+
 alter table public.subscribers drop constraint if exists subscribers_status_check;
 alter table public.subscribers add constraint subscribers_status_check check (status in ('active', 'unsubscribed'));
 
@@ -140,6 +176,8 @@ create index if not exists subscribers_status_idx on public.subscribers (status)
 create index if not exists email_log_created_idx  on public.email_log (created_at desc);
 create index if not exists enquiries_created_idx  on public.enquiries (created_at desc);
 create index if not exists site_content_collection_idx on public.site_content (collection);
+create index if not exists post_comments_post_idx on public.post_comments (post, created_at desc);
+create index if not exists post_likes_post_idx    on public.post_likes (post);
 
 alter table public.site_content    enable row level security;
 alter table public.site_singletons enable row level security;
@@ -149,3 +187,18 @@ alter table public.email_templates enable row level security;
 alter table public.email_log       enable row level security;
 alter table public.admin_signins   enable row level security;
 alter table public.admin_credentials enable row level security;
+-- Like and live-comment totals for a set of posts in one round trip. Counted in
+-- the database rather than by paging rows back to the server, because a count
+-- assembled from a truncated select is a number that quietly stops being true
+-- the day a post gets popular.
+create or replace function public.engagement_counts(post_keys text[])
+returns table(post text, likes bigint, comments bigint)
+language sql stable as $$
+  select k.post,
+         (select count(*) from public.post_likes l where l.post = k.post),
+         (select count(*) from public.post_comments c where c.post = k.post and c.status = 'live')
+  from unnest(post_keys) as k(post);
+$$;
+
+alter table public.post_comments     enable row level security;
+alter table public.post_likes        enable row level security;

@@ -1,5 +1,92 @@
 # QA status
 
+## Likes and comments, one description, and a clip that cannot be embedded — branch `arena/b56f4a47-timfire` (2026-11-16)
+
+Phase two. Three of the owner's reports land here together, because they all touch the same page:
+*"the description is split into two and it is vague"*, *"the TikTok video says Player authentication
+failed"*, *"the alignment is not good"*, *"the preview on the /me page is not showing"* — and then
+*"continue to phase two"*, which is likes and comments.
+
+- **Readers can like and comment on every piece, with no account.** Two new tables, `post_comments`
+  and `post_likes`, deliberately outside `site_content`: what readers leave must never be reachable by
+  a dashboard save, which is the failure class that once deleted all 42 content rows. `auth-flow` now
+  proves it by saving the whole dataset and asserting both reader tables are untouched.
+- **A like is one like.** The reader's browser holds a token, `(post, token)` is unique in the
+  database, and clicking twice is a like followed by not-a-like. When accounts arrive the token
+  becomes the member id; nothing about the counting changes.
+- **Counts are totalled in the database**, by `public.engagement_counts(text[])`, never assembled from
+  a page of rows — a total built from a `limit 300` read would silently stop being true the day a post
+  does well. The Me shelf asks once for all fifteen cards, not once per card.
+- **Moderation is after the fact**, as the owner chose: the form's promise (*"it goes up immediately"*)
+  is the true one, and the dashboard's new **Comments** tab hides, restores or deletes. Hiding is
+  offered first because it can be undone. A hidden comment stops counting on the page but stays in the
+  owner's tally, so he can see what he removed.
+- **`ModerationOutcome` is three-valued, not boolean.** PostgREST answers 200 to an UPDATE that matched
+  no rows, so a boolean would have the dashboard say "Deleted." about a comment another session had
+  already removed. Asking for the affected ids back is what separates `ok` from `missing` (404, and the
+  list refreshes itself) from `error` (503).
+- **The writer's email is stored for the owner and never returned to a reader** — `listComments` strips
+  it, `listAllComments` keeps it, and both directions are asserted.
+- **Nothing emails anybody when a comment lands.** A letter per comment would spend the whole Resend
+  daily allowance the first time a post does well; the cap the owner is on is counted, not guessed.
+- **One description on `/me`, and a specific one.** The hero carried a description and `Journal()`
+  repeated nearly the same paragraph underneath it, which is what read as one thought cut in half. The
+  second is gone and the remaining one names what is there and what a reader can do: *"Poems, spoken
+  word, penlight essays and Good Reports — every piece carrying the photograph or the clip it was
+  posted with. Read one, like it, and tell me under the page what it did to you. One week in seven this
+  page belongs to a reader instead…"* Smoke counts `page-lead` **inside the hero block only** — the
+  class is shared with the weekly-feature copy, and counting the whole page blamed the wrong text.
+- **A clip this site cannot host is a card that says where it goes.** TikTok's own player answers
+  *"Player authentication failed — this link is invalid or has expired"* on a public video that plays
+  fine in the app; `oembed` and `/embed/v2/<id>` both return HTTP 400 from here, so nothing on our side
+  of the iframe can detect or repair that. The story now renders `Watch on TikTok ↗` over the poster
+  still (or a play glyph where there is none), captioned exactly as before. YouTube and Vimeo *do*
+  serve players that work, so those still embed — and CSP `frame-src` lists only those two now, because
+  policy should name what the site actually frames. Filling in `videoSrc` with the file itself makes any
+  clip play in the page, with no code change.
+- **The media column is a fixed measure, not a share of the page.** `minmax(0,460px)` with everything
+  inside capped to it, and a clip capped by *height* (`min(72vh,680px)`) because a 9:16 video in a
+  460px column is taller than it is wide and used to tower over the title beside it. That is the
+  alignment complaint. The duplicate `.story-embed` rules that argued about the same box are gone with
+  the iframe.
+- **A card shows a preview whenever the piece has a frame of its own:** `videoPoster` is now used by
+  the Me cards, ahead of the text-only `.card-video-flag` fallback.
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `./node_modules/.bin/tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 38 routes, adding `/api/comments`, `/api/likes`, `/api/engagement`, `/api/admin/comments` |
+| Frame fidelity | `node qa/frame-fidelity.mjs http://127.0.0.1:3100` | Pass — **49/49**, 19 new: the media column's fixed measure and height-capped clip, the comment box on every story, the external-clip card, no TikTok embed left in the source, the form's post-moderation promise, the reader token, seven engagement CSS contracts, counts on every card fetched in one request, one description in the hero only, and the dashboard's Comments tab with hide-before-delete |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — **152/152**, 22 new: like raises the count by one, liking twice is still one like, a second reader is a second like, withdrawing takes it back down, malformed/unpublished/short tokens refused, empty comment refused, comment goes up immediately, writer email never returned, thread lists it with its counts, honeypot answered and never stored, thread only served for a real piece, moderation closed to readers on both GET and POST, and `frame-src` naming only the two players the site can host |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes, 37 internal targets, 48 images |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — 22 unique titles |
+| Schema contract | `node qa/schema-contract.mjs` | Pass — 47 columns / 31 values, **10 of 10 tables**, `post_comments.status accepts: live, hidden` |
+| Email contract | `node qa/email-contract.mjs` | Pass |
+| Sign-in + subscribe + content guard + moderation | `node qa/auth-flow.mjs` | Pass — **110/110**, 26 new: a reader likes and comments with no account, the comment is live immediately, its email never reaches another reader, counts travel with the thread, moderation is 401 to a reader on read *and* write, the owner sees the email, hiding removes it from the page but not the dashboard, a hidden comment stops counting while its like survives, restoring works, a full content save leaves both reader tables alone, a status outside `live\|hidden` is refused at the table (409), and moderating a deleted comment answers 404 |
+
+The mock database learned four things so those checks could be honest — fidelity gaps, not new
+behaviour, and each one was a way for a test to pass while production failed:
+
+1. **`post_comments` and `post_likes` joined the table registry**, with the column defaults the real
+   database supplies (`status 'live'`, empty email and name, `created_at`). The `live` default is the
+   reason the form's promise is a true one.
+2. **`/rest/v1/rpc/<fn>` is served.** The mock only ever answered `/rest/v1/<table>`, so
+   `supa.rpc('engagement_counts')` — every like button and every card count on the site — would have
+   read as "unavailable" offline and the suite would have blessed a blank. It counts only `live`
+   comments, exactly as the SQL does.
+3. **`HEAD` and `Content-Range`.** `.select('id', { count: 'exact', head: true })` arrives as a HEAD
+   request and postgrest-js reads the number out of `Content-Range`; without both, a like total reads
+   back as 0 and every assertion about it still passes.
+4. **`on_conflict` and `resolution=ignore-duplicates`.** Matching on the primary key alone meant a
+   second like from the same browser found no existing row (a fresh id every time) and quietly became a
+   second like — the exact dishonesty the unique pair exists to prevent.
+
+Two notes on running this locally. The engagement smoke checks use a fresh reader token *and* a fresh
+`203.0.113.x` address per run, because both are what the rate limits count: a second run inside 15
+minutes otherwise spends the first run's allowance and inherits its likes. And `auth-flow.mjs` runs
+against `.next`, so a code change needs `npm run build` before it means anything — one moderation
+assertion passed against a stale bundle before that was caught.
+
 ## The journal becomes Me, and a story opens as a split — branch `arena/94fbff79-timfire` (2026-11-16)
 
 The owner's brief was about intention, not decoration: *"Everything I'm posting is for them, not for

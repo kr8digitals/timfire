@@ -25,6 +25,16 @@ import { createServer } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { checkViolation } from './schema-domains.mjs';
 
+/**
+ * A column set the database will not let two rows share. `post_likes` has a
+ * primary key of its own, but the promise the like button makes — one like per
+ * reader per post — is kept by the unique pair (post, token), so the mock has to
+ * know about it or a second click looks like it worked.
+ */
+const UNIQUE_KEYS = {
+  post_likes: ['post', 'token'],
+};
+
 const PRIMARY_KEYS = {
   admin_signins: ['key'],
   subscribers: ['id'],
@@ -34,6 +44,8 @@ const PRIMARY_KEYS = {
   site_content: ['collection', 'id'],
   site_singletons: ['key'],
   admin_credentials: ['key'],
+  post_comments: ['id'],
+  post_likes: ['id'],
 };
 
 /** Column defaults the real database supplies, so inserts behave the same. */
@@ -59,6 +71,17 @@ function withDefaults(table, row) {
   }
   if (table === 'enquiries') {
     out.answers ??= {};
+    out.created_at ??= new Date().toISOString();
+  }
+  if (table === 'post_comments') {
+    // A comment is live the moment it is written — that is the moderation model,
+    // and the default here is the reason the promise on the form is a true one.
+    out.status ??= 'live';
+    out.email ??= '';
+    out.created_at ??= new Date().toISOString();
+  }
+  if (table === 'post_likes') {
+    out.name ??= '';
     out.created_at ??= new Date().toISOString();
   }
   return out;
@@ -194,16 +217,42 @@ export async function startMocks({ resendPort, dbPort }) {
     res.end(JSON.stringify({ message: `mock resend: unhandled ${req.method} ${req.url}` }));
   });
 
+  /**
+   * `supa.rpc('engagement_counts', …)` — the totals behind every like button and
+   * every card on the Me page.
+   *
+   * The real one is a SQL function so that a count can never be truncated by a
+   * row limit; the mock counts the same rows in memory. It counts only `live`
+   * comments, exactly as the SQL does, or a hidden comment would keep showing up
+   * in a total while being invisible on the page — and QA would bless the lie.
+   */
+  function rpcEngagementCounts(body) {
+    const keys = Array.isArray(body?.post_keys) ? body.post_keys.map(String) : [];
+    return keys.map((post) => ({
+      post,
+      likes: rows('post_likes').filter((r) => r.post === post).length,
+      comments: rows('post_comments').filter((r) => r.post === post && r.status === 'live').length,
+    }));
+  }
+
   /* ---------------- Supabase (PostgREST) ---------------- */
   const supabase = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://mock');
+    const send = (status, payload, headers = {}) => {
+      res.writeHead(status, { 'Content-Type': 'application/json', ...headers });
+      res.end(JSON.stringify(payload));
+    };
+
+    if (url.pathname.startsWith('/rest/v1/rpc/')) {
+      const fn = url.pathname.replace('/rest/v1/rpc/', '');
+      const body = await readBody(req);
+      if (fn === 'engagement_counts') return send(200, rpcEngagementCounts(body));
+      return send(404, { message: `mock supabase: unknown rpc ${fn}` });
+    }
+
     const table = url.pathname.replace('/rest/v1/', '').replace(/\/$/, '');
     const wantsObject = (req.headers.accept || '').includes('pgrst.object');
     const prefer = req.headers.prefer || '';
-    const send = (status, payload) => {
-      res.writeHead(status, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(payload));
-    };
     const single = (list) => {
       if (!wantsObject) return send(200, list);
       if (list.length === 1) return send(200, list[0]);
@@ -216,9 +265,13 @@ export async function startMocks({ resendPort, dbPort }) {
     };
     if (!PRIMARY_KEYS[table]) return send(404, { message: `mock supabase: unknown table ${table}` });
     const filters = filtersOf(url.searchParams);
-    const body = req.method === 'GET' || req.method === 'DELETE' ? null : await readBody(req);
+    // `.select('id', { count: 'exact', head: true })` arrives as HEAD: postgrest-js
+    // takes the method from `head` and the number from the Content-Range header.
+    // Without both, a like total reads back as 0 and every test still passes.
+    const isRead = req.method === 'GET' || req.method === 'HEAD';
+    const body = isRead || req.method === 'DELETE' ? null : await readBody(req);
 
-    if (req.method === 'GET') {
+    if (isRead) {
       let list = rows(table).filter((row) => matches(row, filters));
       const order = url.searchParams.get('order');
       if (order) {
@@ -227,22 +280,33 @@ export async function startMocks({ resendPort, dbPort }) {
           direction === 'desc' ? String(b[column]).localeCompare(String(a[column])) : String(a[column]).localeCompare(String(b[column])),
         );
       }
+      const total = list.length;
       const limit = url.searchParams.get('limit');
       if (limit) list = list.slice(0, Number(limit));
+      // `*/12` is what PostgREST sends when no rows are asked for, only counted.
+      if (!wantsObject) res.setHeader('Content-Range', `${list.length ? '0-' + (list.length - 1) : '*'}/${total}`);
       return single(list);
     }
 
     if (req.method === 'POST') {
       const incoming = Array.isArray(body) ? body : [body];
       const upsert = prefer.includes('merge-duplicates');
+      const ignore = prefer.includes('ignore-duplicates');
       const keys = PRIMARY_KEYS[table];
+      // An upsert names the conflict it means: `.upsert(row, { onConflict: 'post,token' })`.
+      // Without reading it, a second like from the same browser would find no
+      // existing row (a fresh id every time) and quietly become a second like.
+      const conflict = (url.searchParams.get('on_conflict') || '').split(',').map((c) => c.trim()).filter(Boolean);
+      const uniqueBy = conflict.length ? conflict : UNIQUE_KEYS[table] || keys;
       const written = [];
       for (const item of incoming) {
         const row = withDefaults(table, item);
         const violation = checkViolation(table, row);
         if (violation) return send(409, violation);
-        const at = rows(table).findIndex((existing) => keys.every((key) => String(existing[key]) === String(row[key])));
-        if (at >= 0 && upsert) {
+        const at = rows(table).findIndex((existing) => uniqueBy.every((key) => String(existing[key]) === String(row[key])));
+        if (at >= 0 && ignore) {
+          written.push(rows(table)[at]);
+        } else if (at >= 0 && upsert) {
           rows(table)[at] = { ...rows(table)[at], ...row };
           written.push(rows(table)[at]);
         } else if (at >= 0) {

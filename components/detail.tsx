@@ -5,19 +5,45 @@ import { ArrowUpRight, Play } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useStore, safeUrl, safeMedia } from '@/lib/store';
 import { isPublished } from '@/lib/content';
+import { postKey } from '@/lib/posts';
+import Engagement from '@/components/engage';
 
 /** The journal was renamed Me, so its stories live under /me. */
 const baseOf = (kind: 'creative' | 'journal') => (kind === 'journal' ? '/me' : '/creative');
 
 /**
- * TikTok's own player, when the external clip is a TikTok post: the video plays
- * here, in the story, instead of sending the reader off to an app they may not
- * have. Anything else — a Facebook share link, say — stays a card with the
- * poster still, because those cannot be embedded.
+ * A player this site can actually host. YouTube and Vimeo serve an embed that
+ * works for any public video, so those play in the story. Everything else — a
+ * TikTok post, a Facebook share — becomes a card that says where it goes.
  */
-function tiktokEmbed(url: string): string {
-  const id = /tiktok\.com\/@[\w.-]+\/video\/(\d+)/.exec(url)?.[1] ?? /tiktok\.com\/embed\/v2\/(\d+)/.exec(url)?.[1] ?? '';
-  return id ? 'https://www.tiktok.com/embed/v2/' + id : '';
+function embedOf(url: string): { src: string; host: string } | null {
+  const yt = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/.exec(url)?.[1] ?? '';
+  if (yt) return { src: 'https://www.youtube-nocookie.com/embed/' + yt, host: 'YouTube' };
+  const vm = /vimeo\.com\/(?:video\/)?(\d{6,})/.exec(url)?.[1] ?? '';
+  if (vm) return { src: 'https://player.vimeo.com/video/' + vm, host: 'Vimeo' };
+  return null;
+}
+
+/**
+ * Which platform a clip lives on, so the card can say so instead of asking the
+ * reader to guess what they are about to open.
+ *
+ * A third-party player is not something this site can promise. TikTok's own
+ * embed answered "Player authentication failed — this link is invalid or has
+ * expired" on a public video that plays fine in the app, and nothing on our side
+ * of the iframe can detect or fix that. So the rule is plain: a clip that is
+ * self-hosted plays here, in the story; a clip that lives on somebody else's
+ * player is a card that says where it goes and opens it. When the owner hands
+ * over the file, `videoSrc` is filled in and it plays here like every other.
+ */
+function platformOf(url: string): string {
+  const host = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+  if (host.includes('tiktok.com')) return 'TikTok';
+  if (host.includes('facebook.com') || host === 'fb.watch') return 'Facebook';
+  if (host.includes('youtube.com') || host === 'youtu.be') return 'YouTube';
+  if (host.includes('instagram.com')) return 'Instagram';
+  if (host.includes('x.com') || host.includes('twitter.com')) return 'X';
+  return 'the original post';
 }
 
 /**
@@ -58,7 +84,8 @@ export default function Detail({ kind, slug }: { kind: 'creative' | 'journal'; s
   const media = c && c.mediaType !== 'none' ? safeMedia(c.mediaUrl) : '';
   const minRead = Math.max(1, Math.ceil(item.body.trim().split(/\s+/).length / 200));
   const external = isJournal ? safeUrl(item.videoExternal || '') : '';
-  const embed = isJournal && !item.videoSrc && external ? tiktokEmbed(external) : '';
+  // A self-hosted file always wins: it is the only clip this site can promise.
+  const embed = isJournal && !item.videoSrc && external ? embedOf(external) : null;
   const hasMedia = isJournal ? !!(item.image || item.videoSrc || external) : !!media;
 
   return (
@@ -119,30 +146,32 @@ export default function Detail({ kind, slug }: { kind: 'creative' | 'journal'; s
             {isJournal && embed ? (
               <figure className="story-embed">
                 <iframe
-                  src={embed}
-                  title={item.videoCaption || 'Video for ' + item.title}
+                  src={embed.src}
+                  title={(item.videoCaption || 'Video for ' + item.title) + ' — on ' + embed.host}
                   loading="lazy"
-                  scrolling="no"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                   allowFullScreen
                 />
-                <figcaption>{item.videoCaption || 'Watch the video'}</figcaption>
+                {item.videoCaption ? <figcaption>{item.videoCaption}</figcaption> : null}
               </figure>
             ) : null}
             {isJournal && !item.videoSrc && !embed && external ? (
-              <a className="video-card" href={external} target="_blank" rel="noopener noreferrer">
-                {item.videoPoster ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- a poster still for a clip that cannot be embedded
-                  <img src={item.videoPoster} alt={item.videoCaption || item.title} />
-                ) : (
-                  <span className="video-play" aria-hidden="true">
-                    &#9654;
+              <figure className="story-external">
+                <a className="video-card" href={external} target="_blank" rel="noopener noreferrer">
+                  {safeMedia(item.videoPoster || '') ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- a poster still for a clip that lives on another platform
+                    <img src={safeMedia(item.videoPoster || '')} alt={item.videoCaption || item.title} />
+                  ) : (
+                    <span className="video-play" aria-hidden="true">
+                      <Play size={40} />
+                    </span>
+                  )}
+                  <span>
+                    <Play size={17} /> Watch on {platformOf(external)} &#8599;
                   </span>
-                )}
-                <span>
-                  <Play size={17} /> {item.videoCaption || 'Watch the video'} &#8599;
-                </span>
-              </a>
+                </a>
+                {item.videoCaption ? <figcaption>{item.videoCaption}</figcaption> : null}
+              </figure>
             ) : null}
             {media && c ? (
               <>
@@ -214,6 +243,8 @@ export default function Detail({ kind, slug }: { kind: 'creative' | 'journal'; s
           ) : null;
         })()
       ) : null}
+
+      <Engagement post={postKey(kind, item.slug)} />
 
       {kind === 'journal' ? (
         <section className="feature-cta" aria-label="Want to be featured?">

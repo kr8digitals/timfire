@@ -9,6 +9,8 @@ import { PUBLIC_EMAIL } from '@/lib/site';
 import { Reveal } from '@/components/motion';
 import ContactForm from '@/components/contact-form';
 import { FeaturedThisWeek, FeatureApplication } from '@/components/feature';
+import { CardCounts } from '@/components/engage';
+import { postKey, type Counts } from '@/lib/posts';
 import { Price, CurrencySelect } from '@/components/currency';
 import { servicePageByServiceId } from '@/lib/services-content';
 
@@ -54,7 +56,7 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
     eyebrow: 'Me',
     title: 'This page',
     accent: 'is for you.',
-    description: 'Everything I write lands here — poems, spoken word, penlight essays and Good Reports — posted for whoever needs it. Read it, then tell me what it did to you.',
+    description: 'Poems, spoken word, penlight essays and Good Reports — every piece carrying the photograph or the clip it was posted with. Read one, like it, and tell me under the page what it did to you. One week in seven this page belongs to a reader instead: their story, in their words, where mine usually is.',
     image: {
       src: '/images/writing.webp',
       alt: 'TIMFIRE smiling with an open book on his lap, among shelves of old books',
@@ -840,6 +842,21 @@ function Journal() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('All');
   const [count, setCount] = useState(6);
+  // One request for the whole shelf: fifteen cards must not become fifteen queries.
+  // `null` until it answers, so a card never prints a number the site could not vouch for.
+  const [counts, setCounts] = useState<Record<string, Counts> | null>(null);
+  useEffect(() => {
+    let live = true;
+    fetch('/api/engagement', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((v) => {
+        if (live && v?.counts) setCounts(v.counts as Record<string, Counts>);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
   const items = data.journal.filter(isPublished);
   const categories = ['All', ...new Set(items.map((x) => x.category))];
   const found = items.filter(
@@ -847,13 +864,6 @@ function Journal() {
   );
   return (
     <>
-      <Reveal>
-        <p className="page-lead" style={{ maxWidth: 720 }}>
-          This page is the reason I keep writing: whoever is reading it. The first poem, the penlight essays, the Good
-          Reports for the people who poured into me — all of it posted for the person who needs it today. Search below,
-          or wander; every frame in the gallery leads back to its story here.
-        </p>
-      </Reveal>
       <FeaturedThisWeek />
       <div className="page-grid section" style={{ paddingTop: 0 }}>
         <div>
@@ -894,6 +904,8 @@ function Journal() {
             <article className="card light">
               {x.image ? (
                 <img className="card-image journal-thumb" src={x.image} alt={x.imageAlt || x.title} loading="lazy" />
+              ) : x.videoPoster ? (
+                <img className="card-image journal-thumb" src={x.videoPoster} alt={x.videoCaption || x.title} loading="lazy" />
               ) : x.videoSrc || x.videoExternal ? (
                 <div className="card-image card-video-flag">
                   <Play size={26} aria-hidden="true" />
@@ -904,6 +916,7 @@ function Journal() {
               <h3>{x.title}</h3>
               <p>{x.summary}</p>
               <p>{Math.max(1, Math.ceil(x.body.trim().split(/\s+/).length / 200))} min read</p>
+              <CardCounts counts={counts?.[postKey('journal', x.slug)]} />
               {x.tags.map((t) => (
                 <span className="tag" key={t}>
                   {t}

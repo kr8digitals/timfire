@@ -9,7 +9,7 @@ const service = z.object({ id: s, name: s, ngn: z.number().nullable(), usd: z.nu
 const website = z.object({ id: s, name: s, url: s, description: s, image: s, isPublic: b, live: b, kind: s });
 const agent = z.object({ id: s, name: s, description: s, buildType: z.enum(['Live', 'Private build']), url: s });
 const creative = z.object({ id: s, title: s, slug: s, category: z.enum(['Poetry', 'Spoken word', 'Sounds and music']), body: s, mediaUrl: s, captionUrl: s.default(''), mediaType: z.enum(['none', 'audio', 'video', 'external']), status, visibility, publishAt: s });
-const article = z.object({ id: s, title: s, slug: s, category: s, tags: z.array(s), summary: s, body: s, status, visibility, publishAt: s });
+const article = z.object({ id: s, title: s, slug: s, category: s, tags: z.array(s), summary: s, body: s, status, visibility, publishAt: s, image: s.optional(), imageAlt: s.optional(), origin: s.optional(), videoSrc: s.optional(), videoPoster: s.optional(), videoExternal: s.optional(), videoCaption: s.optional() });
 
 export const schema = z.object({
   version: z.literal(1),

@@ -57,7 +57,7 @@ export default function Page() {
         </h1>
         <p className="page-lead">
           Portraits, stages, studios, classrooms and street light — the photographed record of the work and the life
-          around it. Open any frame to see it full size; the arrow keys walk you through the set.
+          around it. Open any frame to see it full size; the arrow keys walk you through the set. Frames that carry a story link straight to the journal page that tells it — every image here happened, and most of them left words behind.
         </p>
       </section>
       <section className="shell" style={{ paddingBottom: 90 }}>

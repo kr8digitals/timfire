@@ -1,8 +1,11 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { GALLERY } from '@/lib/gallery';
+import { BookOpen, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import Link from 'next/link';
+import { GALLERY, type GalleryShot } from '@/lib/gallery';
+import { isPublished } from '@/lib/content';
+import { useStore } from '@/lib/store';
 
 export default function Gallery() {
   const [open, setOpen] = useState<number | null>(null);
@@ -36,6 +39,11 @@ export default function Gallery() {
     };
   }, [open, close, step]);
 
+  const { data } = useStore();
+  /** A frame only offers its story once the story is actually published. */
+  const storyOf = (frame: GalleryShot) =>
+    frame.story ? data.journal.find((x) => x.slug === frame.story && isPublished(x)) ?? null : null;
+
   const shot = open === null ? null : GALLERY[open];
 
   return (
@@ -61,7 +69,14 @@ export default function Gallery() {
                 sizes="(max-width: 680px) 100vw, (max-width: 1020px) 50vw, 33vw"
               />
             </button>
-            <figcaption>{s.caption}</figcaption>
+            <figcaption>
+              {s.caption}
+              {storyOf(s) ? (
+                <Link className="shot-story" href={'/journal/' + encodeURIComponent(s.story!)}>
+                  <BookOpen size={15} /> The story behind this frame
+                </Link>
+              ) : null}
+            </figcaption>
           </figure>
         ))}
       </div>
@@ -90,6 +105,11 @@ export default function Gallery() {
               <span className="lightbox-count mono">
                 {open + 1} / {GALLERY.length}
               </span>
+              {storyOf(shot) ? (
+                <Link className="lightbox-story" href={'/journal/' + encodeURIComponent(shot.story!)}>
+                  <BookOpen size={16} /> Read the story behind this frame
+                </Link>
+              ) : null}
             </figcaption>
           </figure>
           <button type="button" className="lightbox-nav next" onClick={() => step(1)} aria-label="Next image (right arrow key)">

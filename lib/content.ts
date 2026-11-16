@@ -4,7 +4,16 @@ export interface Service { id:string; name:string; ngn:number|null; usd:number|n
 export interface Work { id:string; name:string; url:string; description:string; image:string; isPublic:boolean; live:boolean; kind:string }
 export interface Agent { id:string; name:string; description:string; isPublic:boolean; buildType:'Live'|'Private build'; url:string }
 export interface Creative { id:string; title:string; slug:string; category:'Poetry'|'Spoken word'|'Sounds and music'; body:string; mediaUrl:string; captionUrl:string; mediaType:'none'|'audio'|'video'|'external'; status:Status; visibility:Visibility; publishAt:string }
-export interface Article { id:string; title:string; slug:string; category:string; tags:string[]; summary:string; body:string; status:Status; visibility:Visibility; publishAt:string }
+export interface Article {
+  id:string; title:string; slug:string; category:string; tags:string[]; summary:string; body:string;
+  status:Status; visibility:Visibility; publishAt:string;
+  /** Archive frames: the photograph the post went out with, and its alt text. */
+  image?:string; imageAlt?:string;
+  /** Where the piece first lived, e.g. 'First posted on my Facebook wall, March 2021.' */
+  origin?:string;
+  /** Hybrid video: a self-hosted file in /media, or a card linking out with a poster still. */
+  videoSrc?:string; videoPoster?:string; videoExternal?:string; videoCaption?:string;
+}
 export interface TimelineItem { id:string; year:string; title:string; description:string; isPublic:boolean }
 export interface Certificate { id:string; title:string; description:string; image:string; isPublic:boolean }
 export interface Testimonial { id:string; quote:string; name:string; isPublic:boolean }

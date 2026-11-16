@@ -4,6 +4,8 @@ export type GalleryShot = {
   h: number;
   alt: string;
   caption: string;
+  /** Journal slug of the post that tells the story behind this frame. */
+  story?: string;
 };
 
 /**

@@ -35,10 +35,14 @@ export default function Home() {
             </HeroItem>
             <HeroItem delay={0.7}>
               <p className="hero-lead">
-                Websites and AI agents built to work — fast on the phone in your hand, clear on the first screen.
-                And when the laptop closes: poetry, spoken word, sounds and music.
+                A creative technologist, digital entrepreneur, founder, worshipper, writer and lifelong learner
+                exploring the intersection of creativity, technology and human potential. I turn ideas into digital
+                experiences, creative solutions, and opportunities that make a difference.
               </p>
-              <p className="hero-lead-short">Websites and AI agents that work on the phone in your hand.</p>
+              <p className="hero-lead-short">
+                A creative technologist, founder, worshipper and writer — turning ideas into digital experiences that
+                make a difference.
+              </p>
             </HeroItem>
             <HeroItem delay={0.9}>
               <div className="actions">

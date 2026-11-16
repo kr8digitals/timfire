@@ -9,8 +9,16 @@ export interface Article {
   status:Status; visibility:Visibility; publishAt:string;
   /** Archive frames: the photograph the post went out with, and its alt text. */
   image?:string; imageAlt?:string;
+  /**
+   * The frame's real pixel size. Most archive photographs are tall portraits,
+   * so a renderer that guesses a landscape box crops heads off; with the true
+   * dimensions the photo is fitted whole instead.
+   */
+  imageWidth?:number; imageHeight?:number;
   /** Where the piece first lived, e.g. 'First posted on my Facebook wall, March 2021.' */
   origin?:string;
+  /** The original post itself, so readers can comment where the conversation already is. */
+  sourceUrl?:string;
   /** Hybrid video: a self-hosted file in /media, or a card linking out with a poster still. */
   videoSrc?:string; videoPoster?:string; videoExternal?:string; videoCaption?:string;
 }

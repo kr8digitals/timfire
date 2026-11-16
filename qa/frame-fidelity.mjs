@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+/**
+ * Frame fidelity: no photograph on a story page or a journal card may be cropped
+ * through somebody's face.
+ *
+ * The owner's complaint was exact — "my face is cut off from view, both on mobile
+ * and other screens" — and the cause was two CSS boxes that guessed a shape the
+ * archive photographs do not have: a story photo forced into a 1200x800 landscape
+ * frame with `object-fit: cover`, and a card thumbnail 250px tall with the window
+ * centred. Most of these frames are tall portraits (640x1337, 843x1765), so both
+ * boxes sliced straight through the head.
+ *
+ * This checks the fix from three sides:
+ *   1. every journal photograph carries its real pixel size, read here straight
+ *      out of the WebP on disk — a stale or missing size is what lets a crop back in;
+ *   2. the stylesheet still fits story photos whole (`contain`, never `cover`);
+ *   3. card thumbnails keep a top-biased window, where faces are.
+ *
+ * WebP dimensions are parsed from the file header rather than shelling out, so
+ * the check needs nothing installed.
+ *
+ *   npm run build && node qa/frame-fidelity.mjs http://127.0.0.1:3100
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const ROOT = new URL('..', import.meta.url);
+const BASE = process.argv[2] ?? 'http://127.0.0.1:3100';
+
+let checks = 0;
+let failures = 0;
+function check(label, condition, detail) {
+  checks += 1;
+  if (condition) console.log(`ok   ${label}`);
+  else {
+    console.log(`FAIL ${label}${detail === undefined ? '' : ` — ${detail}`}`);
+    failures += 1;
+  }
+}
+
+/** Width and height of a WebP, from RIFF/VP8, RIFF/VP8L or RIFF/VP8X. */
+function webpSize(file) {
+  const b = readFileSync(file);
+  if (b.toString('latin1', 0, 4) !== 'RIFF' || b.toString('latin1', 8, 12) !== 'WEBP') return null;
+  const fourcc = b.toString('latin1', 12, 16);
+  if (fourcc === 'VP8X') {
+    // 4 bytes size, 4 bytes flags, then canvas width-1 and height-1 as 24-bit LE.
+    const w = 1 + (b[24] | (b[25] << 8) | (b[26] << 16));
+    const h = 1 + (b[28] | (b[29] << 8) | (b[30] << 16));
+    return { width: w, height: h };
+  }
+  if (fourcc === 'VP8L') {
+    const at = 21; // chunk header (8) + 4-byte size field is at 16; signature 0x2f at 20
+    if (b[at - 1] !== 0x2f) return null;
+    const bits = b.readUInt32LE(at);
+    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (fourcc === 'VP8 ') {
+    // chunk size at 16, frame data from 20: 3-byte tag then the 9d 01 2a start code.
+    let at = 20;
+    while (at < b.length - 6 && !(b[at] === 0x9d && b[at + 1] === 0x01 && b[at + 2] === 0x2a)) at += 1;
+    if (b[at] !== 0x9d) return null;
+    return { width: b.readUInt16LE(at + 3) & 0x3fff, height: b.readUInt16LE(at + 5) & 0x3fff };
+  }
+  return null;
+}
+
+const css = readFileSync(join(ROOT.pathname, 'app/globals.css'), 'utf8');
+const rule = (selector) => {
+  const at = css.indexOf(selector);
+  if (at < 0) return '';
+  const end = css.indexOf('}', at);
+  return css.slice(at, end < 0 ? undefined : end + 1);
+};
+
+const res = await fetch(`${BASE}/api/content`);
+if (!res.ok) {
+  console.log(`FAIL ${BASE}/api/content answered ${res.status}`);
+  process.exit(1);
+}
+const { journal } = await res.json();
+const illustrated = journal.filter((item) => typeof item.image === 'string' && item.image.startsWith('/images/'));
+
+check('the journal carries illustrated posts to measure', illustrated.length >= 15, `${illustrated.length} with images`);
+
+let mismatches = 0;
+for (const item of illustrated) {
+  const file = join(ROOT.pathname, 'public', item.image);
+  let real;
+  try {
+    real = webpSize(file);
+  } catch (error) {
+    real = null;
+    console.log(`FAIL ${item.slug}: ${item.image} could not be read — ${error.message}`);
+    failures += 1;
+    checks += 1;
+    continue;
+  }
+  checks += 1;
+  const declared = { width: item.imageWidth, height: item.imageHeight };
+  const same = !!real && declared.width === real.width && declared.height === real.height;
+  if (!same) {
+    mismatches += 1;
+    console.log(
+      `FAIL ${item.slug}: declares ${declared.width}x${declared.height}, ${item.image} is ${real ? `${real.width}x${real.height}` : 'unreadable'}`,
+    );
+  }
+}
+check(
+  'every story photograph declares the real pixel size of its file',
+  mismatches === 0,
+  `${mismatches} of ${illustrated.length} wrong`,
+);
+if (!mismatches) console.log(`     (${illustrated.length} frames measured against the files on disk)`);
+
+/* The two boxes that used to crop. Both are asserted as contracts, because the
+   failure they cause is invisible to every other suite: the page renders, the
+   image loads, the link resolves — only the person in the photograph is missing. */
+const story = rule('.photo-card.article-photo img');
+check('a story photo is fitted whole, never cropped', story.includes('object-fit:contain'), story.slice(0, 160));
+check('and is allowed to be as tall as it is', !/max-height:650px/.test(story), story.slice(0, 160));
+
+const thumb = rule('.card-image.journal-thumb');
+const bias = /object-position:center (\d+)%/.exec(thumb);
+check('a journal card keeps its window on the face, not the middle', !!bias && Number(bias[1]) <= 20, thumb.slice(0, 160));
+check('and that window is taller than the 250px that cut heads off', /height:clamp\(/.test(thumb), thumb.slice(0, 160));
+
+console.log(`\n${checks - failures}/${checks} checks passed.`);
+if (failures) {
+  console.log(`FAIL: ${failures} frame-fidelity checks failed.`);
+  process.exit(1);
+}
+console.log('PASS: every story frame is measured, fitted whole and framed on the face.');

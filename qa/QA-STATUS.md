@@ -1,5 +1,50 @@
 # QA status
 
+## Framing, hero copy and playing the video — branch `arena/dd7534da-timfire` (2026-11-16)
+
+The owner's report was exact: *"the images in the journal page are not positioned well, my face are
+cut off from view both on mobile and other screens."* Two boxes were guessing a shape the archive
+photographs do not have — a story photo forced into a 1200×800 landscape frame with `object-fit:cover`
+under `max-height:650px`, and a journal card thumbnail 250px tall with a centred window. Most of these
+frames are tall portraits (640×1337, 843×1765), so both sliced straight through the head.
+
+- Articles now carry `imageWidth`/`imageHeight` (optional, so older rows still validate). The story
+  photo is fitted whole — `object-fit:contain`, `max-height:min(86vh,1040px)` — and card thumbnails
+  keep a taller window biased to `center 12%`, where faces are. The external-video card's poster got
+  the same bias.
+- New suite `qa/frame-fidelity.mjs` measures every journal photograph against the file on disk (the
+  WebP header is parsed in-process, no dependencies, cross-checked against ImageMagick on all 27
+  archive frames) and asserts both CSS contracts. A stale dimension, a reintroduced `cover`, or a
+  centred thumbnail window fails the suite — the crop is invisible to every other check, because the
+  page renders, the image loads and the link resolves.
+- The homepage hero description is now the owner's own positioning statement. `.hero-lead` went from
+  1.06rem/46ch to `clamp(.94rem,1.02vw,1.02rem)`/60ch so three sentences occupy the space two used
+  to; the phone hero keeps a trimmed line at .98rem/56ch. `.hero{overflow:hidden}` and
+  `overflow-wrap:break-word` mean it cannot overflow at any width.
+- Post 2's TikTok plays **inside** the story through TikTok's own embed player (`/embed/v2/<id>`)
+  instead of a poster still linking out, and CSP `frame-src` now allows `https://www.tiktok.com`.
+  Anything that cannot be embedded — a Facebook share link — still renders as a card. The caption no
+  longer says he is talking: he is singing the poem, and the reader judges the poem from that.
+- `sourceUrl` added to the article contract, to the dashboard's Journal editor ("Original post URL —
+  where readers can comment") and to the story page ("Comment on the original post ↗"), so the owner
+  can attach each piece's real Facebook post himself, one field at a time, with no code change.
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `npx tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 35 pages |
+| Frame fidelity | `node qa/frame-fidelity.mjs http://127.0.0.1:3100` | **New** — Pass, 21/21: 15 story frames declare the real pixel size of their file, story photos are fitted whole, card windows are top-biased |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — 119/119, and the CSP header now carries `frame-src … https://www.tiktok.com` |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes, 37 internal targets, 49 images |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — 22 unique titles |
+| Schema contract | `node qa/schema-contract.mjs` | Pass — 36 columns / 28 values, 8 of 8 tables |
+| Email contract | `node qa/email-contract.mjs` | Pass |
+| Sign-in + subscribe + content guard | `node qa/auth-flow.mjs` | Pass — 84/84 |
+
+The live rows were patched to match: `imageWidth`/`imageHeight` on all 15 journal pieces and the
+corrected caption on the musician piece, via one `UPDATE … FROM (VALUES …)` merging into `data`, so
+nothing else in those rows moved.
+
 ## Content-loss guard — branch `arena/84fc2dd5-timfire` (2026-11-16)
 
 The live `site_content` table was found holding **0 rows**. All 42 content rows (stats, services,

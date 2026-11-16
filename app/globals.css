@@ -98,7 +98,7 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 /* ---------- Homepage: living background + summary sections ---------- */
 .hero-scenes{position:absolute;inset:0;z-index:0;pointer-events:none}
 .hero-intro{display:block;font-family:var(--font-display);color:var(--muted);font-size:clamp(1.05rem,1.6vw,1.35rem);margin:0 0 10px}
-.hero-lead{color:var(--muted);max-width:46ch;margin:18px 0 0;font-size:1.06rem;line-height:1.6}
+.hero-lead{color:var(--muted);max-width:min(60ch,100%);margin:18px 0 0;font-size:clamp(.94rem,1.02vw,1.02rem);line-height:1.55;overflow-wrap:break-word}
 .hero-name{margin:6px 0 0}
 .proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
 .proof-card{position:relative;display:grid;gap:12px;border-radius:var(--radius);overflow:hidden;background:var(--panel);border:1px solid var(--border);padding:14px;transition:transform .22s ease,border-color .22s ease}
@@ -199,10 +199,27 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 .lightbox-story:hover{text-decoration:underline}
 .origin-line{color:var(--muted);font-size:15px;border-left:2px solid var(--orange);padding-left:12px;margin:0 0 28px}
 .article-photo{margin:0 0 34px}
+/* ---------- Article frames: fitted whole, never cropped ---------- */
+/* The archive photographs are tall portraits. A landscape box with cover cut
+   heads off on every screen, so the story photo is fitted inside the column at
+   its own ratio (the dimensions travel with the article) and centred instead. */
+.photo-card.article-photo{display:block;background:#241812}
+.photo-card.article-photo img{width:100%;height:auto;max-height:min(86vh,1040px);object-fit:contain;object-position:center}
+.source-link{display:inline-flex;gap:6px;align-items:center;margin-left:14px;color:var(--orange);font-family:var(--font-display);font-size:15px;white-space:nowrap}
+.source-link:hover{text-decoration:underline}
+@media(max-width:520px){.origin-line{display:grid;gap:8px}.source-link{margin-left:0;white-space:normal}}
+/* Journal thumbs keep a fixed box (a grid of fifty different ratios would not
+   read as a grid), but the window is taller and biased to the top, where the
+   face is, instead of slicing the portrait through the middle. */
+.card-image.journal-thumb{height:clamp(280px,34vw,400px);object-position:center 12%}
+/* An embedded player, for the clips that can be played here rather than linked. */
+.story-embed{margin:8px 0 26px;max-width:420px}
+.story-embed iframe{display:block;width:100%;aspect-ratio:325/680;border:1px solid var(--border);border-radius:18px;background:#000}
+.story-embed figcaption{color:var(--muted);font-size:15px;margin-top:10px}
 .story-video{width:100%;max-width:860px;border-radius:18px;border:1px solid var(--border);background:#000;display:block;margin:8px 0 26px}
 .video-card{display:block;max-width:860px;border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--panel);margin:8px 0 26px;transition:border-color .2s,transform .2s}
 .video-card:hover{border-color:var(--orange);transform:translateY(-2px)}
-.video-card img{display:block;width:100%;height:auto;max-height:460px;object-fit:cover}
+.video-card img{display:block;width:100%;height:auto;max-height:460px;object-fit:cover;object-position:center 14%}
 .video-card .video-play{display:grid;place-items:center;min-height:220px;font-size:44px;color:var(--orange)}
 .video-card>span:last-child{display:flex;gap:9px;align-items:center;padding:14px 18px;color:var(--orange);font-family:var(--font-display)}
 @media(max-width:680px){.lightbox{gap:6px;padding:14px}.lightbox-nav{width:40px;height:40px}.lightbox-figure img{max-height:70vh}}
@@ -253,7 +270,7 @@ input,select,textarea{font-size:16px}
 .hero-lead-short{display:none}
 @media(max-width:800px){
   .hero-lead{display:none}
-  .hero-lead-short{display:block;color:var(--muted);font-family:var(--font-display);font-size:1.02rem;line-height:1.5;margin:14px 0 0;max-width:34ch}
+  .hero-lead-short{display:block;color:var(--muted);font-family:var(--font-display);font-size:.98rem;line-height:1.45;margin:14px 0 0;max-width:min(56ch,100%);overflow-wrap:break-word}
   .hero-art{min-height:330px;height:330px;margin-top:6px}
   .hero-art img{max-height:340px}
   .hero-name{font-size:clamp(1.3rem,5.4vw,1.8rem)}

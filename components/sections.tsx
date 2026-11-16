@@ -890,7 +890,7 @@ function Journal() {
         {found.slice(0, count).map((x, i) => (
           <Reveal key={x.id} delay={Math.min(i * 0.05, 0.25)}>
             <article className="card light">
-              {x.image ? <img className="card-image" src={x.image} alt={x.imageAlt || x.title} loading="lazy" /> : null}
+              {x.image ? <img className="card-image journal-thumb" src={x.image} alt={x.imageAlt || x.title} loading="lazy" /> : null}
               <span className="badge">{x.category}</span>
               <h3>{x.title}</h3>
               <p>{x.summary}</p>

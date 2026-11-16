@@ -17,6 +17,8 @@
  *   the code is single-use; logout ends it
  *   five wrong passwords from one address → locked out, even with the right one
  *   subscribing saves the name and sends a welcome letter that can unsubscribe
+ *   an empty content table serves the seed, a save that would delete every row
+ *   is refused, and removing one item still saves and still deletes
  *
  *   npm run build && node qa/auth-flow.mjs
  */
@@ -294,7 +296,89 @@ try {
     await newLogin.json();
   }
 
-  /* ---------- 7. logout ---------- */
+  /* ---------- 7. the content table cannot be blanked ---------- */
+  {
+    // The mock database starts empty. That is the state the live one was found
+    // in — every collection deleted — and it used to render a site with no
+    // services, no work and no journal. A visitor must still see a full site.
+    const blank = await (await fetch(`${APP}/api/content`)).json();
+    check(
+      'an empty content table still serves a full site, not a blank one',
+      blank.services.length === 7 && blank.websites.length === 9 && blank.stats.length === 3,
+      `services ${blank.services.length}, websites ${blank.websites.length}, stats ${blank.stats.length}`,
+    );
+    check(
+      'and the fallback says so in the server log, where an operator will see it',
+      serverLog.includes('site_content returned 0 rows'),
+      serverLog.slice(-400),
+    );
+
+    // The dashboard round-trips what it loaded, so put the rows back.
+    const live = rotated || cookie;
+    const read = await fetch(`${APP}/api/admin/content`, { headers: { cookie: live } });
+    eq('the dashboard can read the whole dataset, drafts included', read.status, 200);
+    const full = await read.json();
+    const saved = await fetch(`${APP}/api/admin/content`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: live },
+      body: JSON.stringify(full),
+    });
+    eq('and saving it back writes every row', saved.status, 200);
+    const written = mocks.table('site_content').length;
+    check('the content table now holds rows', written > 40, `${written} rows`);
+
+    // The disaster, replayed: a payload whose every collection is empty. This
+    // is what deleted all 42 rows, because saving drops whatever is missing.
+    const emptied = { ...full };
+    for (const collection of [
+      'stats',
+      'services',
+      'websites',
+      'agents',
+      'certificates',
+      'creative',
+      'journal',
+      'timeline',
+      'testimonials',
+      'socials',
+      'media',
+    ]) {
+      emptied[collection] = [];
+    }
+    const wipe = await fetch(`${APP}/api/admin/content`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: live },
+      body: JSON.stringify(emptied),
+    });
+    eq('a save that would delete every row is refused', wipe.status, 503);
+    eq('and not one row was deleted', mocks.table('site_content').length, written);
+    check(
+      'the refusal is logged too',
+      serverLog.includes('would delete every content row'),
+      serverLog.slice(-400),
+    );
+    const stillUp = await (await fetch(`${APP}/api/content`)).json();
+    eq('so the public site is unchanged', stillUp.services.length, 7);
+
+    // The interlock must not turn into a ban on editing: removing one service
+    // is an ordinary save, and the row really does go.
+    const oneGone = { ...full, services: full.services.filter((item) => item.id !== 'mentorship') };
+    const edited = await fetch(`${APP}/api/admin/content`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie: live },
+      body: JSON.stringify(oneGone),
+    });
+    eq('removing one service is still an ordinary save', edited.status, 200);
+    eq('and only that row is deleted', mocks.table('site_content').length, written - 1);
+    check(
+      'it is the mentorship row that went',
+      !mocks.table('site_content').some((row) => row.collection === 'services' && row.id === 'mentorship'),
+    );
+    const reloaded = await (await fetch(`${APP}/api/content`)).json();
+    eq('so the public site now shows six services', reloaded.services.length, 6);
+  }
+
+  /* ---------- 8. logout ---------- */
   {
     const res = await post('/api/auth/logout', {}, { cookie: rotated || cookie });
     const cleared = sessionCookie(res);

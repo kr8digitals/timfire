@@ -40,6 +40,9 @@ function seedOrder(collection: Collection): Map<string, number> {
   return map;
 }
 
+/** Set once an empty-table read has been reported, so the alarm does not repeat. */
+let warnedAboutEmptyTable = false;
+
 /** Assemble the full SiteData shape from the database, seed order preserved. */
 export async function loadSiteData(): Promise<{ data: SiteData; source: 'db' | 'seed' }> {
   const supa = db();
@@ -51,21 +54,40 @@ export async function loadSiteData(): Promise<{ data: SiteData; source: 'db' | '
   if (content.error || singletons.error) return { data: cloneSeed(), source: 'seed' };
 
   const data = cloneSeed();
-  for (const collection of COLLECTIONS) {
-    (data[collection] as unknown[]) = [];
-  }
-  const rowsByCollection = new Map<string, { id: string; data: unknown }[]>();
-  for (const row of content.data ?? []) {
-    if (!(COLLECTIONS as readonly string[]).includes(row.collection)) continue;
-    const list = rowsByCollection.get(row.collection) ?? [];
-    list.push({ id: row.id, data: row.data });
-    rowsByCollection.set(row.collection, list);
-  }
-  for (const collection of COLLECTIONS) {
-    const order = seedOrder(collection);
-    const rows = rowsByCollection.get(collection) ?? [];
-    rows.sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999));
-    (data[collection] as unknown[]) = rows.map((r) => r.data);
+  // An empty `site_content` table is damage, not data. Every collection is
+  // cleared below and refilled from rows, so a table with no rows renders a
+  // site with no services, no work, no prices and no journal — which is what
+  // the live site did once, after a save whose payload carried empty lists
+  // deleted all 42 rows. Treat that read as a loss and keep the shipped seed
+  // collections on screen instead. The singletons live in their own table and
+  // still apply, so the owner's live profile copy and rates are never reverted.
+  const emptyTable = (content.data ?? []).length === 0;
+  if (emptyTable) {
+    // Once per instance: the alarm matters, but a request-per-line flood would
+    // bury the very logs someone needs while investigating.
+    if (!warnedAboutEmptyTable) {
+      warnedAboutEmptyTable = true;
+      console.warn(
+        '[db] site_content returned 0 rows: serving the shipped seed collections so the site is not blank. Investigate before saving from the dashboard.',
+      );
+    }
+  } else {
+    for (const collection of COLLECTIONS) {
+      (data[collection] as unknown[]) = [];
+    }
+    const rowsByCollection = new Map<string, { id: string; data: unknown }[]>();
+    for (const row of content.data ?? []) {
+      if (!(COLLECTIONS as readonly string[]).includes(row.collection)) continue;
+      const list = rowsByCollection.get(row.collection) ?? [];
+      list.push({ id: row.id, data: row.data });
+      rowsByCollection.set(row.collection, list);
+    }
+    for (const collection of COLLECTIONS) {
+      const order = seedOrder(collection);
+      const rows = rowsByCollection.get(collection) ?? [];
+      rows.sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999));
+      (data[collection] as unknown[]) = rows.map((r) => r.data);
+    }
   }
   for (const row of singletons.data ?? []) {
     if (row.key === 'profile') data.profile = row.data as SiteData['profile'];
@@ -73,13 +95,34 @@ export async function loadSiteData(): Promise<{ data: SiteData; source: 'db' | '
     else if (row.key === 'settings') data.settings = { ...data.settings, ...(row.data as SiteData['settings']) };
     else if (row.key === 'revisions') data.revisions = (row.data as SiteData['revisions']) ?? {};
   }
-  return { data, source: 'db' };
+  return { data, source: emptyTable ? 'seed' : 'db' };
 }
 
 /** Write the whole SiteData back: upsert every row, drop what disappeared. */
 export async function saveSiteData(next: SiteData): Promise<boolean> {
   const supa = db();
   if (!supa) return false;
+  // Total-wipe interlock. This function deletes whatever the payload no longer
+  // carries, so a payload whose every collection is empty deletes every row in
+  // the table — that is exactly how the site lost all 42 of its content rows.
+  // Refuse that write while the table still holds something to lose. Editing
+  // stays unrestricted: removing some items, or even emptying one collection,
+  // is a normal save and goes through.
+  const wouldEmptyEverything = COLLECTIONS.every(
+    (collection) => ((next[collection] as unknown[] | undefined) ?? []).length === 0,
+  );
+  if (wouldEmptyEverything) {
+    const probe = await supa.from('site_content').select('id').limit(1);
+    if (!probe.error && (probe.data ?? []).length > 0) {
+      console.warn(
+        '[db] Refused a save that would delete every content row: all collections arrived empty. Nothing was written.',
+      );
+      return false;
+    }
+    if (probe.error) {
+      console.warn(`[db] Could not probe site_content before an all-empty save, continuing: ${probe.error.message}`);
+    }
+  }
   for (const collection of COLLECTIONS) {
     const items = next[collection] as { id: string }[];
     const rows = items.map((item) => ({ collection, id: item.id, data: item, updated_at: new Date().toISOString() }));

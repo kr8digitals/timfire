@@ -1,5 +1,40 @@
 # QA status
 
+## Content-loss guard — branch `arena/84fc2dd5-timfire` (2026-11-16)
+
+The live `site_content` table was found holding **0 rows**. All 42 content rows (stats, services,
+websites, agents, creative, timeline, certificates, socials) had been deleted, and because
+`loadSiteData()` blanks every collection and refills it from rows, the site was one cache-miss away
+from serving a homepage with no services, no work and no prices. `saveSiteData()` deletes whatever a
+payload no longer carries, so a single dashboard save whose collections all arrived empty deletes the
+whole table. All 42 rows were restored from the shipped seed — 57 rows in total once the 15 archive
+journal pieces are counted — and both ends of the path are now guarded:
+
+- `loadSiteData()` reads an empty `site_content` as damage, not as data: the shipped seed collections
+  stay on screen and the fallback is written to the server log. `site_singletons` is a separate table
+  and still applies, so live profile copy and rates are never reverted. `source` reports `seed`.
+- `saveSiteData()` refuses a payload that would delete every row while the table still holds one, and
+  logs the refusal. Removing items — even emptying one collection — stays an ordinary save.
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `npx tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — 119/119 |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes, 37 internal targets, 49 images |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — 22 unique titles |
+| Schema contract | `node qa/schema-contract.mjs` | Pass — 36 columns / 28 values, 8 of 8 tables |
+| Email contract | `node qa/email-contract.mjs` | Pass |
+| Sign-in + subscribe + content guard | `node qa/auth-flow.mjs` | Pass — 84/84, 13 of them new: an empty content table still serves 7 services / 9 sites / 3 stats and logs the fallback; the dashboard round-trip writes all 57 rows; an all-empty save is refused with 503, deletes nothing and logs the refusal; removing one service still saves 200 and deletes exactly that row, and the public site then shows six |
+
+The mock Supabase learned two things so those checks could be honest — fidelity gaps, not new
+behaviour. `.not('id','in',…)`, the delete `saveSiteData` relies on, arrives as `id=not.in.(…)`, which
+the mock parsed as an unknown operator and answered with its `default: return true` — matching every
+row; and its `in` handler stripped only double quotes while the code sends `'a','b'`. Either one alone
+turned that delete into a delete of the whole collection, which is how the new checks found the mock
+emptying the table it had just written. Unknown operators now match nothing, both quote styles are
+stripped, and `not.` negates.
+
 ## Copy, placement and admin-password batch — branch `arena/ba0afa77-timfire` (2026-11-13)
 
 Run against the production build (`npm run build` + `next start -p 3100`) with the offline mocks

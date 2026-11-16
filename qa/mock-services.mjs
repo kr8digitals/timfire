@@ -64,7 +64,19 @@ function withDefaults(table, row) {
   return out;
 }
 
-function matchCond(row, [column, [op, raw]]) {
+function matchCond(row, [column, [op, raw, negate]]) {
+  const hit = positiveMatch(row, column, op, raw);
+  return negate ? !hit : hit;
+}
+
+/**
+ * One positive condition. An operator this mock does not implement matches
+ * nothing, never everything: `saveSiteData` deletes with `.not('id','in',…)`,
+ * and a filter the mock quietly treated as match-all turned that into a delete
+ * of the whole collection — the read-side twin of the blind spot
+ * `checkViolation` was added to close.
+ */
+function positiveMatch(row, column, op, raw) {
   {
     const value = row[column];
     switch (op) {
@@ -89,12 +101,16 @@ function matchCond(row, [column, [op, raw]]) {
       case 'is':
         return raw === 'null' ? value === null || value === undefined : String(value) === raw;
       case 'in':
+        // PostgREST takes both `in.(a,b)` and `in.('a','b')`, and saveSiteData
+        // builds the single-quoted form, so strip either quote style.
         return raw
           .replace(/^\(|\)$/g, '')
           .split(',')
-          .some((candidate) => candidate.trim().replace(/^"|"$/g, '') === String(value));
+          .some((candidate) => candidate.trim().replace(/^["']|["']$/g, '') === String(value));
       default:
-        return true;
+        // Fail closed. A filter this mock cannot evaluate must never match
+        // every row, or a delete would take the whole table with it.
+        return false;
     }
   }
 }
@@ -105,15 +121,21 @@ function matches(row, filters) {
   );
 }
 
-/** `key.like.pw:%,key.like.req:%` — one condition inside an .or() group. */
+/** `key.like.pw:%,key.like.req:%` — one condition inside an .or() group, and
+ *  `id=not.in.(a,b)` — the negation supabase-js emits for `.not(col, op, val)`. */
 function parseCond(text) {
   const dot = String(text).indexOf('.');
   if (dot < 0) return null;
   const column = String(text).slice(0, dot);
-  const rest = String(text).slice(dot + 1);
+  let rest = String(text).slice(dot + 1);
+  let negate = false;
+  if (rest.startsWith('not.')) {
+    negate = true;
+    rest = rest.slice(4);
+  }
   const dot2 = rest.indexOf('.');
   if (dot2 < 0) return null;
-  return [column, [rest.slice(0, dot2), rest.slice(dot2 + 1)]];
+  return [column, [rest.slice(0, dot2), rest.slice(dot2 + 1), negate]];
 }
 
 function filtersOf(params) {

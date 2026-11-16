@@ -72,7 +72,7 @@ export default function Gallery() {
             <figcaption>
               {s.caption}
               {storyOf(s) ? (
-                <Link className="shot-story" href={'/journal/' + encodeURIComponent(s.story!)}>
+                <Link className="shot-story" href={'/me/' + encodeURIComponent(s.story!)}>
                   <BookOpen size={15} /> The story behind this frame
                 </Link>
               ) : null}
@@ -106,7 +106,7 @@ export default function Gallery() {
                 {open + 1} / {GALLERY.length}
               </span>
               {storyOf(shot) ? (
-                <Link className="lightbox-story" href={'/journal/' + encodeURIComponent(shot.story!)}>
+                <Link className="lightbox-story" href={'/me/' + encodeURIComponent(shot.story!)}>
                   <BookOpen size={16} /> Read the story behind this frame
                 </Link>
               ) : null}

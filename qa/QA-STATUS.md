@@ -1,5 +1,66 @@
 # QA status
 
+## The journal becomes Me, and a story opens as a split — branch `arena/94fbff79-timfire` (2026-11-16)
+
+The owner's brief was about intention, not decoration: *"Everything I'm posting is for them, not for
+me."* So the address changed, the page changed who it speaks to, and the story pages changed shape.
+
+- **`/journal` → `/me`.** The route moved (`app/me/page.tsx`, `app/me/[slug]/page.tsx`), and
+  `next.config.ts` now answers the old addresses with permanent 308s — `/journal` → `/me` and
+  `/journal/:path*` → `/me/:path*` — so every link already shared on Facebook and TikTok still
+  lands. Canonicals, OG urls, the sitemap, the 404 list, the nav, the search index, the gallery's
+  story links and the publish-notification email all say `/me`. Smoke proves the redirect, the
+  followed link and the 200 at the end of it.
+- **A story page opens as a split:** what the piece is (eyebrow, title, standfirst, reading time,
+  tags, where it first lived) on the left, the photograph or the clip that carried it on the right,
+  and the writing below both. The old layout put the title alone at the top and dumped a full-width
+  photograph underneath it, which is what the owner called *"not good enough"*. One column below
+  900px. `qa/frame-fidelity.mjs` now asserts the split, the single-column fallback and the phone
+  stack as CSS contracts, because a regression here is invisible to every other suite.
+- **The gallery viewer keeps the same rhythm:** caption, count and story link on the left, the frame
+  at true size on the right, stacked on a phone — asserted the same way.
+- **The musician story carries no lead photograph.** Its frame was a still from a different clip, so
+  it said something the post did not. Only the TikTok player renders now, on the right, captioned
+  *"This is what I can do: me singing, breaking the doubt."* Both ends were corrected — the seed
+  and the live row (`data - 'image' - 'imageAlt' - 'imageWidth' - 'imageHeight' - 'videoPoster'`), so
+  the fix holds whether the site is served from the database or from the shipped seed. A story whose
+  media is a clip and not a photograph still gets a card face: `.card-video-flag`.
+- **The page belongs to the reader.** The hero is now `Me / This page *is for you.*`, the lead says
+  who it is posted for, and below it sits **Featuring this week** — one reader's story in their own
+  words, their photograph on the right, their handles beside it — then the writing, then the ask.
+  A new `features` collection (`lib/content.ts`, `lib/validate.ts`, `lib/db.ts`, dashboard tab
+  "Featured this week") carries it; with nobody chosen yet the block says the week is open rather
+  than rendering an empty hole.
+- **A new collection can no longer be deleted by an old browser tab.** `features` is optional in the
+  contract, `saveSiteData` skips a collection the payload does not carry at all, and the merge path in
+  `lib/store.tsx` refuses to materialise one neither side has. Absence now means "this payload
+  predates it"; only an explicit empty list clears a collection. That is the same failure class as the
+  42-row wipe, closed before the next collection-dependent feature ships rather than after.
+- **"Want to be featured?" is a real form, not a placeholder.** A `feature` enquiry kind in
+  `lib/forms.ts` collects the name they want on the page (a handle is a name), where they are writing
+  from, their story, their socials and an optional photograph. It travels the existing, already
+  hardened pipeline — honeypot, per-IP rate limit, `enquiries` row, owner forward with Reply-To,
+  named acknowledgement — and appears in the dashboard Inbox. The same ask sits under every story
+  page. Accounts, likes, comments and the emailed questions build on this next.
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Type safety | `./node_modules/.bin/tsc --noEmit` | Pass, no errors |
+| Production build | `npm run build` | Pass — 35 pages, `/me` and `/me/[slug]` in place of the journal routes |
+| Frame fidelity | `node qa/frame-fidelity.mjs http://127.0.0.1:3100` | Pass — **30/30**, 9 new: the story split, its single-column fallback, the phone stack, the gallery viewer's two columns, and the musician story carrying no photograph with the corrected caption and the right clip |
+| Route + behaviour smoke | `./qa/smoke.sh http://127.0.0.1:3100` | Pass — **130/130**, 11 new: the 308 on `/journal`, an old story link following to `/me` and landing 200, the page titled and worded for the reader, and the hero statement scoped to the hero itself |
+| Link crawler | `node qa/link-audit.mjs http://127.0.0.1:3100` | Pass — 22 routes, 37 internal targets, 48 images; no `/journal` href survives in any rendered page |
+| SEO probe | `node qa/seo-probe.mjs http://127.0.0.1:3100` | Pass — 22 unique titles, canonicals on the new addresses |
+| Schema contract | `node qa/schema-contract.mjs` | Pass — 36 columns / 28 values, 8 of 8 tables |
+| Email contract | `node qa/email-contract.mjs` | Pass |
+| Sign-in + subscribe + content guard | `node qa/auth-flow.mjs` | Pass — 84/84, with `features` added to the every-collection-empty payload the guard must refuse |
+
+Two notes on running this locally. `smoke.sh` spends real sign-in attempts, and the mock Supabase
+keeps them across server restarts, so a second run inside 15 minutes answers 429 — restart
+`qa/run-mocks.mjs` as well as the site, not just the site. And the hero check that failed on the
+first pass was the check being wrong, not the page: `Websites and AI agents built to work…` still
+belongs in the footer, so the assertion is now scoped to the hero block.
+
 ## Framing, hero copy and playing the video — branch `arena/dd7534da-timfire` (2026-11-16)
 
 The owner's report was exact: *"the images in the journal page are not positioned well, my face are

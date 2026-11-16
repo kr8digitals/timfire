@@ -11,7 +11,7 @@ check() { # path expected
   if [ "$code" != "$2" ]; then echo "FAIL $1 (expected $2, got $code)"; fail=1; else echo "ok   $1 $code"; fi
 }
 
-for p in / /about /work /ventures /services /creative /journal /gallery /timeline /now /contact /admin /sitemap.xml /robots.txt \
+for p in / /about /work /ventures /services /creative /me /gallery /timeline /now /contact /admin /sitemap.xml /robots.txt \
   /services/website-design-development /services/ai-agent-development /services/seo-optimisation /services/graphic-design \
   /services/branding /services/video-editing /services/mentorship \
   /collaborate/music /collaborate/spoken-word /collaborate/poetry /collaborate/speaking; do
@@ -107,7 +107,7 @@ html=$(curl -s "$BASE/")
 echo "$html" | grep -q 'hero-lead-short' && echo "ok   mobile hero keeps one short line" || { echo "FAIL mobile hero lead missing"; fail=1; }
 
 echo "-- one public inbox, and the list at the foot of every page"
-for p in / /about /work /services /creative /journal /gallery /contact /now; do
+for p in / /about /work /services /creative /me /gallery /contact /now; do
   html=$(curl -s "$BASE$p")
   echo "$html" | grep -q 'hi@kutimfire.com' && { echo "FAIL $p still advertises the dead hi@ mailbox"; fail=1; } || echo "ok   $p does not mention hi@"
   echo "$html" | grep -q 'hello@kutimfire.com' && echo "ok   $p offers hello@kutimfire.com" || { echo "FAIL $p has no public inbox"; fail=1; }
@@ -144,11 +144,35 @@ html=$(curl -s "$BASE/creative")
 echo "$html" | grep -q 'Music &amp; piano' && { echo "FAIL creative page still says Music & piano"; fail=1; } || echo "ok   creative page dropped Music & piano"
 echo "$html" | grep -q 'Sounds and music' && echo "ok   creative page says sounds and music" || { echo "FAIL creative page missing sounds and music"; fail=1; }
 
-echo "-- services and journal heroes carry a photograph and one description"
-for p in /services /journal; do
+echo "-- services and Me heroes carry a photograph and one description"
+for p in /services /me; do
   html=$(curl -s "$BASE$p")
   echo "$html" | grep -q 'hero-split' && echo "ok   $p hero is a split with a photo" || { echo "FAIL $p hero has no photo"; fail=1; }
 done
 curl -s "$BASE/services" | grep -q 'The final scope and cost depend on your requirements' && { echo "FAIL services still carries the vague first description"; fail=1; } || echo "ok   services vague description gone"
+
+echo "-- the journal address follows the rename, old links included"
+code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/journal")
+[ "$code" = "308" ] && echo "ok   /journal redirects permanently" || { echo "FAIL /journal answered $code, expected 308"; fail=1; }
+loc=$(curl -s -D - -o /dev/null "$BASE/journal/hes-got-a-queen" | grep -i '^location:' | tr -d '\r')
+echo "$loc" | grep -q '/me/hes-got-a-queen' && echo "ok   an old story link follows to /me" || { echo "FAIL old story link went to: $loc"; fail=1; }
+code=$(curl -s -o /dev/null -w '%{http_code}' -L "$BASE/journal/hes-got-a-queen")
+[ "$code" = "200" ] && echo "ok   and lands on a live page" || { echo "FAIL following the old link gave $code"; fail=1; }
+
+echo "-- the page is called Me, and it is aimed at the reader"
+html=$(curl -s "$BASE/me")
+echo "$html" | grep -q 'is for you' && echo "ok   the Me page says who it is for" || { echo "FAIL the Me page hero lost its point"; fail=1; }
+echo "$html" | grep -qi 'The journal' && { echo "FAIL the Me page still calls itself the journal"; fail=1; } || echo "ok   the Me page no longer calls itself the journal"
+echo "$html" | grep -q 'whoever is reading it' && echo "ok   and it speaks to the person reading" || { echo "FAIL the Me page lead was not rewritten"; fail=1; }
+curl -s "$BASE/me" | grep -q '<title>Me | TIMFIRE</title>' && echo "ok   the tab is titled Me" || { echo "FAIL the Me page title is wrong"; fail=1; }
+
+echo "-- the homepage carries the owner's own positioning statement"
+html=$(curl -s "$BASE/")
+echo "$html" | grep -q 'A creative technologist, digital entrepreneur, founder, worshipper' && echo "ok   the hero says what he is" || { echo "FAIL the hero statement is missing"; fail=1; }
+echo "$html" | grep -q 'opportunities that make a difference' && echo "ok   and what he makes" || { echo "FAIL the hero statement is truncated"; fail=1; }
+# Scoped to the hero itself: that phrase still belongs in the footer, where it has always been.
+hero=$(printf '%s' "$html" | tr -d '\n' | sed 's/.*hero-intro/hero-intro/; s/hero-art.*//')
+printf '%s' "$hero" | grep -q 'Websites and AI agents built to work' && { echo "FAIL the old hero lead is still in the hero"; fail=1; } || echo "ok   the old hero lead is out of the hero"
+printf '%s' "$hero" | grep -q 'hero-lead-short' && echo "ok   and the mobile hero still has its one short line" || { echo "FAIL the mobile hero lead went missing"; fail=1; }
 
 exit $fail

@@ -5,6 +5,15 @@ const script=process.env.NODE_ENV==='development'?"'self' 'unsafe-inline' 'unsaf
 const config: NextConfig = {
   poweredByHeader:false,
   images:{formats:['image/avif','image/webp']},
+  /**
+   * The journal is now Me — a page for the reader rather than a diary — so the
+   * address says that too. Every old link follows, including the fifteen story
+   * URLs already shared and indexed.
+   */
+  async redirects(){return [
+    {source:'/journal',destination:'/me',permanent:true},
+    {source:'/journal/:path*',destination:'/me/:path*',permanent:true},
+  ];},
   async headers(){return [{source:'/:path*',headers:[
     {key:'Content-Security-Policy',value:`default-src 'self'; script-src ${script}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.frankfurter.app; media-src 'self' data: blob: https:; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.tiktok.com; object-src 'none'; base-uri 'self'; form-action 'self'${frame}`},
     {key:'X-Content-Type-Options',value:'nosniff'},

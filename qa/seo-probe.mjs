@@ -4,7 +4,7 @@
 // canonical link and OpenGraph title; asserts /admin stays out of the index.
 const BASE = process.argv[2] || 'http://127.0.0.1:3000';
 const ROUTES = [
-  '/', '/about', '/work', '/ventures', '/services', '/creative', '/journal', '/gallery', '/timeline', '/now', '/contact',
+  '/', '/about', '/work', '/ventures', '/services', '/creative', '/me', '/gallery', '/timeline', '/now', '/contact',
   '/services/website-design-development', '/services/ai-agent-development', '/services/seo-optimisation',
   '/services/graphic-design', '/services/branding', '/services/video-editing', '/services/mentorship',
   '/collaborate/music', '/collaborate/spoken-word', '/collaborate/poetry', '/collaborate/speaking',

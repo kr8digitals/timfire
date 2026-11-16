@@ -338,6 +338,7 @@ try {
       'certificates',
       'creative',
       'journal',
+      'features',
       'timeline',
       'testimonials',
       'socials',

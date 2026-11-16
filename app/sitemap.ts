@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entries.push({ url: `${SITE_ORIGIN}/collaborate/${c}`, lastModified, changeFrequency: 'monthly', priority: 0.6 });
   }
   for (const post of published.journal) {
-    entries.push({ url: `${SITE_ORIGIN}/journal/${post.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.6 });
+    entries.push({ url: `${SITE_ORIGIN}/me/${post.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.6 });
   }
   for (const piece of published.creative) {
     entries.push({ url: `${SITE_ORIGIN}/creative/${piece.slug}`, lastModified, changeFrequency: 'monthly', priority: 0.5 });

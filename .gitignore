@@ -6,3 +6,8 @@ node_modules/
 qa/*.png
 qa/test-export.json
 qa/temporary-test-hash.txt
+
+# Private study material — the owner's raw Facebook export and parsed digests.
+# Never commit: it is personal data, not site content.
+fbdata/
+google_drive/

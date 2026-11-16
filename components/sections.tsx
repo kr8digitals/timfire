@@ -53,7 +53,7 @@ const pageCopy: Record<string, { eyebrow: string; title: string; accent: string;
     eyebrow: 'The journal',
     title: 'Published',
     accent: 'and forthcoming.',
-    description: 'Poems, spoken word, articles, books and announcements — indexed for search the moment they go live.',
+    description: 'The wall posts that outgrew the wall: poems, spoken word, penlight essays and Good Reports — indexed for search the moment they go live.',
     image: {
       src: '/images/writing.webp',
       alt: 'TIMFIRE smiling with an open book on his lap, among shelves of old books',
@@ -186,6 +186,14 @@ function About() {
             My name is <em>Timfire.</em>
           </h2>
           <p>{data.profile.about}</p>
+          <p>
+            I keep a Good Report — the habit of naming, in public, the people who poured into me: my father, Dr
+            Iziogo Thomas, whose hands delivered a thousand first breaths; the mentor who gave twenty-one days and
+            still calls to ask if I am still becoming; the colleague who bought a premium bread because a joke made
+            her feel at home. The first poem I ever wrote, &ldquo;He&rsquo;s got a queen,&rdquo; went out on 13
+            December 2023 beside five photographs, and it still opens the journal here. Gratitude is not a section of
+            my life. It is the ledger I write everything else in.
+          </p>
           <p>
             I study Linguistics at Ebonyi State University, which turns out to be an unusual advantage: most websites
             fail on language long before they fail on code. So I edit a homepage the way I edit a verse — cut until
@@ -840,8 +848,9 @@ function Journal() {
     <>
       <Reveal>
         <p className="page-lead" style={{ maxWidth: 720 }}>
-          The publishing space: poems, spoken word, articles, books and announcements. Everything lands here the moment
-          it is ready — search and categories below, the full text behind each title.
+          Everything I ever posted that deserved to stay: the first poem, the penlight essays, the Good Reports for
+          the people who poured into me. Search below, or wander — and every frame in the gallery leads back to its
+          story here.
         </p>
       </Reveal>
       <div className="page-grid section" style={{ paddingTop: 0 }}>

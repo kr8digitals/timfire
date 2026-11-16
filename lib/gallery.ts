@@ -44,4 +44,20 @@ export const GALLERY: GalleryShot[] = [
   { src: '/images/gallery/02-green-chair.webp', w: 1000, h: 1250, alt: 'TIMFIRE seated in a green chair', caption: 'Green chair, quiet room. A portrait between builds.' },
   { src: '/images/gallery/28-shirt-portrait.webp', w: 1000, h: 1300, alt: 'Soft-lit shirt portrait of TIMFIRE', caption: 'Soft light, shirt portrait.' },
   { src: '/images/gallery/13-white-pray.webp', w: 1000, h: 1250, alt: 'TIMFIRE in white with hands folded', caption: 'White, hands folded — the quiet frame of the session.' },
+  // The Facebook archive frames (Dec 2023 – Jul 2026). Every one of these
+  // carries a story: the journal post it was published with.
+  { src: '/images/archive/queen-couple.webp', w: 640, h: 1337, alt: 'TIMFIRE in a beaded crown and white attire standing beside his queen in a tiara and coral beads', caption: '13 December 2023 — the frame the first poem went out with.', story: 'hes-got-a-queen' },
+  { src: '/images/archive/queen-solo.webp', w: 480, h: 1010, alt: 'The queen alone in a tiara, coral beads and a lion-print wrapper, smiling', caption: 'The queen the first poem was written for.', story: 'hes-got-a-queen' },
+  { src: '/images/archive/king-solo.webp', w: 640, h: 1337, alt: 'TIMFIRE in white traditional attire and a beaded crown, raising one fist and grinning', caption: 'If not mistaken, is he a king?', story: 'hes-got-a-queen' },
+  { src: '/images/archive/worship-stage.webp', w: 900, h: 600, alt: 'TIMFIRE singing into a microphone with one hand raised before a crowd holding up phone lights', caption: 'A sea of phone lights — the night the storm was a mirage.', story: 'the-storm-is-a-mirage' },
+  { src: '/images/archive/science-hero-statue.webp', w: 843, h: 843, alt: 'A bronze statue of Dr Iziogo Thomas raised on a plinth before a cheering crowd', caption: 'The science hero, cast in bronze — my father, Dr Iziogo Thomas.', story: 'celebrate-the-science-hero' },
+  { src: '/images/archive/science-hero-cheer.webp', w: 843, h: 843, alt: 'Dr Iziogo Thomas in a white coat raising one hand while colleagues in white coats applaud', caption: 'A ward applauding the hands that never tired.', story: 'celebrate-the-science-hero' },
+  { src: '/images/archive/redefiner-teal.webp', w: 843, h: 937, alt: 'The Redefiner in a teal patterned dress, arms crossed, outdoors', caption: 'The Redefiner — 21 days that birthed KR8 Digitals.', story: 'she-gave-me-50b' },
+  { src: '/images/archive/bread.webp', w: 843, h: 1765, alt: 'A colleague handing TIMFIRE a paper bag with the promised bread inside', caption: 'The joke that became a premium bread.', story: 'she-bought-a-bread-for-me' },
+  { src: '/images/archive/its-time-2.webp', w: 612, h: 816, alt: 'TIMFIRE in a white shirt against a stone wall with both hands raised', caption: 'Both hands up: it. is. time.', story: 'i-think-its-time' },
+  { src: '/images/archive/in-love.webp', w: 843, h: 1124, alt: 'TIMFIRE in white walking beside a woman in an ankara dress, both carrying bags', caption: 'Still sunset. Still honey. Still beautiful.', story: 'so-guys-i-fell-in-love' },
+  { src: '/images/archive/keyboard.webp', w: 819, h: 1024, alt: 'TIMFIRE in a “Create Well” t-shirt playing a keyboard outdoors on a hillside', caption: 'Create Well tee, hillside keyboard — music makes no sense alone.', story: 'music-makes-no-sense' },
+  { src: '/images/archive/unaware-rain.webp', w: 704, h: 1472, alt: 'A man standing in the rain at dusk with both arms spread wide', caption: 'Arms open in the rain — the silent influencer.', story: 'hes-not-even-aware' },
+  { src: '/images/archive/screenshot-story.webp', w: 843, h: 1052, alt: 'TIMFIRE seated and smiling in beige traditional wear beside a phone screen showing the scholarship space', caption: 'The screenshot that survived Nigerian network.', story: 'the-screenshot-story' },
+  { src: '/images/archive/who-am-i-2.webp', w: 843, h: 1124, alt: 'Close selfie of TIMFIRE in the shop with eyes closed, thinking', caption: 'Eyes shut, question open: who am I?', story: 'who-am-i' },
 ];

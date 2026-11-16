@@ -203,8 +203,10 @@ a.card.light:hover,.card.light:hover{box-shadow:0 16px 40px #00000038}
 /* The archive photographs are tall portraits. A landscape box with cover cut
    heads off on every screen, so the story photo is fitted inside the column at
    its own ratio (the dimensions travel with the article) and centred instead. */
-.photo-card.article-photo{display:block;background:#241812}
-.photo-card.article-photo img{width:100%;height:auto;max-height:min(86vh,1040px);object-fit:contain;object-position:center}
+/* The card hugs the photograph rather than letterboxing it inside a full-width
+   box, so a tall portrait sits centred in the column at its own width. */
+.photo-card.article-photo{width:fit-content;max-width:100%;margin-inline:auto;background:#241812}
+.photo-card.article-photo img{display:block;width:auto;max-width:100%;height:auto;max-height:min(86vh,1040px);object-fit:contain}
 .source-link{display:inline-flex;gap:6px;align-items:center;margin-left:14px;color:var(--orange);font-family:var(--font-display);font-size:15px;white-space:nowrap}
 .source-link:hover{text-decoration:underline}
 @media(max-width:520px){.origin-line{display:grid;gap:8px}.source-link{margin-left:0;white-space:normal}}

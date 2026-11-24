@@ -310,19 +310,6 @@ input,select,textarea{font-size:16px}
 /* Anchors (#form, #general, #behind) land under the header without this. */
 [id]{scroll-margin-top:96px}
 
-/* Hero: the long description stays on the desktop and gives way to one line on
-   a phone, so the first screen is a face, a name and a next step. */
-.hero-lead-short{display:none}
-@media(max-width:800px){
-  .hero-lead{display:none}
-  .hero-lead-short{display:block;color:var(--muted);font-family:var(--font-display);font-size:.98rem;line-height:1.45;margin:14px 0 0;max-width:min(56ch,100%);overflow-wrap:break-word}
-  .hero-art{min-height:330px;height:330px;margin-top:6px}
-  .hero-art img{max-height:340px}
-  .hero-name{font-size:clamp(1.3rem,5.4vw,1.8rem)}
-  .hero-copy .actions{margin-top:26px}
-  .hero-copy .actions .button{flex:1 1 auto;min-width:150px}
-}
-
 /* Rotated Work-page shots: keep the tilt, lose the 5px of sideways overflow
    that was making every page on the site pannable on a phone. */
 @media(max-width:900px){

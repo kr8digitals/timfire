@@ -39,10 +39,6 @@ export default function Home() {
                 exploring the intersection of creativity, technology and human potential. I turn ideas into digital
                 experiences, creative solutions, and opportunities that make a difference.
               </p>
-              <p className="hero-lead-short">
-                A creative technologist, founder, worshipper and writer — turning ideas into digital experiences that
-                make a difference.
-              </p>
             </HeroItem>
             <HeroItem delay={0.9}>
               <div className="actions">
